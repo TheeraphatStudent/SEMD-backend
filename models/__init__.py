@@ -2,10 +2,18 @@
 
 from .auth_model import AuthLoginRequest, AuthLoginProviderRequest, AuthTwoFactorRequest, AuthLoginResponse
 from .base_response_model import BaseResponseModel
-from .default_model import GetDefaultApiEndpoint ,GetDefaultHealthCheck
-from .ml_model import MLModelItem, MLModelResponse
-from .prediction_model import PredictionRequest, PredictionResponse, PredictionResult
-from .report_model import ReportModelItem, ReportModelResponse, ReportModelRequest
+from .default_model import GetDefaultApiEndpoint, GetDefaultHealthCheck
+from .prediction_model import PredictionModelDb
+from .user_model import UserModelDb
+from .refresh_model import RefreshTokenModelDb
+from .service_conf_model import ServiceConfModelDb
+from .model_registry_model import ModelRegistryModelDb
+from .access_key_model import AccessKeyModelDb
+from .url_flag_model import UrlFlagModelDb
+from .url_report_model import UrlReportModelDb
+from .activity_log_model import ActivityLogModelDb
+from .usage_log_model import UsageLogModelDb
+from .third_service_conf_model import ThirdServiceConfModelDb
 from .stats import (
     ReportStatResponse, ReportStatListResponse, ReportStatTrendResponse,
     ReportDetailResponse, SystemStatResponse, SystemHealthResponse,
@@ -32,14 +40,8 @@ __all__ = [
     "GetDefaultApiEndpoint",
     "GetDefaultHealthCheck",
 
-    # ML
-    "MLModelItem",
-    "MLModelResponse",
-
     # Prediction
-    "PredictionRequest",
-    "PredictionResponse",
-    "PredictionResult",
+    "PredictionModelDb",
 
     # Report
     "ReportModelItem",
@@ -85,5 +87,17 @@ __all__ = [
     "UrlFlagStatResponse",
     "UrlFlagTrendResponse",
     "UrlFlagDetailResponse",
-    "UrlFlagCategoryResponse"
+    "UrlFlagCategoryResponse",
+    
+    # Database Models
+    "UserModelDb",
+    "RefreshTokenModelDb",
+    "ServiceConfModelDb",
+    "ModelRegistryModelDb",
+    "AccessKeyModelDb",
+    "UrlFlagModelDb",
+    "UrlReportModelDb",
+    "ActivityLogModelDb",
+    "UsageLogModelDb",
+    "ThirdServiceConfModelDb"
 ]

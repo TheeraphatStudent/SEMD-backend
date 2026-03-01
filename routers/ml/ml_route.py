@@ -1,5 +1,5 @@
 from routers import BaseRoute
-from models import MLModelResponse
+from typing import Any
 
 class MLRoute(BaseRoute):
     def __init__(self):
@@ -9,8 +9,8 @@ class MLRoute(BaseRoute):
             responses={404: {"description": "Not found"}, 501: {"description": "Not implemented"}, 422: {"description": "Validation error"}}
         )
 
-        self.router.get("/service", response_model=MLModelResponse)(self.get_service)
+        self.router.get("/service", response_model=Any)
 
 
     def get_service(self):
-        return MLModelResponse(message="Service is running", data=None)
+        return None

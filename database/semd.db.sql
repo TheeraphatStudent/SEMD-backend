@@ -103,7 +103,6 @@ CREATE TABLE IF NOT EXISTS model_registry (
     mlflow_run_id        VARCHAR(64) NOT NULL,
     mlflow_model_version INT NULL,
     experiment_id        VARCHAR(64) NULL,
-    stage                model_stage_type NOT NULL DEFAULT 'NONE',
     
     -- Artifact URIs
     model_uri            TEXT NOT NULL,
@@ -202,6 +201,7 @@ CREATE TABLE IF NOT EXISTS usage_log (
 -- ตารางบริการภายนอก (Third Service Conf)
 CREATE TABLE IF NOT EXISTS third_service_conf (
     third_service_conf_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    service_conf_id      BIGINT UNIQUE REFERENCES service_conf(service_conf_id) ON DELETE CASCADE,
     service_name          VARCHAR(64) NOT NULL,
     base_url              TEXT NOT NULL,
     http_method           VARCHAR(8) NOT NULL DEFAULT 'GET',

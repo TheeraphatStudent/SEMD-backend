@@ -28,7 +28,7 @@ fi
 
 source .venv/bin/activate
 
-./.venv/bin/pip install -r requirements/dev.txt
+./.venv/bin/pip install -r requirements.txt
 
 ./.venv/bin/pip list
 

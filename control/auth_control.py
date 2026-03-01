@@ -13,7 +13,7 @@ from models.auth_model import (
 from services.auth_service import AuthService
 from services.oauth_service import OAuthService
 from services.two_factor_service import TwoFactorService
-from database.user import User
+from models.user_model import UserModelDb
 
 class AuthControl:
     
@@ -45,7 +45,7 @@ class AuthControl:
         payload = AuthService.verify_token(request.pre_auth_token, "pre_auth")
         
         user_id = int(payload.get("sub"))
-        user = db.query(User).filter(User.user_id == user_id).first()
+        user = db.query(UserModelDb).filter(UserModelDb.user_id == user_id).first()
         
         if not user:
             raise HTTPException(
@@ -119,7 +119,7 @@ class AuthControl:
         AuthService.revoke_refresh_token(refresh_token, db)
     
     @classmethod
-    def setup_2fa(cls, current_user: User, db: Session) -> TwoFASetupResponse:
+    def setup_2fa(cls, current_user: UserModelDb, db: Session) -> TwoFASetupResponse:
         secret = TwoFactorService.generate_totp_secret()
         qr_uri = TwoFactorService.get_totp_uri(secret, current_user.email)
         
@@ -129,7 +129,7 @@ class AuthControl:
         )
     
     @classmethod
-    def enable_2fa(cls, request: TwoFAEnableRequest, current_user: User, db: Session):
+    def enable_2fa(cls, request: TwoFAEnableRequest, current_user: UserModelDb, db: Session):
         if not TwoFactorService.verify_totp(request.secret, request.otp_code):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
