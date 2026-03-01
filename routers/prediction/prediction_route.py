@@ -1,5 +1,6 @@
 from routers import BaseRoute
 from fastapi import UploadFile, HTTPException
+from models import PredictionResponse
 from typing import Any
 import csv
 import io
@@ -12,7 +13,7 @@ class PredictionRoute(BaseRoute):
             responses={404: {"description": "Not found"}, 501: {"description": "Not implemented"}, 422: {"description": "Validation error"}}
         )
 
-        self.router.post("", response_model=Any)
+        self.router.post("", response_model=PredictionResponse)(self.predict)
 
     async def predict(self, request: Any):
         pass

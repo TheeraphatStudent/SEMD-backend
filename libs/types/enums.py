@@ -33,3 +33,7 @@ class ModelStageType(str, Enum):
     STAGING = "STAGING"
     PRODUCTION = "PRODUCTION"
     ARCHIVED = "ARCHIVED"
+
+class OAuthProviderType(str, Enum):
+    GITHUB = "GITHUB"
+    GOOGLE = "GOOGLE"

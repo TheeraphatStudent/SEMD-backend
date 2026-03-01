@@ -4,6 +4,7 @@ from typing import List, Optional
 import logging
 
 from services.ml_service_client import ml_service_client
+from models import BaseResponseModel
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,10 +17,8 @@ class TrainingJobRequest(BaseModel):
     run_name: Optional[str] = Field(default=None, description="Custom run name")
 
 
-class TrainingJobResponse(BaseModel):
+class TrainingJobResponse(BaseResponseModel):
     job_id: str
-    status: str
-    message: str
 
 
 class JobResultRequest(BaseModel):
@@ -49,9 +48,9 @@ class MLTrainingRouter:
                 )
                 
                 return TrainingJobResponse(
-                    job_id=job_id,
-                    status="submitted",
-                    message="Training job submitted successfully"
+                    status=200,
+                    message="Training job submitted successfully",
+                    job_id=job_id
                 )
             
             except Exception as e:
@@ -89,9 +88,9 @@ class MLTrainingRouter:
                 )
                 
                 return TrainingJobResponse(
-                    job_id=job_id,
-                    status="submitted",
-                    message="Model retraining triggered successfully"
+                    status=200,
+                    message="Model retraining triggered successfully",
+                    job_id=job_id
                 )
             
             except Exception as e:

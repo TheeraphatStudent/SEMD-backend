@@ -1,5 +1,5 @@
 from routers import BaseRoute
-from typing import Any
+from models import ReportResponse, ReportListResponse
 
 class ReportRoute(BaseRoute):
     def __init__(self):
@@ -9,8 +9,8 @@ class ReportRoute(BaseRoute):
             responses={404: {"description": "Not found"}, 501: {"description": "Not implemented"}, 422: {"description": "Validation error"}}
         )
 
-        self.router.get("", response_model=Any)
-        self.router.post("", response_model=Any)
+        self.router.get("", response_model=ReportListResponse)(self.get_report_data)
+        self.router.post("", response_model=ReportResponse)(self.create_report)
 
     async def create_report(self):
         pass

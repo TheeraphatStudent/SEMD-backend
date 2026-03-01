@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from models.base_response_model import BaseResponseModel
+from libs.types.enums import RoleType
 
 class AuthLoginRequest(BaseModel):
     username: str = Field(
@@ -181,4 +182,69 @@ class OAuthCallbackRequest(BaseModel):
     state: str = Field(
         title="state",
         description="State parameter for verification",
+    )
+
+class RegisterRequest(BaseModel):
+    username: str = Field(
+        title="username",
+        description="Username for registration",
+        min_length=3,
+        max_length=32
+    )
+    email: EmailStr = Field(
+        title="email",
+        description="Email address"
+    )
+    full_name: str = Field(
+        title="full_name",
+        description="Full name of the user",
+        max_length=512
+    )
+    password: str = Field(
+        title="password",
+        description="Password for the account",
+        min_length=8
+    )
+
+class RegisterResponse(BaseResponseModel):
+    status: int = 201
+    message: str = "User registered successfully"
+    user_id: int = Field(
+        title="user_id",
+        description="ID of the newly created user"
+    )
+
+class CreateUserRequest(BaseModel):
+    username: str = Field(
+        title="username",
+        description="Username for the new user",
+        min_length=3,
+        max_length=32
+    )
+    email: EmailStr = Field(
+        title="email",
+        description="Email address"
+    )
+    full_name: str = Field(
+        title="full_name",
+        description="Full name of the user",
+        max_length=512
+    )
+    password: str = Field(
+        title="password",
+        description="Password for the account",
+        min_length=8
+    )
+    role: RoleType = Field(
+        title="role",
+        description="Role for the new user (ADMIN only)",
+        default=RoleType.ADMIN
+    )
+
+class CreateUserResponse(BaseResponseModel):
+    status: int = 201
+    message: str = "User created successfully"
+    user_id: int = Field(
+        title="user_id",
+        description="ID of the newly created user"
     )

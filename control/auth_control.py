@@ -8,12 +8,14 @@ from models.auth_model import (
     RefreshTokenRequest, TwoFAEnableRequest, TokenPairResponse,
     PreAuthResponse, TwoFASetupResponse, OAuthDeviceCodeRequest,
     OAuthDeviceCodeResponse, OAuthDevicePollRequest, OAuthAuthorizationRequest,
-    OAuthAuthorizationResponse, OAuthCallbackRequest
+    OAuthAuthorizationResponse, OAuthCallbackRequest, RegisterRequest,
+    RegisterResponse, CreateUserRequest, CreateUserResponse
 )
 from services.auth_service import AuthService
 from services.oauth_service import OAuthService
 from services.two_factor_service import TwoFactorService
 from database import User
+from libs.types.enums import RoleType
 
 class AuthControl:
     
@@ -210,6 +212,45 @@ class AuthControl:
         return OAuthAuthorizationResponse(
             authorization_url=authorization_url,
             state=state
+        )
+    
+    @classmethod
+    def register(cls, request: RegisterRequest, db: Session) -> RegisterResponse:
+        user = AuthService.register_user(
+            username=request.username,
+            email=request.email,
+            full_name=request.full_name,
+            password=request.password,
+            db=db
+        )
+        
+        return RegisterResponse(
+            status=201,
+            message="User registered successfully",
+            user_id=user.user_id
+        )
+    
+    @classmethod
+    def create_user(cls, request: CreateUserRequest, current_user: User, db: Session) -> CreateUserResponse:
+        if current_user.role != RoleType.SUPER_ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only SUPER_ADMIN can create admin users"
+            )
+        
+        user = AuthService.create_user(
+            username=request.username,
+            email=request.email,
+            full_name=request.full_name,
+            password=request.password,
+            role=request.role,
+            db=db
+        )
+        
+        return CreateUserResponse(
+            status=201,
+            message="User created successfully",
+            user_id=user.user_id
         )
     
     @classmethod

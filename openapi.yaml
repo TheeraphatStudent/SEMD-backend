@@ -357,6 +357,87 @@ paths:
           description: Unauthorized
         '422':
           description: Validation error
+  /ml/service:
+    get:
+      tags:
+      - ml
+      summary: Get Service
+      operationId: get_service_ml_service_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MLServiceResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /prediction:
+    post:
+      tags:
+      - prediction
+      summary: Predict
+      operationId: predict_prediction_post
+      parameters:
+      - name: request
+        in: query
+        required: true
+        schema:
+          title: Request
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /report:
+    get:
+      tags:
+      - report
+      summary: Get Report Data
+      operationId: get_report_data_report_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportListResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - report
+      summary: Create Report
+      operationId: create_report_report_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
   /dashboard/system-stat:
     get:
       tags:
@@ -1311,6 +1392,33 @@ components:
           default: 0 / 512GB
       type: object
       title: GetDefaultHealthCheck
+    MLServiceResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: ML service data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: MLServiceResponse
     OAuthAuthorizationRequest:
       properties:
         provider:
@@ -1564,6 +1672,33 @@ components:
       - message
       - data
       title: PredictionDetailResponse
+    PredictionResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: Prediction result data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: PredictionResponse
     PredictionStatItem:
       properties:
         total_predictions:
@@ -1772,6 +1907,62 @@ components:
       - message
       - data
       title: ReportDetailResponse
+    ReportListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items: {}
+          type: array
+          title: data
+          description: List of reports
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ReportListResponse
+    ReportResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: Report data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ReportResponse
     ReportStatItem:
       properties:
         reported_by_amount:

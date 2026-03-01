@@ -4,7 +4,8 @@ from models.auth_model import (
     RefreshTokenRequest, TwoFAEnableRequest, TokenPairResponse,
     PreAuthResponse, TwoFASetupResponse, OAuthDeviceCodeRequest,
     OAuthDeviceCodeResponse, OAuthDevicePollRequest, OAuthAuthorizationRequest,
-    OAuthAuthorizationResponse, OAuthCallbackRequest
+    OAuthAuthorizationResponse, OAuthCallbackRequest, RegisterRequest,
+    RegisterResponse, CreateUserRequest, CreateUserResponse
 )
 from models.base_response_model import BaseResponseModel
 from fastapi import HTTPException, Depends, Query
@@ -39,6 +40,20 @@ class AuthRoute(BaseRoute):
             tags=["auth"],
             responses={404: {"description": "Not found"}, 401: {"description": "Unauthorized"}, 422: {"description": "Validation error"}}
         )
+
+        self.router.post(
+            "/register",
+            response_model=RegisterResponse,
+            summary="User Registration",
+            description="Register a new user account with MEMBER role. Public endpoint."
+        )(self.register)
+        
+        self.router.post(
+            "/create",
+            response_model=CreateUserResponse,
+            summary="Create Admin User",
+            description="Create a new ADMIN user. Requires SUPER_ADMIN role."
+        )(self.create_user)
         
         self.router.post(
             "/login",
@@ -184,7 +199,19 @@ class AuthRoute(BaseRoute):
 
     async def oauth_callback(self, provider: str, code: str = Query(...), state: str = Query(...), db: Session = Depends(get_db)):
         try:
-            callback_request = OAuthCallbackRequest(code=code, state=state)
-            return await AuthControl.handle_oauth_callback(provider, callback_request, db)
+            request = OAuthCallbackRequest(code=code, state=state)
+            return await AuthControl.handle_oauth_callback(provider, request, db)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    async def register(self, request: RegisterRequest, db: Session = Depends(get_db)):
+        try:
+            return AuthControl.register(request, db)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    async def create_user(self, request: CreateUserRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+        try:
+            return AuthControl.create_user(request, current_user, db)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

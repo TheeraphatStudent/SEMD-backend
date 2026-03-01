@@ -11,6 +11,7 @@ from fastapi import HTTPException, status
 from config.settings import settings
 from database import User, RefreshToken
 from models.auth_model import TokenPairResponse
+from libs.types.enums import RoleType
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -183,5 +184,79 @@ class AuthService:
         if db_token:
             db_token.is_revoked = True
             db.commit()
+    
+    @classmethod
+    def register_user(cls, username: str, email: str, full_name: str, password: str, db: Session) -> User:
+        existing_user = db.query(User).filter(
+            (User.username == username) | (User.email == email)
+        ).first()
+        
+        if existing_user:
+            if existing_user.username == username:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists"
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already exists"
+                )
+        
+        hashed_password = cls.hash_password(password)
+        
+        new_user = User(
+            username=username,
+            email=email,
+            full_name=full_name,
+            password_hash=hashed_password,
+            role=RoleType.MEMBER.value
+        )
+        
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        return new_user
+    
+    @classmethod
+    def create_user(cls, username: str, email: str, full_name: str, password: str, role: RoleType, db: Session) -> User:
+        existing_user = db.query(User).filter(
+            (User.username == username) | (User.email == email)
+        ).first()
+        
+        if existing_user:
+            if existing_user.username == username:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists"
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already exists"
+                )
+        
+        if role not in [RoleType.ADMIN]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only ADMIN role can be created through this endpoint"
+            )
+        
+        hashed_password = cls.hash_password(password)
+        
+        new_user = User(
+            username=username,
+            email=email,
+            full_name=full_name,
+            password_hash=hashed_password,
+            role=role.value
+        )
+        
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        return new_user
 
 auth_service = AuthService()
