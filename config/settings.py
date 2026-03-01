@@ -42,6 +42,23 @@ class Settings(BaseSettings):
     jwt_secret: str = config.get("JWT", "SECRET", fallback="your-secret-key")
     jwt_algorithm: str = config.get("JWT", "ALGORITHM", fallback="HS256")
 
+    # Auth settings
+    auth_secret_key: str = config.get("AUTH", "SECRET_KEY", fallback="your-secret-key-here")
+    auth_algorithm: str = config.get("AUTH", "ALGORITHM", fallback="HS256")
+    auth_access_token_expire_minutes: int = config.getint("AUTH", "ACCESS_TOKEN_EXPIRE_MINUTES", fallback=15)
+    auth_refresh_token_expire_days: int = config.getint("AUTH", "REFRESH_TOKEN_EXPIRE_DAYS", fallback=7)
+
+    # GitHub OAuth settings
+    github_client_id: str = config.get("GITHUB", "CLIENT_ID", fallback="")
+    github_client_secret: str = config.get("GITHUB", "CLIENT_SECRET", fallback="")
+    github_redirect_uri: str = config.get("GITHUB", "REDIRECT_URI", fallback="http://localhost:8000/auth/callback/github")
+    github_homepage_url: str = config.get("GITHUB", "HOMEPAGE_URL", fallback="http://localhost:8000")
+
+    # Google OAuth settings
+    google_client_id: str = config.get("GOOGLE", "CLIENT_ID", fallback="")
+    google_client_secret: str = config.get("GOOGLE", "CLIENT_SECRET", fallback="")
+    google_redirect_uri: str = config.get("GOOGLE", "REDIRECT_URI", fallback="http://localhost:8000/auth/callback/google")
+
     @property
     def database_url(self) -> str:
         """Build PostgreSQL connection URL."""

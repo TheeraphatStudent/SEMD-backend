@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
     username        VARCHAR(32) UNIQUE NOT NULL,
     email           VARCHAR(64) UNIQUE NOT NULL,
     full_name       VARCHAR(512) NOT NULL,
+    birthday        TIMESTAMPTZ NULL,
     password_hash   VARCHAR(1024) NOT NULL,
     role            role_type NOT NULL DEFAULT 'MEMBER',
     
@@ -64,6 +65,17 @@ CREATE TABLE IF NOT EXISTS users (
     
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ตาราง Refresh Tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    refresh_tokens_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id                 BIGINT REFERENCES users(user_id) ON DELETE CASCADE NOT NULL,
+    token_hash              VARCHAR(64) NOT NULL UNIQUE,
+    jti                     UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    expires_at              TIMESTAMPTZ NOT NULL,
+    is_revoked              BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ตารางจัดการบริการ (Service Config)
