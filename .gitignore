@@ -1,1 +1,13 @@
 .venv
+*.ini
+*.conf
+
+.env
+.env.local
+.env.production
+.env.development
+
+!**/*.example.ini
+!**/*.example.conf
+
+**__pycache__
