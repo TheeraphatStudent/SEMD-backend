@@ -15,10 +15,9 @@ class AuthLoginRequest(BaseModel):
     )
 
 class AuthLoginProviderRequest(BaseModel):
-    provider: str = Field(
+    provider: OAuthProviderType = Field(
         title="provider",
-        description="Authentication provider (e.g., google, github)",
-        examples=["google", "github"],
+        description="Authentication provider (e.g., google, github)"
     )
 
     token: str = Field(
@@ -115,10 +114,9 @@ class TwoFAEnableRequest(BaseModel):
     )
 
 class OAuthDeviceCodeRequest(BaseModel):
-    provider: str = Field(
+    provider: OAuthProviderType = Field(
         title="provider",
-        description="OAuth provider (github or google)",
-        examples=["github", "google"],
+        description="OAuth provider (github or google)"
     )
 
 class OAuthDeviceCodeResponse(BaseResponseModel):
@@ -146,9 +144,9 @@ class OAuthDeviceCodeResponse(BaseResponseModel):
     )
 
 class OAuthDevicePollRequest(BaseModel):
-    provider: str = Field(
+    provider: OAuthProviderType = Field(
         title="provider",
-        description="OAuth provider",
+        description="OAuth provider"
     )
     device_code: str = Field(
         title="device_code",
@@ -156,10 +154,9 @@ class OAuthDevicePollRequest(BaseModel):
     )
 
 class OAuthAuthorizationRequest(BaseModel):
-    provider: str = Field(
+    provider: OAuthProviderType = Field(
         title="provider",
-        description="OAuth provider (github or google)",
-        examples=["github", "google"],
+        description="OAuth provider (github or google)"
     )
 
 class OAuthAuthorizationResponse(BaseResponseModel):

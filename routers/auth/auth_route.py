@@ -16,6 +16,7 @@ from services.client import postgres_client
 from control.auth_control import AuthControl
 from guard.auth_guard import AuthGuard
 from database import User
+from libs.types.enums import OAuthProviderType
 
 def get_db():
     db = postgres_client.get_session_instance()
@@ -197,10 +198,10 @@ class AuthRoute(BaseRoute):
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    async def oauth_callback(self, provider: str, code: str = Query(...), state: str = Query(...), db: Session = Depends(get_db)):
+    async def oauth_callback(self, provider: OAuthProviderType, code: str = Query(...), state: str = Query(...), db: Session = Depends(get_db)):
         try:
             request = OAuthCallbackRequest(code=code, state=state)
-            return await AuthControl.handle_oauth_callback(provider, request, db)
+            return await AuthControl.handle_oauth_callback(provider.value, request, db)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     

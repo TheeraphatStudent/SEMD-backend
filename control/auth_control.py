@@ -78,18 +78,18 @@ class AuthControl:
     
     @classmethod
     async def login_provider(cls, request: AuthLoginProviderRequest, db: Session) -> Union[TokenPairResponse, PreAuthResponse]:
-        if request.provider == "github":
+        if request.provider.value == "github":
             user_info = await OAuthService.exchange_github_token(request.token)
-        elif request.provider == "google":
+        elif request.provider.value == "google":
             user_info = await OAuthService.exchange_google_token(request.token)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported provider: {request.provider}"
+                detail=f"Unsupported provider: {request.provider.value}"
             )
         
         user = OAuthService.upsert_oauth_user(
-            provider=request.provider,
+            provider=request.provider.value,
             oauth_id=user_info["id"],
             email=user_info["email"],
             name=user_info["name"],
@@ -142,7 +142,7 @@ class AuthControl:
     
     @classmethod
     async def initiate_device_flow(cls, request: OAuthDeviceCodeRequest) -> OAuthDeviceCodeResponse:
-        if request.provider == "github":
+        if request.provider.value == "github":
             data = await OAuthService.initiate_github_device_flow()
             return OAuthDeviceCodeResponse(
                 device_code=data["device_code"],
@@ -154,12 +154,12 @@ class AuthControl:
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Device flow not supported for provider: {request.provider}"
+                detail=f"Device flow not supported for provider: {request.provider.value}"
             )
     
     @classmethod
     async def poll_device_flow(cls, request: OAuthDevicePollRequest, db: Session) -> Union[TokenPairResponse, None]:
-        if request.provider == "github":
+        if request.provider.value == "github":
             access_token = await OAuthService.poll_github_device_flow(request.device_code)
             
             if access_token is None:
@@ -192,21 +192,21 @@ class AuthControl:
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Device flow not supported for provider: {request.provider}"
+                detail=f"Device flow not supported for provider: {request.provider.value}"
             )
     
     @classmethod
     def initiate_oauth_authorization(cls, request: OAuthAuthorizationRequest) -> OAuthAuthorizationResponse:
         state = secrets.token_urlsafe(32)
         
-        if request.provider == "github":
+        if request.provider.value == "github":
             authorization_url = OAuthService.generate_github_authorization_url(state)
-        elif request.provider == "google":
+        elif request.provider.value == "google":
             authorization_url = OAuthService.generate_google_authorization_url(state)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported provider: {request.provider}"
+                detail=f"Unsupported provider: {request.provider.value}"
             )
         
         return OAuthAuthorizationResponse(
