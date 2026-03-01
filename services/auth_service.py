@@ -9,8 +9,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from config.settings import settings
-from models.user_model import UserModelDb
-from models.refresh_model import RefreshTokenModelDb
+from database import User, RefreshToken
 from models.auth_model import TokenPairResponse
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,8 +28,8 @@ class AuthService:
         return pwd_context.verify(plain, hashed)
     
     @classmethod
-    def authenticate_user(cls, username: str, password: str, db: Session) -> UserModelDb:
-        user = db.query(UserModelDb).filter(UserModelDb.username == username).first()
+    def authenticate_user(cls, username: str, password: str, db: Session) -> User:
+        user = db.query(User).filter(User.username == username).first()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,7 +52,7 @@ class AuthService:
         return user
     
     @classmethod
-    def create_access_token(cls, user: UserModelDb) -> str:
+    def create_access_token(cls, user: User) -> str:
         expire = datetime.utcnow() + timedelta(minutes=settings.auth_access_token_expire_minutes)
         payload = {
             "sub": str(user.user_id),
@@ -66,7 +65,7 @@ class AuthService:
         return token
     
     @classmethod
-    def create_refresh_token(cls, user: UserModelDb, db: Session) -> str:
+    def create_refresh_token(cls, user: User, db: Session) -> str:
         jti = uuid.uuid4()
         expire = datetime.utcnow() + timedelta(days=settings.auth_refresh_token_expire_days)
         
@@ -81,7 +80,7 @@ class AuthService:
         
         token_hash = hashlib.sha256(token.encode()).hexdigest()
         
-        db_refresh_token = RefreshTokenModelDb(
+        db_refresh_token = RefreshToken(
             user_id=user.user_id,
             token_hash=token_hash,
             jti=jti,
@@ -132,8 +131,8 @@ class AuthService:
         
         token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
         
-        db_token = db.query(RefreshTokenModelDb).filter(
-            RefreshTokenModelDb.token_hash == token_hash
+        db_token = db.query(RefreshToken).filter(
+            RefreshToken.token_hash == token_hash
         ).first()
         
         if not db_token:
@@ -157,7 +156,7 @@ class AuthService:
         db_token.is_revoked = True
         db.commit()
         
-        user = db.query(UserModelDb).filter(UserModelDb.user_id == db_token.user_id).first()
+        user = db.query(User).filter(User.user_id == db_token.user_id).first()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -177,8 +176,8 @@ class AuthService:
     def revoke_refresh_token(cls, refresh_token: str, db: Session):
         token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
         
-        db_token = db.query(RefreshTokenModelDb).filter(
-            RefreshTokenModelDb.token_hash == token_hash
+        db_token = db.query(RefreshToken).filter(
+            RefreshToken.token_hash == token_hash
         ).first()
         
         if db_token:

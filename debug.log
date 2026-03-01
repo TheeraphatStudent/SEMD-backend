@@ -2,159 +2,37 @@
    FastAPI   Starting development server 🚀
  
              Searching for package file structure from directories with __init__.py files
-ERROR    Import error: No module named 'psycopg2'                                                                                                         
-WARNING  Ensure all the package directories have an __init__.py file                                                                                      
+<configparser.ConfigParser object at 0x7293ed247890>
+Connection client: postgresql://example:exmaple@localhost:5433/semd_db
+             Importing from /home/semd/Desktop/SEMD-backend
+ 
+    module   🐍 main.py
+ 
+      code   Importing the FastAPI app object from the module with the following code:
+ 
+             from main import app
+ 
+       app   Using import string: main:app
+ 
+    server   Server started at http://127.0.0.1:8000
+    server   Documentation at http://127.0.0.1:8000/docs
+ 
+       tip   Running in development mode, for production use: fastapi run
+ 
+             Logs:
+ 
+      INFO   Will watch for changes in these directories: ['/home/semd/Desktop/SEMD-backend']
+      INFO   Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+      INFO   Started reloader process [1790142] using WatchFiles
+<configparser.ConfigParser object at 0x76188fa13350>
+Connection client: postgresql://example:exmaple@localhost:5433/semd_db
+      INFO   Started server process [1790150]
+      INFO   Waiting for application startup.
+      INFO   Application startup complete.
 
-╭────────────────────────────────────────────────────────── Traceback (most recent call last) ───────────────────────────────────────────────────────────╮
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/fastapi_cli/cli.py:328 in dev                                                       │
-│                                                                                                                                                        │
-│   325 │                                                                                                                                                │
-│   326 │   Otherwise, it uses the first [bold]FastAPI[/bold] app found in the imported module o                                                         │
-│   327 │   """                                                                                                                                          │
-│ ❱ 328 │   _run(                                                                                                                                        │
-│   329 │   │   path=path,                                                                                                                               │
-│   330 │   │   host=host,                                                                                                                               │
-│   331 │   │   port=port,                                                                                                                               │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/fastapi_cli/cli.py:156 in _run                                                      │
-│                                                                                                                                                        │
-│   153 │   │   │   elif config.entrypoint:                                                                                                              │
-│   154 │   │   │   │   import_data = get_import_data_from_import_string(config.entrypoint)                                                              │
-│   155 │   │   │   else:                                                                                                                                │
-│ ❱ 156 │   │   │   │   import_data = get_import_data()                                                                                                  │
-│   157 │   │   except FastAPICLIException as e:                                                                                                         │
-│   158 │   │   │   toolkit.print_line()                                                                                                                 │
-│   159 │   │   │   toolkit.print(f"[error]{e}")                                                                                                         │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/fastapi_cli/discover.py:125 in get_import_data                                      │
-│                                                                                                                                                        │
-│   122 │   │   raise FastAPICLIException(f"Path does not exist {path}")                                                                                 │
-│   123 │   mod_data = get_module_data_from_path(path)                                                                                                   │
-│   124 │   sys.path.insert(0, str(mod_data.extra_sys_path))                                                                                             │
-│ ❱ 125 │   use_app_name = get_app_name(mod_data=mod_data, app_name=app_name)                                                                            │
-│   126 │                                                                                                                                                │
-│   127 │   import_string = f"{mod_data.module_import_str}:{use_app_name}"                                                                               │
-│   128                                                                                                                                                  │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/fastapi_cli/discover.py:69 in get_app_name                                          │
-│                                                                                                                                                        │
-│    66                                                                                                                                                  │
-│    67 def get_app_name(*, mod_data: ModuleData, app_name: str | None = None) -> str:                                                                   │
-│    68 │   try:                                                                                                                                         │
-│ ❱  69 │   │   mod = importlib.import_module(mod_data.module_import_str)                                                                                │
-│    70 │   except (ImportError, ValueError) as e:                                                                                                       │
-│    71 │   │   logger.error(f"Import error: {e}")                                                                                                       │
-│    72 │   │   logger.warning(                                                                                                                          │
-│                                                                                                                                                        │
-│ /usr/lib/python3.12/importlib/__init__.py:90 in import_module                                                                                          │
-│                                                                                                                                                        │
-│    87 │   │   │   if character != '.':                                                                                                                 │
-│    88 │   │   │   │   break                                                                                                                            │
-│    89 │   │   │   level += 1                                                                                                                           │
-│ ❱  90 │   return _bootstrap._gcd_import(name[level:], package, level)                                                                                  │
-│    91                                                                                                                                                  │
-│    92                                                                                                                                                  │
-│    93 _RELOADING = {}                                                                                                                                  │
-│ in _gcd_import:1387                                                                                                                                    │
-│ in _find_and_load:1360                                                                                                                                 │
-│ in _find_and_load_unlocked:1331                                                                                                                        │
-│ in _load_unlocked:935                                                                                                                                  │
-│ in exec_module:995                                                                                                                                     │
-│ in _call_with_frames_removed:488                                                                                                                       │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/main.py:12 in <module>                                                                                                 │
-│                                                                                                                                                        │
-│    9                                                                                                                                                   │
-│   10 from fastapi import FastAPI                                                                                                                       │
-│   11 from fastapi.middleware.cors import CORSMiddleware                                                                                                │
-│ ❱ 12 from routers import (                                                                                                                             │
-│   13 │   AuthRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,                                                               │
-│   14 │   ReportStatRoute, PredictionStatRoute, UserStatRoute, ApiKeyStatRoute,                                                                         │
-│   15 │   ThirdPartyStatRoute, UrlFlagStatRoute                                                                                                         │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/routers/__init__.py:4 in <module>                                                                                      │
-│                                                                                                                                                        │
-│    1 # Routers package                                                                                                                                 │
-│    2                                                                                                                                                   │
-│    3 from .base_route import BaseRoute                                                                                                                 │
-│ ❱  4 from .auth import AuthRoute                                                                                                                       │
-│    5 from .ml import MLRoute                                                                                                                           │
-│    6 from .prediction import PredictionRoute                                                                                                           │
-│    7 from .report import ReportRoute                                                                                                                   │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/routers/auth/__init__.py:1 in <module>                                                                                 │
-│                                                                                                                                                        │
-│ ❱ 1 from .auth_route import AuthRoute                                                                                                                  │
-│   2                                                                                                                                                    │
-│   3 __all__ = ["AuthRoute"]                                                                                                                            │
-│   4                                                                                                                                                    │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/routers/auth/auth_route.py:14 in <module>                                                                              │
-│                                                                                                                                                        │
-│    11 from sqlalchemy.orm import Session                                                                                                               │
-│    12 from typing import Union, Optional                                                                                                               │
-│    13                                                                                                                                                  │
-│ ❱  14 from services.postgres_client import postgres_client                                                                                             │
-│    15 from control.auth_control import AuthControl                                                                                                     │
-│    16 from guard.auth_guard import AuthGuard                                                                                                           │
-│    17 from database.user import User                                                                                                                   │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/services/__init__.py:3 in <module>                                                                                     │
-│                                                                                                                                                        │
-│    1 """Service module for business logic."""                                                                                                          │
-│    2                                                                                                                                                   │
-│ ❱  3 from .postgres_client import PostgresClient                                                                                                       │
-│    4 from .redis_client import RedisClient                                                                                                             │
-│    5 from .prediction_service import PredictionService                                                                                                 │
-│    6 from .user_service import UserService                                                                                                             │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/services/postgres_client.py:49 in <module>                                                                             │
-│                                                                                                                                                        │
-│   46 │   │   """Get a new session instance."""                                                                                                         │
-│   47 │   │   return self.SessionLocal()                                                                                                                │
-│   48                                                                                                                                                   │
-│ ❱ 49 postgres_client = PostgresClient()                                                                                                                │
-│   50                                                                                                                                                   │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/services/postgres_client.py:21 in __init__                                                                             │
-│                                                                                                                                                        │
-│   18 │                                                                                                                                                 │
-│   19 │   def __init__(self):                                                                                                                           │
-│   20 │   │   if not hasattr(self, 'engine'):                                                                                                           │
-│ ❱ 21 │   │   │   self.engine = create_engine(settings.database_url, pool_pre_ping=True)                                                                │
-│   22 │   │   │   self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sel                                                          │
-│   23 │   │   │   self.Base = declarative_base()                                                                                                        │
-│   24                                                                                                                                                   │
-│ in create_engine:2                                                                                                                                     │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/sqlalchemy/util/deprecations.py:281 in warned                                       │
-│                                                                                                                                                        │
-│   278 │   │   │   │   │   │   version_warnings[m],                                                                                                     │
-│   279 │   │   │   │   │   │   stacklevel=3,                                                                                                            │
-│   280 │   │   │   │   │   )                                                                                                                            │
-│ ❱ 281 │   │   │   return fn(*args, **kwargs)  # type: ignore[no-any-return]                                                                            │
-│   282 │   │                                                                                                                                            │
-│   283 │   │   doc = fn.__doc__ is not None and fn.__doc__ or ""                                                                                        │
-│   284 │   │   if doc:                                                                                                                                  │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/sqlalchemy/engine/create.py:617 in create_engine                                    │
-│                                                                                                                                                        │
-│   614 │   │   for k in util.get_func_kwargs(dbapi_meth):                                                                                               │
-│   615 │   │   │   if k in kwargs:                                                                                                                      │
-│   616 │   │   │   │   dbapi_args[k] = pop_kwarg(k)                                                                                                     │
-│ ❱ 617 │   │   dbapi = dbapi_meth(**dbapi_args)                                                                                                         │
-│   618 │                                                                                                                                                │
-│   619 │   dialect_args["dbapi"] = dbapi                                                                                                                │
-│   620                                                                                                                                                  │
-│                                                                                                                                                        │
-│ /home/semd/Desktop/SEMD-backend/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/psycopg2.py:696 in import_dbapi                      │
-│                                                                                                                                                        │
-│   693 │                                                                                                                                                │
-│   694 │   @classmethod                                                                                                                                 │
-│   695 │   def import_dbapi(cls):                                                                                                                       │
-│ ❱ 696 │   │   import psycopg2                                                                                                                          │
-│   697 │   │                                                                                                                                            │
-│   698 │   │   return psycopg2                                                                                                                          │
-│   699                                                                                                                                                  │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-ModuleNotFoundError: No module named 'psycopg2'
+      INFO   Shutting down
+      INFO   Waiting for application shutdown.
+      INFO   Application shutdown complete.
+      INFO   Finished server process [1790150]
+      INFO   Stopping reloader process [1790142]
+

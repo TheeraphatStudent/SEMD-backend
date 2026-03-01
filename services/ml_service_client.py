@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
 
-from services.redis_client import redis_client
+from services.client import redis_client
 from config.settings import settings
 
 logging.basicConfig(level=logging.INFO)

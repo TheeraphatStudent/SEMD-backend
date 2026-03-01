@@ -2,14 +2,17 @@
 
 from functools import lru_cache
 from typing import List, Union
+from pathlib import Path
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
 import configparser
 
 config = configparser.ConfigParser()
-config.read("./backend.ini")
+config.read(Path(__file__).parent / "backend.ini")
 config.sections()
+
+print(config)
 
 class Settings(BaseSettings):
     """Configuration values loaded from environment variables."""

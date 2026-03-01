@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from config.settings import settings
-from models.user_model import UserModelDb
+from database import User
 
 class OAuthService:
     
@@ -268,16 +268,16 @@ class OAuthService:
         email: str,
         name: str,
         db: Session
-    ) -> UserModelDb:
-        user = db.query(UserModelDb).filter(UserModelDb.oauth_id == oauth_id, UserModelDb.oauth_provider == provider).first()
+    ) -> User:
+        user = db.query(User).filter(User.oauth_id == oauth_id, User.oauth_provider == provider).first()
         
         if user:
-            user.updated_at = db.query(UserModelDb).filter(UserModelDb.user_id == user.user_id).first().updated_at
+            user.updated_at = db.query(User).filter(User.user_id == user.user_id).first().updated_at
             db.commit()
             db.refresh(user)
             return user
         
-        existing_user = db.query(UserModelDb).filter(UserModelDb.email == email).first()
+        existing_user = db.query(User).filter(User.email == email).first()
         if existing_user:
             existing_user.oauth_provider = provider
             existing_user.oauth_id = oauth_id
@@ -292,11 +292,11 @@ class OAuthService:
         username = email.split("@")[0]
         base_username = username
         counter = 1
-        while db.query(UserModelDb).filter(UserModelDb.username == username).first():
+        while db.query(User).filter(User.username == username).first():
             username = f"{base_username}{counter}"
             counter += 1
         
-        new_user = UserModelDb(
+        new_user = User(
             username=username,
             email=email,
             full_name=name,

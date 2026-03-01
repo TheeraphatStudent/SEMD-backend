@@ -6,7 +6,7 @@ from mimetypes import init
 import uuid
 from datetime import datetime
 
-from . import postgres_client, redis_client
+from services.client import postgres_client, redis_client
 from models import PredictionModelDb
 
 class PredictionService:

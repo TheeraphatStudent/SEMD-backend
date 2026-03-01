@@ -76,8 +76,8 @@ class AuthGuard:
             HTTPException: If token is invalid or user not found
         """
         from services.auth_service import AuthService
-        from models.user_model import UserModelDb
-        from services.postgres_client import postgres_client
+        from database import User
+        from services.client import postgres_client
         
         if db is None:
             db = postgres_client.get_session_instance()

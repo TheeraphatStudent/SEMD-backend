@@ -2,7 +2,7 @@ import pyotp
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from models.user_model import UserModelDb
+from database import User
 
 class TwoFactorService:
     
@@ -24,7 +24,7 @@ class TwoFactorService:
         return totp.verify(code, valid_window=1)
     
     @classmethod
-    def enable_2fa(cls, user: UserModelDb, secret: str, db: Session):
+    def enable_2fa(cls, user: User, secret: str, db: Session):
         user.twofa_secret = secret
         user.is_2fa_enabled = True
         db.commit()
