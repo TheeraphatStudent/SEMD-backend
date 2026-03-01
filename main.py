@@ -24,6 +24,7 @@ app = FastAPI(
     version=settings.app_version,
     openapi_url='/openapi.json',
     docs_url='/docs',
+    root_path='/api/v1',
     debug=settings.debug
 )
 
