@@ -1,0 +1,2940 @@
+openapi: 3.1.0
+info:
+  title: SEMD API
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: Root
+      description: Root endpoint with API information.
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDefaultApiEndpoint'
+  /health:
+    get:
+      summary: Health Check
+      description: Health check endpoint.
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDefaultHealthCheck'
+  /auth/login:
+    post:
+      tags:
+      - auth
+      summary: User Login
+      description: Authenticate user with username and password. Returns token pair
+        or pre-auth token if 2FA is enabled.
+      operationId: login_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/TokenPairResponse'
+                - $ref: '#/components/schemas/PreAuthResponse'
+                title: Response Login Auth Login Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/login/2fa:
+    post:
+      tags:
+      - auth
+      summary: Complete 2FA Login
+      description: Complete authentication with 2FA verification code after receiving
+        pre-auth token.
+      operationId: login_2fa_auth_login_2fa_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFAVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/login/provider:
+    post:
+      tags:
+      - auth
+      summary: OAuth Provider Login
+      description: Authenticate using OAuth provider (GitHub or Google) token.
+      operationId: login_provider_auth_login_provider_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginProviderRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/TokenPairResponse'
+                - $ref: '#/components/schemas/PreAuthResponse'
+                title: Response Login Provider Auth Login Provider Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/refresh:
+    post:
+      tags:
+      - auth
+      summary: Refresh Access Token
+      description: Exchange refresh token for a new token pair.
+      operationId: refresh_auth_refresh_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/logout:
+    post:
+      tags:
+      - auth
+      summary: User Logout
+      description: Revoke refresh token and logout user.
+      operationId: logout_auth_logout_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/2fa/setup:
+    post:
+      tags:
+      - auth
+      summary: Setup 2FA
+      description: Generate TOTP secret and QR code for 2FA setup. Requires authentication.
+      operationId: setup_2fa_auth_2fa_setup_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFASetupResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/2fa/enable:
+    post:
+      tags:
+      - auth
+      summary: Enable 2FA
+      description: Enable 2FA for the authenticated user by verifying OTP code. Requires
+        authentication.
+      operationId: enable_2fa_auth_2fa_enable_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFAEnableRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/oauth/device:
+    post:
+      tags:
+      - auth
+      summary: Initiate OAuth Device Flow
+      description: Start OAuth device authorization flow for GitHub. Returns device
+        code and user code.
+      operationId: oauth_device_initiate_auth_oauth_device_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthDeviceCodeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthDeviceCodeResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/oauth/device/poll:
+    post:
+      tags:
+      - auth
+      summary: Poll OAuth Device Flow
+      description: Poll for OAuth device flow completion. Returns token pair when
+        authorized or pending status.
+      operationId: oauth_device_poll_auth_oauth_device_poll_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthDevicePollRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/TokenPairResponse'
+                - $ref: '#/components/schemas/PreAuthResponse'
+                - $ref: '#/components/schemas/BaseResponseModel'
+                title: Response Oauth Device Poll Auth Oauth Device Poll Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/oauth/authorize:
+    post:
+      tags:
+      - auth
+      summary: Get OAuth Authorization URL
+      description: Generate OAuth authorization URL for GitHub or Google login.
+      operationId: oauth_authorize_auth_oauth_authorize_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthAuthorizationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthAuthorizationResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/callback/{provider}:
+    get:
+      tags:
+      - auth
+      summary: OAuth Callback
+      description: Handle OAuth callback from provider. Exchanges authorization code
+        for tokens.
+      operationId: oauth_callback_auth_callback__provider__get
+      parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Provider
+      - name: code
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Code
+      - name: state
+        in: query
+        required: true
+        schema:
+          type: string
+          title: State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/TokenPairResponse'
+                - $ref: '#/components/schemas/PreAuthResponse'
+                title: Response Oauth Callback Auth Callback  Provider  Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /dashboard/system-stat:
+    get:
+      tags:
+      - Dashboard
+      summary: Getsystemstat
+      operationId: getSystemStat_dashboard_system_stat_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/system-health:
+    get:
+      tags:
+      - Dashboard
+      summary: Getsystemhealth
+      operationId: getSystemHealth_dashboard_system_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemHealthResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/system-performance:
+    get:
+      tags:
+      - Dashboard
+      summary: Getsystemperformance
+      operationId: getSystemPerformance_dashboard_system_performance_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemPerformanceResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/third-party-stat:
+    get:
+      tags:
+      - Dashboard
+      summary: Getthirdpartystat
+      operationId: getThirdPartyStat_dashboard_third_party_stat_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/url-flag-stat:
+    get:
+      tags:
+      - Dashboard
+      summary: Geturlflagstat
+      operationId: getUrlFlagStat_dashboard_url_flag_stat_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/url-report-stat:
+    get:
+      tags:
+      - Dashboard
+      summary: Geturlreportstat
+      operationId: getUrlReportStat_dashboard_url_report_stat_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/api-access-key-stat:
+    get:
+      tags:
+      - Dashboard
+      summary: Getapiaccesskeystat
+      operationId: getApiAccessKeyStat_dashboard_api_access_key_stat_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /dashboard/user-stat:
+    get:
+      tags:
+      - Dashboard
+      summary: Getuserstat
+      operationId: getUserStat_dashboard_user_stat_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/report:
+    get:
+      tags:
+      - stat-report
+      summary: Get Report Stat
+      operationId: get_report_stat_stat_report_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/report/list:
+    get:
+      tags:
+      - stat-report
+      summary: Get Urls List
+      operationId: get_urls_list_stat_report_list_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatListResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/report/trend:
+    get:
+      tags:
+      - stat-report
+      summary: Get Urls Trend
+      operationId: get_urls_trend_stat_report_trend_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatTrendResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/report/detail:
+    get:
+      tags:
+      - stat-report
+      summary: Get Report Detail
+      operationId: get_report_detail_stat_report_detail_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetailResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/prediction:
+    get:
+      tags:
+      - stat-prediction
+      summary: Get Prediction Stat
+      operationId: get_prediction_stat_stat_prediction_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/prediction/trend:
+    get:
+      tags:
+      - stat-prediction
+      summary: Get Prediction Trend
+      operationId: get_prediction_trend_stat_prediction_trend_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionTrendResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/prediction/by-model:
+    get:
+      tags:
+      - stat-prediction
+      summary: Get Prediction By Model
+      operationId: get_prediction_by_model_stat_prediction_by_model_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionByModelResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/prediction/detail:
+    get:
+      tags:
+      - stat-prediction
+      summary: Get Prediction Detail
+      operationId: get_prediction_detail_stat_prediction_detail_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionDetailResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/user:
+    get:
+      tags:
+      - stat-user
+      summary: Get User Stat
+      operationId: get_user_stat_stat_user_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/user/activity:
+    get:
+      tags:
+      - stat-user
+      summary: Get User Activity
+      operationId: get_user_activity_stat_user_activity_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserActivityResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/user/role:
+    get:
+      tags:
+      - stat-user
+      summary: Get User Role
+      operationId: get_user_role_stat_user_role_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/user/top:
+    get:
+      tags:
+      - stat-user
+      summary: Get Top Users
+      operationId: get_top_users_stat_user_top_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUserResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/api-key:
+    get:
+      tags:
+      - stat-api-key
+      summary: Get Api Key Stat
+      operationId: get_api_key_stat_stat_api_key_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/api-key/usage:
+    get:
+      tags:
+      - stat-api-key
+      summary: Get Api Key Usage
+      operationId: get_api_key_usage_stat_api_key_usage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyUsageResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/api-key/trend:
+    get:
+      tags:
+      - stat-api-key
+      summary: Get Api Key Trend
+      operationId: get_api_key_trend_stat_api_key_trend_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyTrendResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/api-key/endpoint:
+    get:
+      tags:
+      - stat-api-key
+      summary: Get Api Endpoint Stat
+      operationId: get_api_endpoint_stat_stat_api_key_endpoint_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEndpointStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/third-party:
+    get:
+      tags:
+      - stat-third-party
+      summary: Get Third Party Stat
+      operationId: get_third_party_stat_stat_third_party_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/third-party/services:
+    get:
+      tags:
+      - stat-third-party
+      summary: Get Third Party Services
+      operationId: get_third_party_services_stat_third_party_services_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyServiceResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/third-party/trend:
+    get:
+      tags:
+      - stat-third-party
+      summary: Get Third Party Trend
+      operationId: get_third_party_trend_stat_third_party_trend_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyTrendResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/third-party/errors:
+    get:
+      tags:
+      - stat-third-party
+      summary: Get Third Party Errors
+      operationId: get_third_party_errors_stat_third_party_errors_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyErrorResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/url-flag:
+    get:
+      tags:
+      - stat-url-flag
+      summary: Get Url Flag Stat
+      operationId: get_url_flag_stat_stat_url_flag_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagStatResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/url-flag/trend:
+    get:
+      tags:
+      - stat-url-flag
+      summary: Get Url Flag Trend
+      operationId: get_url_flag_trend_stat_url_flag_trend_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagTrendResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/url-flag/detail:
+    get:
+      tags:
+      - stat-url-flag
+      summary: Get Url Flag Detail
+      operationId: get_url_flag_detail_stat_url_flag_detail_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagDetailResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /stat/url-flag/category:
+    get:
+      tags:
+      - stat-url-flag
+      summary: Get Url Flag Category
+      operationId: get_url_flag_category_stat_url_flag_category_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagCategoryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+components:
+  schemas:
+    ApiEndpointStatItem:
+      properties:
+        endpoint:
+          type: string
+          title: Endpoint
+          description: API endpoint path
+        method:
+          type: string
+          title: Method
+          description: HTTP method
+        request_count:
+          type: integer
+          title: Request Count
+          description: Number of requests
+        avg_response_time:
+          type: number
+          title: Avg Response Time
+          description: Average response time in ms
+        error_rate:
+          type: number
+          title: Error Rate
+          description: Error rate percentage
+      type: object
+      required:
+      - endpoint
+      - method
+      - request_count
+      - avg_response_time
+      - error_rate
+      title: ApiEndpointStatItem
+    ApiEndpointStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ApiEndpointStatItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ApiEndpointStatResponse
+    ApiKeyStatItem:
+      properties:
+        total_keys:
+          type: integer
+          title: Total Keys
+          description: Total number of API keys
+        active_keys:
+          type: integer
+          title: Active Keys
+          description: Active API keys
+        expired_keys:
+          type: integer
+          title: Expired Keys
+          description: Expired API keys
+        revoked_keys:
+          type: integer
+          title: Revoked Keys
+          description: Revoked API keys
+        total_requests:
+          type: integer
+          title: Total Requests
+          description: Total API requests
+        requests_today:
+          type: integer
+          title: Requests Today
+          description: API requests today
+      type: object
+      required:
+      - total_keys
+      - active_keys
+      - expired_keys
+      - revoked_keys
+      - total_requests
+      - requests_today
+      title: ApiKeyStatItem
+    ApiKeyStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/ApiKeyStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ApiKeyStatResponse
+    ApiKeyTrendItem:
+      properties:
+        date:
+          type: string
+          title: Date
+          description: Date
+          examples:
+          - '2025-01-15'
+        request_count:
+          type: integer
+          title: Request Count
+          description: Number of API requests
+        unique_keys:
+          type: integer
+          title: Unique Keys
+          description: Number of unique keys used
+        error_count:
+          type: integer
+          title: Error Count
+          description: Number of errors
+      type: object
+      required:
+      - date
+      - request_count
+      - unique_keys
+      - error_count
+      title: ApiKeyTrendItem
+    ApiKeyTrendResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ApiKeyTrendItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ApiKeyTrendResponse
+    ApiKeyUsageItem:
+      properties:
+        api_key_id:
+          type: string
+          title: Api Key Id
+          description: API key ID
+        key_name:
+          type: string
+          title: Key Name
+          description: API key name
+        owner:
+          type: string
+          title: Owner
+          description: Key owner
+        request_count:
+          type: integer
+          title: Request Count
+          description: Number of requests
+        last_used:
+          type: string
+          title: Last Used
+          description: Last used timestamp
+        status:
+          type: string
+          title: Status
+          description: 'Key status: active, expired, revoked'
+      type: object
+      required:
+      - api_key_id
+      - key_name
+      - owner
+      - request_count
+      - last_used
+      - status
+      title: ApiKeyUsageItem
+    ApiKeyUsageResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ApiKeyUsageItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ApiKeyUsageResponse
+    AuthLoginProviderRequest:
+      properties:
+        provider:
+          type: string
+          title: provider
+          description: Authentication provider (e.g., google, github)
+          examples:
+          - google
+          - github
+        token:
+          type: string
+          title: token
+          description: Authentication token from provider
+      type: object
+      required:
+      - provider
+      - token
+      title: AuthLoginProviderRequest
+    AuthLoginRequest:
+      properties:
+        username:
+          type: string
+          title: username
+          description: Username for login
+        password:
+          type: string
+          title: password
+          description: Password for login
+      type: object
+      required:
+      - username
+      - password
+      title: AuthLoginRequest
+    BaseResponseModel:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+      type: object
+      required:
+      - status
+      - message
+      title: BaseResponseModel
+    GetDefaultApiEndpoint:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Message
+          default: Welcome to SEMD API
+        version:
+          type: string
+          title: Version
+          description: Version
+          default: 1.0.0
+        docs:
+          type: string
+          title: Docs
+          description: Docs
+          default: /docs
+        openapi:
+          type: string
+          title: Openapi
+          description: OpenAPI
+          default: /openapi.json
+      type: object
+      title: GetDefaultApiEndpoint
+    GetDefaultHealthCheck:
+      properties:
+        status:
+          type: string
+          title: Status
+          description: Status
+          default: Healthy
+        cpu_usage:
+          type: string
+          title: Cpu Usage
+          description: CPU Usage
+          default: 0%
+        memory_usage:
+          type: string
+          title: Memory Usage
+          description: Memory Usage
+          default: 0 / 16GB
+        disk_usage:
+          type: string
+          title: Disk Usage
+          description: Disk Usage
+          default: 0 / 512GB
+      type: object
+      title: GetDefaultHealthCheck
+    OAuthAuthorizationRequest:
+      properties:
+        provider:
+          type: string
+          title: provider
+          description: OAuth provider (github or google)
+          examples:
+          - github
+          - google
+      type: object
+      required:
+      - provider
+      title: OAuthAuthorizationRequest
+    OAuthAuthorizationResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 200
+        message:
+          type: string
+          title: Message
+          default: Authorization URL generated
+        authorization_url:
+          type: string
+          title: authorization_url
+          description: URL to redirect user for authorization
+        state:
+          type: string
+          title: state
+          description: State parameter for CSRF protection
+      type: object
+      required:
+      - authorization_url
+      - state
+      title: OAuthAuthorizationResponse
+    OAuthDeviceCodeRequest:
+      properties:
+        provider:
+          type: string
+          title: provider
+          description: OAuth provider (github or google)
+          examples:
+          - github
+          - google
+      type: object
+      required:
+      - provider
+      title: OAuthDeviceCodeRequest
+    OAuthDeviceCodeResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 200
+        message:
+          type: string
+          title: Message
+          default: Device code generated
+        device_code:
+          type: string
+          title: device_code
+          description: Device verification code
+        user_code:
+          type: string
+          title: user_code
+          description: User verification code to enter
+        verification_uri:
+          type: string
+          title: verification_uri
+          description: URL where user enters the code
+        expires_in:
+          type: integer
+          title: expires_in
+          description: Seconds until code expires
+        interval:
+          type: integer
+          title: interval
+          description: Minimum seconds between polling requests
+      type: object
+      required:
+      - device_code
+      - user_code
+      - verification_uri
+      - expires_in
+      - interval
+      title: OAuthDeviceCodeResponse
+    OAuthDevicePollRequest:
+      properties:
+        provider:
+          type: string
+          title: provider
+          description: OAuth provider
+        device_code:
+          type: string
+          title: device_code
+          description: Device code to poll
+      type: object
+      required:
+      - provider
+      - device_code
+      title: OAuthDevicePollRequest
+    PreAuthResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 200
+        message:
+          type: string
+          title: Message
+          default: 2FA verification required
+        pre_auth_token:
+          type: string
+          title: pre_auth_token
+          description: Pre-authentication token for 2FA
+        requires_2fa:
+          type: boolean
+          title: requires_2fa
+          description: Indicates 2FA is required
+          default: true
+      type: object
+      required:
+      - pre_auth_token
+      title: PreAuthResponse
+    PredictionByModelItem:
+      properties:
+        model_id:
+          type: string
+          title: Model Id
+          description: ML model ID
+        model_name:
+          type: string
+          title: Model Name
+          description: ML model name
+        prediction_count:
+          type: integer
+          title: Prediction Count
+          description: Number of predictions
+        accuracy_rate:
+          type: number
+          title: Accuracy Rate
+          description: Model accuracy rate
+        avg_response_time:
+          type: number
+          title: Avg Response Time
+          description: Average response time in ms
+      type: object
+      required:
+      - model_id
+      - model_name
+      - prediction_count
+      - accuracy_rate
+      - avg_response_time
+      title: PredictionByModelItem
+    PredictionByModelResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/PredictionByModelItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: PredictionByModelResponse
+    PredictionDetailItem:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Prediction ID
+        url:
+          type: string
+          title: Url
+          description: Predicted URL
+        is_malicious:
+          type: boolean
+          title: Is Malicious
+          description: Prediction result
+        confidence:
+          type: number
+          title: Confidence
+          description: Confidence score
+        model_used:
+          type: string
+          title: Model Used
+          description: Model ID used
+        predicted_at:
+          type: string
+          title: Predicted At
+          description: Prediction timestamp
+        response_time:
+          type: number
+          title: Response Time
+          description: Response time in ms
+      type: object
+      required:
+      - id
+      - url
+      - is_malicious
+      - confidence
+      - model_used
+      - predicted_at
+      - response_time
+      title: PredictionDetailItem
+    PredictionDetailResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/PredictionDetailItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: PredictionDetailResponse
+    PredictionStatItem:
+      properties:
+        total_predictions:
+          type: integer
+          title: Total Predictions
+          description: Total number of predictions
+        malicious_count:
+          type: integer
+          title: Malicious Count
+          description: Number of malicious URLs detected
+        safe_count:
+          type: integer
+          title: Safe Count
+          description: Number of safe URLs
+        pending_count:
+          type: integer
+          title: Pending Count
+          description: Number of pending predictions
+        accuracy_rate:
+          type: number
+          title: Accuracy Rate
+          description: Overall accuracy rate
+        avg_response_time:
+          type: number
+          title: Avg Response Time
+          description: Average response time in ms
+      type: object
+      required:
+      - total_predictions
+      - malicious_count
+      - safe_count
+      - pending_count
+      - accuracy_rate
+      - avg_response_time
+      title: PredictionStatItem
+    PredictionStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/PredictionStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: PredictionStatResponse
+    PredictionTrendItem:
+      properties:
+        date:
+          type: string
+          title: Date
+          description: Date of data point
+          examples:
+          - '2025-01-15'
+        total_predictions:
+          type: integer
+          title: Total Predictions
+          description: Total predictions on this date
+        malicious_count:
+          type: integer
+          title: Malicious Count
+          description: Malicious URLs detected
+        safe_count:
+          type: integer
+          title: Safe Count
+          description: Safe URLs detected
+        accuracy_rate:
+          type: number
+          title: Accuracy Rate
+          description: Accuracy rate for this date
+      type: object
+      required:
+      - date
+      - total_predictions
+      - malicious_count
+      - safe_count
+      - accuracy_rate
+      title: PredictionTrendItem
+    PredictionTrendResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/PredictionTrendItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: PredictionTrendResponse
+    RefreshTokenRequest:
+      properties:
+        refresh_token:
+          type: string
+          title: refresh_token
+          description: Refresh token to exchange for new token pair
+      type: object
+      required:
+      - refresh_token
+      title: RefreshTokenRequest
+    ReportDetailItem:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Report ID
+        url:
+          type: string
+          title: Url
+          description: Reported URL
+        status:
+          type: string
+          title: Status
+          description: 'Verification status: pending, verified, rejected'
+        is_malicious:
+          type: boolean
+          title: Is Malicious
+          description: Whether URL is malicious
+        reported_by:
+          type: string
+          title: Reported By
+          description: User ID who reported
+        reported_at:
+          type: string
+          title: Reported At
+          description: Report timestamp
+        verified_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Verified By
+          description: User ID who verified
+        verified_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Verified At
+          description: Verification timestamp
+      type: object
+      required:
+      - id
+      - url
+      - status
+      - is_malicious
+      - reported_by
+      - reported_at
+      title: ReportDetailItem
+    ReportDetailResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ReportDetailItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ReportDetailResponse
+    ReportStatItem:
+      properties:
+        reported_by_amount:
+          type: integer
+          title: reported_by_amount
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E17\u0E35\u0E16\u0E39\
+            \u0E01\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E42\u0E14\u0E22\u0E04\u0E38\
+            \u0E13"
+        safe_urls:
+          type: integer
+          title: safe_urls
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E1B\u0E25\u0E2D\u0E14\
+            \u0E20\u0E31\u0E22"
+        malicious_urls:
+          type: integer
+          title: malicious_urls
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E2D\u0E31\u0E19\u0E15\
+            \u0E23\u0E32\u0E22"
+        error_urls:
+          type: integer
+          title: error_urls
+          description: "\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E1C\u0E34\u0E14\u0E1E\
+            \u0E25\u0E32\u0E14"
+        pending_urls:
+          type: integer
+          title: pending_urls
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E23\u0E2D\u0E15\u0E23\
+            \u0E27\u0E08\u0E2A\u0E2D\u0E1A"
+      type: object
+      required:
+      - reported_by_amount
+      - safe_urls
+      - malicious_urls
+      - error_urls
+      - pending_urls
+      title: ReportStatItem
+    ReportStatListItem:
+      properties:
+        url:
+          type: string
+          title: url
+          description: "URL \u0E2D\u0E31\u0E19\u0E15\u0E23\u0E32\u0E22"
+          examples:
+          - https://
+        amount:
+          type: integer
+          title: amount
+          description: "\u0E1E\u0E1A\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14 227\
+            \ url"
+          examples:
+          - 227
+      type: object
+      required:
+      - url
+      - amount
+      title: ReportStatListItem
+    ReportStatListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ReportStatListItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ReportStatListResponse
+    ReportStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/ReportStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ReportStatResponse
+    ReportStatTrendItem:
+      properties:
+        date:
+          type: string
+          title: date
+          description: "\u0E40\u0E27\u0E25\u0E32\u0E02\u0E2D\u0E07\u0E0A\u0E38\u0E14\
+            \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25"
+          examples:
+          - 10/04/2025
+        malicious_urls:
+          type: integer
+          title: malicious_urls
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E2D\u0E31\u0E19\u0E15\
+            \u0E23\u0E32\u0E22"
+        benign_urls:
+          type: integer
+          title: benign_urls
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E1B\u0E25\u0E2D\u0E14\
+            \u0E20\u0E31\u0E22"
+        pending_urls:
+          type: integer
+          title: pending_urls
+          description: "\u0E25\u0E34\u0E49\u0E07\u0E04\u0E4C\u0E23\u0E2D\u0E15\u0E23\
+            \u0E27\u0E08\u0E2A\u0E2D\u0E1A"
+      type: object
+      required:
+      - date
+      - malicious_urls
+      - benign_urls
+      - pending_urls
+      title: ReportStatTrendItem
+    ReportStatTrendResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ReportStatTrendItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ReportStatTrendResponse
+    SystemHealthItem:
+      properties:
+        status:
+          type: string
+          title: Status
+          description: 'System status: healthy, degraded, down'
+        cpu_usage:
+          type: number
+          title: Cpu Usage
+          description: CPU usage percentage
+        memory_usage:
+          type: number
+          title: Memory Usage
+          description: Memory usage percentage
+        disk_usage:
+          type: number
+          title: Disk Usage
+          description: Disk usage percentage
+        uptime:
+          type: integer
+          title: Uptime
+          description: System uptime in seconds
+        active_connections:
+          type: integer
+          title: Active Connections
+          description: Active database connections
+      type: object
+      required:
+      - status
+      - cpu_usage
+      - memory_usage
+      - disk_usage
+      - uptime
+      - active_connections
+      title: SystemHealthItem
+    SystemHealthResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/SystemHealthItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemHealthResponse
+    SystemPerformanceItem:
+      properties:
+        timestamp:
+          type: string
+          title: Timestamp
+          description: Timestamp of measurement
+        cpu_usage:
+          type: number
+          title: Cpu Usage
+          description: CPU usage percentage
+        memory_usage:
+          type: number
+          title: Memory Usage
+          description: Memory usage percentage
+        request_count:
+          type: integer
+          title: Request Count
+          description: Number of requests
+        avg_response_time:
+          type: number
+          title: Avg Response Time
+          description: Average response time in ms
+      type: object
+      required:
+      - timestamp
+      - cpu_usage
+      - memory_usage
+      - request_count
+      - avg_response_time
+      title: SystemPerformanceItem
+    SystemPerformanceResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/SystemPerformanceItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemPerformanceResponse
+    SystemStatItem:
+      properties:
+        total_model:
+          type: integer
+          title: models
+          description: "\u0E42\u0E21\u0E40\u0E14\u0E25"
+        total_queue:
+          type: integer
+          title: queues
+          description: "\u0E04\u0E34\u0E27"
+        total_api_key:
+          type: integer
+          title: api_keys
+          description: API access key
+        total_user:
+          type: integer
+          title: users
+          description: "\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E07\u0E32\u0E19\u0E17\
+            \u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14"
+        total_dataset:
+          type: integer
+          title: datasets
+          description: "\u0E0A\u0E38\u0E14\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25"
+      type: object
+      required:
+      - total_model
+      - total_queue
+      - total_api_key
+      - total_user
+      - total_dataset
+      title: SystemStatItem
+    SystemStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/SystemStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemStatResponse
+    ThirdPartyErrorItem:
+      properties:
+        service_name:
+          type: string
+          title: Service Name
+          description: Service name
+        error_type:
+          type: string
+          title: Error Type
+          description: Error type
+        error_message:
+          type: string
+          title: Error Message
+          description: Error message
+        count:
+          type: integer
+          title: Count
+          description: Number of occurrences
+        last_occurred:
+          type: string
+          title: Last Occurred
+          description: Last occurrence timestamp
+      type: object
+      required:
+      - service_name
+      - error_type
+      - error_message
+      - count
+      - last_occurred
+      title: ThirdPartyErrorItem
+    ThirdPartyErrorResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ThirdPartyErrorItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ThirdPartyErrorResponse
+    ThirdPartyServiceItem:
+      properties:
+        service_id:
+          type: string
+          title: Service Id
+          description: Service ID
+        service_name:
+          type: string
+          title: Service Name
+          description: Service name
+        service_type:
+          type: string
+          title: Service Type
+          description: 'Service type: url_scanner, threat_intel, etc'
+        status:
+          type: string
+          title: Status
+          description: 'Service status: active, inactive, error'
+        request_count:
+          type: integer
+          title: Request Count
+          description: Number of requests
+        success_rate:
+          type: number
+          title: Success Rate
+          description: Success rate percentage
+        avg_response_time:
+          type: number
+          title: Avg Response Time
+          description: Average response time in ms
+        last_used:
+          type: string
+          title: Last Used
+          description: Last used timestamp
+      type: object
+      required:
+      - service_id
+      - service_name
+      - service_type
+      - status
+      - request_count
+      - success_rate
+      - avg_response_time
+      - last_used
+      title: ThirdPartyServiceItem
+    ThirdPartyServiceResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ThirdPartyServiceItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ThirdPartyServiceResponse
+    ThirdPartyStatItem:
+      properties:
+        total_services:
+          type: integer
+          title: Total Services
+          description: Total third-party services
+        active_services:
+          type: integer
+          title: Active Services
+          description: Active services
+        inactive_services:
+          type: integer
+          title: Inactive Services
+          description: Inactive services
+        total_requests:
+          type: integer
+          title: Total Requests
+          description: Total requests to third-party services
+        successful_requests:
+          type: integer
+          title: Successful Requests
+          description: Successful requests
+        failed_requests:
+          type: integer
+          title: Failed Requests
+          description: Failed requests
+      type: object
+      required:
+      - total_services
+      - active_services
+      - inactive_services
+      - total_requests
+      - successful_requests
+      - failed_requests
+      title: ThirdPartyStatItem
+    ThirdPartyStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/ThirdPartyStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ThirdPartyStatResponse
+    ThirdPartyTrendItem:
+      properties:
+        date:
+          type: string
+          title: Date
+          description: Date
+          examples:
+          - '2025-01-15'
+        service_name:
+          type: string
+          title: Service Name
+          description: Service name
+        request_count:
+          type: integer
+          title: Request Count
+          description: Number of requests
+        success_count:
+          type: integer
+          title: Success Count
+          description: Successful requests
+        failed_count:
+          type: integer
+          title: Failed Count
+          description: Failed requests
+        avg_response_time:
+          type: number
+          title: Avg Response Time
+          description: Average response time in ms
+      type: object
+      required:
+      - date
+      - service_name
+      - request_count
+      - success_count
+      - failed_count
+      - avg_response_time
+      title: ThirdPartyTrendItem
+    ThirdPartyTrendResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/ThirdPartyTrendItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: ThirdPartyTrendResponse
+    TokenPairResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 200
+        message:
+          type: string
+          title: Message
+          default: Authentication successful
+        access_token:
+          type: string
+          title: access_token
+          description: JWT access token
+        refresh_token:
+          type: string
+          title: refresh_token
+          description: JWT refresh token
+        token_type:
+          type: string
+          title: token_type
+          description: Token type
+          default: bearer
+      type: object
+      required:
+      - access_token
+      - refresh_token
+      title: TokenPairResponse
+    TopUserItem:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+          description: User ID
+        username:
+          type: string
+          title: Username
+          description: Username
+        email:
+          type: string
+          title: Email
+          description: User email
+        prediction_count:
+          type: integer
+          title: Prediction Count
+          description: Number of predictions made
+        report_count:
+          type: integer
+          title: Report Count
+          description: Number of reports submitted
+        last_active:
+          type: string
+          title: Last Active
+          description: Last activity timestamp
+      type: object
+      required:
+      - user_id
+      - username
+      - email
+      - prediction_count
+      - report_count
+      - last_active
+      title: TopUserItem
+    TopUserResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/TopUserItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: TopUserResponse
+    TwoFAEnableRequest:
+      properties:
+        secret:
+          type: string
+          title: secret
+          description: TOTP secret key to enable
+        otp_code:
+          type: string
+          title: otp_code
+          description: One-time password code to verify
+      type: object
+      required:
+      - secret
+      - otp_code
+      title: TwoFAEnableRequest
+    TwoFASetupResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 200
+        message:
+          type: string
+          title: Message
+          default: 2FA setup initiated
+        secret:
+          type: string
+          title: secret
+          description: TOTP secret key
+        qr_uri:
+          type: string
+          title: qr_uri
+          description: QR code URI for authenticator apps
+      type: object
+      required:
+      - secret
+      - qr_uri
+      title: TwoFASetupResponse
+    TwoFAVerifyRequest:
+      properties:
+        pre_auth_token:
+          type: string
+          title: pre_auth_token
+          description: Pre-authentication token
+        otp_code:
+          type: string
+          title: otp_code
+          description: One-time password code
+      type: object
+      required:
+      - pre_auth_token
+      - otp_code
+      title: TwoFAVerifyRequest
+    UrlFlagCategoryItem:
+      properties:
+        category:
+          type: string
+          title: Category
+          description: 'Flag category: phishing, malware, spam, etc'
+        count:
+          type: integer
+          title: Count
+          description: Number of flags in this category
+        percentage:
+          type: number
+          title: Percentage
+          description: Percentage of total flags
+      type: object
+      required:
+      - category
+      - count
+      - percentage
+      title: UrlFlagCategoryItem
+    UrlFlagCategoryResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/UrlFlagCategoryItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagCategoryResponse
+    UrlFlagDetailItem:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Flag ID
+        url:
+          type: string
+          title: Url
+          description: Flagged URL
+        flag_type:
+          type: string
+          title: Flag Type
+          description: 'Flag type: phishing, malware, spam, etc'
+        status:
+          type: string
+          title: Status
+          description: 'Status: pending, confirmed, rejected'
+        flagged_by:
+          type: string
+          title: Flagged By
+          description: User ID or system
+        flagged_at:
+          type: string
+          title: Flagged At
+          description: Flag timestamp
+        reviewed_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reviewed By
+          description: Reviewer ID
+        reviewed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reviewed At
+          description: Review timestamp
+        confidence:
+          type: number
+          title: Confidence
+          description: Confidence score
+      type: object
+      required:
+      - id
+      - url
+      - flag_type
+      - status
+      - flagged_by
+      - flagged_at
+      - confidence
+      title: UrlFlagDetailItem
+    UrlFlagDetailResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/UrlFlagDetailItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagDetailResponse
+    UrlFlagStatItem:
+      properties:
+        total_flagged:
+          type: integer
+          title: Total Flagged
+          description: Total flagged URLs
+        pending_review:
+          type: integer
+          title: Pending Review
+          description: URLs pending review
+        confirmed_malicious:
+          type: integer
+          title: Confirmed Malicious
+          description: Confirmed malicious URLs
+        false_positives:
+          type: integer
+          title: False Positives
+          description: False positive flags
+        auto_flagged:
+          type: integer
+          title: Auto Flagged
+          description: Auto-flagged by system
+        user_flagged:
+          type: integer
+          title: User Flagged
+          description: Flagged by users
+      type: object
+      required:
+      - total_flagged
+      - pending_review
+      - confirmed_malicious
+      - false_positives
+      - auto_flagged
+      - user_flagged
+      title: UrlFlagStatItem
+    UrlFlagStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/UrlFlagStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagStatResponse
+    UrlFlagTrendItem:
+      properties:
+        date:
+          type: string
+          title: Date
+          description: Date
+          examples:
+          - '2025-01-15'
+        total_flagged:
+          type: integer
+          title: Total Flagged
+          description: Total flags on this date
+        confirmed_malicious:
+          type: integer
+          title: Confirmed Malicious
+          description: Confirmed malicious
+        false_positives:
+          type: integer
+          title: False Positives
+          description: False positives
+        pending_review:
+          type: integer
+          title: Pending Review
+          description: Pending review
+      type: object
+      required:
+      - date
+      - total_flagged
+      - confirmed_malicious
+      - false_positives
+      - pending_review
+      title: UrlFlagTrendItem
+    UrlFlagTrendResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/UrlFlagTrendItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagTrendResponse
+    UserActivityItem:
+      properties:
+        date:
+          type: string
+          title: Date
+          description: Date
+          examples:
+          - '2025-01-15'
+        active_users:
+          type: integer
+          title: Active Users
+          description: Active users on this date
+        new_users:
+          type: integer
+          title: New Users
+          description: New users registered
+        total_actions:
+          type: integer
+          title: Total Actions
+          description: Total user actions
+      type: object
+      required:
+      - date
+      - active_users
+      - new_users
+      - total_actions
+      title: UserActivityItem
+    UserActivityResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/UserActivityItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UserActivityResponse
+    UserRoleStatItem:
+      properties:
+        role:
+          type: string
+          title: Role
+          description: 'User role: admin, user, moderator'
+        count:
+          type: integer
+          title: Count
+          description: Number of users with this role
+        percentage:
+          type: number
+          title: Percentage
+          description: Percentage of total users
+      type: object
+      required:
+      - role
+      - count
+      - percentage
+      title: UserRoleStatItem
+    UserRoleStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/UserRoleStatItem'
+          type: array
+          title: Data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UserRoleStatResponse
+    UserStatItem:
+      properties:
+        total_users:
+          type: integer
+          title: Total Users
+          description: Total number of users
+        active_users:
+          type: integer
+          title: Active Users
+          description: Active users in last 30 days
+        new_users_today:
+          type: integer
+          title: New Users Today
+          description: New users registered today
+        new_users_this_week:
+          type: integer
+          title: New Users This Week
+          description: New users this week
+        new_users_this_month:
+          type: integer
+          title: New Users This Month
+          description: New users this month
+      type: object
+      required:
+      - total_users
+      - active_users
+      - new_users_today
+      - new_users_this_week
+      - new_users_this_month
+      title: UserStatItem
+    UserStatResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/UserStatItem'
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UserStatResponse
