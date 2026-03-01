@@ -1,0 +1,30 @@
+# API management
+fastapi[standard]>=0.126.0
+uvicorn>=0.30.0
+
+# Configuration management
+pydantic-settings>=2.11.0
+pydantic>=2.12.3
+configparser>=7.2.0
+
+# Database - PostgreSQL
+sqlalchemy>=2.0.0
+
+# Redis
+redis>=5.0.0
+
+# JWT & security
+PyJWT>=2.8.0
+python-jose>=3.3.0
+passlib>=1.7.4
+python-multipart>=0.0.6
+
+# Ml flow
+mlflow>=3.7.0
+python-dotenv>=1.2.1
+
+# Python format
+pyformat>=1.0
+
+#ASGI
+uvicorn>=0.38.0

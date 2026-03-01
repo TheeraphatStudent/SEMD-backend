@@ -1,0 +1,107 @@
+# Malicious URL Detection Backend API
+
+A FastAPI-based backend service for malicious URL detection with enhanced schema validation.
+
+## Project Structure
+
+```
+backend/
+├── main.py                 # FastAPI application entry point
+├── config/                 # Application configuration package
+│   └── settings.py         # Pydantic settings definition
+│
+├── db/                     # Database configuration
+│
+├── guard/                  # Check auth from user request routing 
+│
+├── models/                 # Pydantic models and configuration helpers
+│   ├── items.py            # Item data models with schema validation
+│   └── users.py            # User data models with schema validation
+│
+├── routers/                # API route handlers
+│   ├── items.py            # Item management endpoints
+│   └── users.py            # User management endpoints
+│
+├── service/                # Logic
+│   └── external_service/   # Connect to exernal api
+│
+├── workers/                # Ai & Redis worker
+├── requirements.txt        # Python dependencies
+├── .env.example            # Environment variables template
+├── backend-working.sh      # Virtual environment activation script
+└── README.md
+```
+
+## Setup Project
+
+```bash
+source ./backend-working.sh
+```
+
+This will:
+
+1. Deactivate any existing virtual environment
+2. Fix permissions for the `.venv` directory
+3. Activate the backend virtual environment
+4. Install/update requirements
+5. Display installed packages
+
+### To deactivate
+
+```bash
+deactivate
+```
+
+## Running the Application
+
+After setup:
+
+```bash
+fastapi dev main.py
+```
+
+The API will be available at:
+
+- **API**: http://127.0.0.1:8000
+- **Documentation**: http://127.0.0.1:8000/docs
+- **Alternative Docs**: http://127.0.0.1:8000/redoc
+
+---
+
+Running with uvicorn 
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## Working with wsl or linux
+
+**Fix ascii problem**
+
+Problem:
+```bash
+-bash: $'\r': command not found
+-bash: ./model-working.sh: line 25: syntax error: unexpected end of file
+```
+
+Fixed:
+```bash
+sed -i 's/\r$//' ./backend-working.sh
+```
+
+## Configuration
+
+Create a `.env` file based on `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Modify settings as needed. The application uses Pydantic Settings for configuration management. The following environment variables are available:
+
+- `APP_NAME` – Display name used throughout the API responses
+- `APP_VERSION` – Version string exposed by the documentation
+- `DEBUG` – Enable FastAPI debug mode
+- `ALLOWED_ORIGINS` – Comma-separated list of origins allowed by CORS
+
+- [FastAPI](https://fastapi.tiangolo.com/#run-it)
