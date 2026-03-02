@@ -258,9 +258,11 @@ class AuthControl:
         if provider == "github":
             access_token = await OAuthService.exchange_github_code(request.code)
             user_info = await OAuthService.get_github_user_info(access_token)
+
         elif provider == "google":
             access_token = await OAuthService.exchange_google_code(request.code)
             user_info = await OAuthService.get_google_user_info(access_token)
+
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -269,9 +271,7 @@ class AuthControl:
         
         user = OAuthService.upsert_oauth_user(
             provider=provider,
-            oauth_id=user_info["id"],
-            email=user_info["email"],
-            name=user_info["name"],
+            user_info=user_info,
             db=db
         )
         

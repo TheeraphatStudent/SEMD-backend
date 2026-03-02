@@ -104,7 +104,9 @@ class AuthRoute(BaseRoute):
             summary="Enable 2FA",
             description="Enable 2FA for the authenticated user by verifying OTP code. Requires authentication."
         )(self.enable_2fa)
-        
+
+        # OAuth
+
         self.router.post(
             "/oauth/device",
             response_model=OAuthDeviceCodeResponse,

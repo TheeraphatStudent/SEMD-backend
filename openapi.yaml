@@ -1628,8 +1628,8 @@ components:
     OAuthProviderType:
       type: string
       enum:
-      - GITHUB
-      - GOOGLE
+      - github
+      - google
       title: OAuthProviderType
     PreAuthResponse:
       properties:
