@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS users (
     gh_acc_token    TEXT NULL,
     gh_re_token     TEXT NULL,
     twofa_secret    TEXT NULL,
+    is_2fa_enabled  BOOLEAN NOT NULL DEFAULT FALSE,
     
     -- Extension & Profile
     ex_acc_token     TEXT NULL,

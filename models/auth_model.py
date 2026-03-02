@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from models.base_response_model import BaseResponseModel
-from libs.types.enums import RoleType
+from libs.types.enums import RoleType, OAuthProviderType
 
 class AuthLoginRequest(BaseModel):
     username: str = Field(

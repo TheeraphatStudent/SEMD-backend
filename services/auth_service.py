@@ -37,14 +37,13 @@ class AuthService:
                 detail="Invalid username or password"
             )
         
-        password_to_check = user.hashed_password or user.password_hash
-        if not password_to_check:
+        if not user.password_hash:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or password"
             )
         
-        if not cls.verify_password(password, password_to_check):
+        if not cls.verify_password(password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or password"

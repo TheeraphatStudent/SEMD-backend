@@ -27,6 +27,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetDefaultHealthCheck'
+  /auth/register:
+    post:
+      tags:
+      - auth
+      summary: User Registration
+      description: Register a new user account with MEMBER role. Public endpoint.
+      operationId: register_auth_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/create:
+    post:
+      tags:
+      - auth
+      summary: Create Admin User
+      description: Create a new ADMIN user. Requires SUPER_ADMIN role.
+      operationId: create_user_auth_create_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
   /auth/login:
     post:
       tags:
@@ -327,8 +388,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          title: Provider
+          $ref: '#/components/schemas/OAuthProviderType'
       - name: code
         in: query
         required: true
@@ -1291,12 +1351,9 @@ components:
     AuthLoginProviderRequest:
       properties:
         provider:
-          type: string
+          $ref: '#/components/schemas/OAuthProviderType'
           title: provider
           description: Authentication provider (e.g., google, github)
-          examples:
-          - google
-          - github
         token:
           type: string
           title: token
@@ -1344,6 +1401,59 @@ components:
       - status
       - message
       title: BaseResponseModel
+    CreateUserRequest:
+      properties:
+        username:
+          type: string
+          maxLength: 32
+          minLength: 3
+          title: username
+          description: Username for the new user
+        email:
+          type: string
+          format: email
+          title: email
+          description: Email address
+        full_name:
+          type: string
+          maxLength: 512
+          title: full_name
+          description: Full name of the user
+        password:
+          type: string
+          minLength: 8
+          title: password
+          description: Password for the account
+        role:
+          $ref: '#/components/schemas/RoleType'
+          title: role
+          description: Role for the new user (ADMIN only)
+          default: ADMIN
+      type: object
+      required:
+      - username
+      - email
+      - full_name
+      - password
+      title: CreateUserRequest
+    CreateUserResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 201
+        message:
+          type: string
+          title: Message
+          default: User created successfully
+        user_id:
+          type: integer
+          title: user_id
+          description: ID of the newly created user
+      type: object
+      required:
+      - user_id
+      title: CreateUserResponse
     GetDefaultApiEndpoint:
       properties:
         message:
@@ -1422,12 +1532,9 @@ components:
     OAuthAuthorizationRequest:
       properties:
         provider:
-          type: string
+          $ref: '#/components/schemas/OAuthProviderType'
           title: provider
           description: OAuth provider (github or google)
-          examples:
-          - github
-          - google
       type: object
       required:
       - provider
@@ -1458,12 +1565,9 @@ components:
     OAuthDeviceCodeRequest:
       properties:
         provider:
-          type: string
+          $ref: '#/components/schemas/OAuthProviderType'
           title: provider
           description: OAuth provider (github or google)
-          examples:
-          - github
-          - google
       type: object
       required:
       - provider
@@ -1509,7 +1613,7 @@ components:
     OAuthDevicePollRequest:
       properties:
         provider:
-          type: string
+          $ref: '#/components/schemas/OAuthProviderType'
           title: provider
           description: OAuth provider
         device_code:
@@ -1521,6 +1625,12 @@ components:
       - provider
       - device_code
       title: OAuthDevicePollRequest
+    OAuthProviderType:
+      type: string
+      enum:
+      - GITHUB
+      - GOOGLE
+      title: OAuthProviderType
     PreAuthResponse:
       properties:
         status:
@@ -1831,6 +1941,54 @@ components:
       required:
       - refresh_token
       title: RefreshTokenRequest
+    RegisterRequest:
+      properties:
+        username:
+          type: string
+          maxLength: 32
+          minLength: 3
+          title: username
+          description: Username for registration
+        email:
+          type: string
+          format: email
+          title: email
+          description: Email address
+        full_name:
+          type: string
+          maxLength: 512
+          title: full_name
+          description: Full name of the user
+        password:
+          type: string
+          minLength: 8
+          title: password
+          description: Password for the account
+      type: object
+      required:
+      - username
+      - email
+      - full_name
+      - password
+      title: RegisterRequest
+    RegisterResponse:
+      properties:
+        status:
+          type: integer
+          title: Status
+          default: 201
+        message:
+          type: string
+          title: Message
+          default: User registered successfully
+        user_id:
+          type: integer
+          title: user_id
+          description: ID of the newly created user
+      type: object
+      required:
+      - user_id
+      title: RegisterResponse
     ReportDetailItem:
       properties:
         id:
@@ -2134,6 +2292,14 @@ components:
       - message
       - data
       title: ReportStatTrendResponse
+    RoleType:
+      type: string
+      enum:
+      - GUEST
+      - MEMBER
+      - ADMIN
+      - SUPER_ADMIN
+      title: RoleType
     SystemHealthItem:
       properties:
         status:

@@ -24,6 +24,7 @@ class User(Base):
     gh_acc_token = Column(Text, nullable=True)
     gh_re_token = Column(Text, nullable=True)
     twofa_secret = Column(Text, nullable=True)
+    is_2fa_enabled = Column(Boolean, nullable=False, server_default='false')
     
     ex_acc_token = Column(Text, nullable=True)
     ex_acc_token_exp = Column(TIMESTAMP(timezone=True), nullable=True)

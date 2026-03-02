@@ -21,6 +21,7 @@ class UserModelDb(BaseModel):
     gh_acc_token: Optional[str] = None
     gh_re_token: Optional[str] = None
     twofa_secret: Optional[str] = None
+    is_2fa_enabled: bool = Field(default=False)
     
     ex_acc_token: Optional[str] = None
     ex_acc_token_exp: Optional[datetime] = None

@@ -302,7 +302,7 @@ class OAuthService:
             full_name=name,
             oauth_provider=provider,
             oauth_id=oauth_id,
-            hashed_password=None,
+            password_hash=None,
             role="MEMBER"
         )
         
