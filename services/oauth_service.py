@@ -187,12 +187,18 @@ class OAuthService:
     
     @classmethod
     def generate_google_authorization_url(cls, state: str) -> str:
+        scopes = [
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "openid"
+        ]
+
         base_url = "https://accounts.google.com/o/oauth2/v2/auth"
         params = {
             "client_id": settings.google_client_id,
             "redirect_uri": settings.google_redirect_uri,
             "response_type": "code",
-            "scope": "openid email profile",
+            "scope": "%20".join(scopes),
             "state": state,
             "access_type": "offline"
         }
