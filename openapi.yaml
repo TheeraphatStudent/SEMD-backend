@@ -436,18 +436,19 @@ paths:
           description: Not implemented
         '422':
           description: Validation error
-  /prediction:
+  /prediction/predict:
     post:
       tags:
       - prediction
-      summary: Predict
-      operationId: predict_prediction_post
-      parameters:
-      - name: request
-        in: query
+      summary: Predict URL
+      description: Predict if a URL is malicious or not
+      operationId: predict_prediction_predict_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictionRequest'
         required: true
-        schema:
-          title: Request
       responses:
         '200':
           description: Successful Response
@@ -1782,6 +1783,34 @@ components:
       - message
       - data
       title: PredictionDetailResponse
+    PredictionRequest:
+      properties:
+        url:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: url
+          description: URL to predict -> 'https://example.com' or ['http://example.com',
+            'https://test.com']
+        text_file:
+          anyOf:
+          - type: string
+            format: binary
+          - type: 'null'
+          title: Text File
+          description: Upload a text file with URLs, one per line
+        csv_file:
+          anyOf:
+          - type: string
+            format: binary
+          - type: 'null'
+          title: Csv File
+          description: Upload a CSV file with URLs in the first column or 'url' column
+      type: object
+      title: PredictionRequest
     PredictionResponse:
       properties:
         status:
