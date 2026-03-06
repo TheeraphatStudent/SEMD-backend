@@ -95,7 +95,7 @@ class OAuthService:
         params = {
             "client_id": settings.github_client_id,
             "redirect_uri": settings.github_redirect_uri,
-            "scope": "read:user user:email",
+            "scope": "read:user%20user:email",
             "state": state
         }
         query_string = "&".join([f"{k}={v}" for k, v in params.items()])
@@ -187,12 +187,18 @@ class OAuthService:
     
     @classmethod
     def generate_google_authorization_url(cls, state: str) -> str:
+        scopes = [
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "openid"
+        ]
+
         base_url = "https://accounts.google.com/o/oauth2/v2/auth"
         params = {
             "client_id": settings.google_client_id,
             "redirect_uri": settings.google_redirect_uri,
             "response_type": "code",
-            "scope": "openid email profile",
+            "scope": "%20".join(scopes),
             "state": state,
             "access_type": "offline"
         }
@@ -248,7 +254,8 @@ class OAuthService:
                 return {
                     "id": user_data.get("id"),
                     "email": user_data.get("email"),
-                    "name": user_data.get("name")
+                    "name": user_data.get("name"),
+                    "avatar_url": user_data.get("picture")
                 }
         except httpx.HTTPError as e:
             raise HTTPException(
@@ -264,32 +271,36 @@ class OAuthService:
     def upsert_oauth_user(
         cls,
         provider: str,
-        oauth_id: str,
-        email: str,
-        name: str,
+        user_info: Dict[str, str],
         db: Session
     ) -> User:
-        user = db.query(User).filter(User.oauth_id == oauth_id, User.oauth_provider == provider).first()
+        print(user_info)
+
+        if provider == "github":
+            user = db.query(User).filter(User.gh_id == user_info["id"]).first()
+        elif provider == "google":
+            user = db.query(User).filter(User.gg_id == user_info["id"]).first()
+        else:
+            user = None
         
         if user:
-            user.updated_at = db.query(User).filter(User.user_id == user.user_id).first().updated_at
             db.commit()
             db.refresh(user)
             return user
         
-        existing_user = db.query(User).filter(User.email == email).first()
+        existing_user = db.query(User).filter(User.email == user_info["email"]).first()
         if existing_user:
-            existing_user.oauth_provider = provider
-            existing_user.oauth_id = oauth_id
             if provider == "github":
-                existing_user.gh_id = oauth_id
+                existing_user.gh_id = user_info["id"]
+                existing_user.profile_img_uri = user_info["avatar_url"]
             elif provider == "google":
-                existing_user.gg_id = oauth_id
+                existing_user.gg_id = user_info["id"]
+                existing_user.profile_img_uri = user_info["avatar_url"]
             db.commit()
             db.refresh(existing_user)
             return existing_user
         
-        username = email.split("@")[0]
+        username = user_info["email"].split("@")[0]
         base_username = username
         counter = 1
         while db.query(User).filter(User.username == username).first():
@@ -298,18 +309,18 @@ class OAuthService:
         
         new_user = User(
             username=username,
-            email=email,
-            full_name=name,
-            oauth_provider=provider,
-            oauth_id=oauth_id,
-            password_hash=None,
+            email=user_info["email"],
+            full_name=user_info["name"],
+            password_hash="",
             role="MEMBER"
         )
         
         if provider == "github":
-            new_user.gh_id = oauth_id
+            new_user.gh_id = user_info["id"]
+            new_user.profile_img_uri = user_info["avatar_url"]
         elif provider == "google":
-            new_user.gg_id = oauth_id
+            new_user.gg_id = user_info["id"]
+            new_user.profile_img_uri = user_info["avatar_url"]
         
         db.add(new_user)
         db.commit()

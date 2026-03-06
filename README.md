@@ -97,11 +97,7 @@ Create a `.env` file based on `.env.example`:
 cp .env.example .env
 ```
 
-Modify settings as needed. The application uses Pydantic Settings for configuration management. The following environment variables are available:
+## Resource
 
-- `APP_NAME` – Display name used throughout the API responses
-- `APP_VERSION` – Version string exposed by the documentation
-- `DEBUG` – Enable FastAPI debug mode
-- `ALLOWED_ORIGINS` – Comma-separated list of origins allowed by CORS
-
+- [2fa-qa](https://stefansundin.github.io/2fa-qr/)
 - [FastAPI](https://fastapi.tiangolo.com/#run-it)

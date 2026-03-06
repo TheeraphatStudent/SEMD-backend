@@ -35,5 +35,5 @@ class ModelStageType(str, Enum):
     ARCHIVED = "ARCHIVED"
 
 class OAuthProviderType(str, Enum):
-    GITHUB = "GITHUB"
-    GOOGLE = "GOOGLE"
+    GITHUB = "github"
+    GOOGLE = "google"
