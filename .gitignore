@@ -11,3 +11,5 @@
 !**/*.example.conf
 
 **__pycache__
+
+.vscode

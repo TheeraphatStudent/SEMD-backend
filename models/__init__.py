@@ -22,6 +22,7 @@ from .activity_log_model import ActivityLogModelDb
 from .usage_log_model import UsageLogModelDb
 from .third_service_conf_model import ThirdServiceConfModelDb
 from .prediction_response import PredictionResponse, PredictionDetailResponse
+from .prediction_request import PredictionRequest
 from .ml_response import MLServiceResponse
 from .report_response import ReportResponse, ReportListResponse
 from .stats import (
@@ -68,15 +69,15 @@ __all__ = [
 
     # Prediction
     "PredictionModelDb",
+    "PredictionRequest",
+    "PredictionResponse",
+    "PredictionDetailResponse",
 
     # Report
     "ReportModelItem",
     "ReportModelResponse",
     "ReportModelRequest",
     
-    # Response Models
-    "PredictionResponse",
-    "PredictionDetailResponse",
     "MLServiceResponse",
     "ReportResponse",
     "ReportListResponse",
