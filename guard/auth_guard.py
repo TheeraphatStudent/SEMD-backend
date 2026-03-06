@@ -9,9 +9,6 @@ from config.settings import settings
 
 
 class AuthGuard:
-
-    VALID_API_KEY = settings.api_key
-
     @staticmethod
     def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
         if not x_api_key:
@@ -21,11 +18,12 @@ class AuthGuard:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        if x_api_key != AuthGuard.VALID_API_KEY:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid API key",
-            )
+        # Get api key from access_key table
+        # if x_api_key != AuthGuard.VALID_API_KEY:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail="Invalid API key",
+        #     )
 
         return x_api_key
 
