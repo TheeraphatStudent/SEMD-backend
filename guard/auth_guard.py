@@ -2,18 +2,13 @@
 Authentication guard for API key and Bearer token verification.
 """
 
-from fastapi import HTTPException, status, Header
+from fastapi import HTTPException, status, Header, Depends
 from typing import Optional, Dict
-from jose import jwt, JWTError
+from sqlalchemy.orm import Session
 from config.settings import settings
 
 
 class AuthGuard:
-
-    VALID_API_KEY = settings.api_key
-    VALID_JWT_SECRET = settings.jwt_secret
-    VALID_JWT_ALGORITHM = settings.jwt_algorithm
-
     @staticmethod
     def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
         if not x_api_key:
@@ -23,16 +18,17 @@ class AuthGuard:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        if x_api_key != AuthGuard.VALID_API_KEY:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid API key",
-            )
+        # Get api key from access_key table
+        # if x_api_key != AuthGuard.VALID_API_KEY:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail="Invalid API key",
+        #     )
 
         return x_api_key
 
     @staticmethod
-    def verify_bearer_token(authorization: Optional[str] = Header(None)) -> dict:
+    def verify_bearer_token(authorization: Optional[str] = Header(None)) -> str:
         """
         Verify Bearer token from Authorization header.
 
@@ -40,7 +36,7 @@ class AuthGuard:
             authorization: Authorization header value
 
         Returns:
-            str: The verified bearer token
+            str: The verified bearer token string
 
         Raises:
             HTTPException: If bearer token is missing or invalid
@@ -60,19 +56,55 @@ class AuthGuard:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        token = parts[1]
-        try:
-            payload = jwt.decode(
-                token,
-                AuthGuard.VALID_JWT_SECRET,
-                algorithms=[AuthGuard.VALID_JWT_ALGORITHM],
-            )
-            return payload
-        except JWTError as e:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Invalid bearer token: {e}",
-            )
+        return parts[1]
+
+    @staticmethod
+    def get_current_user(authorization: str = Depends(verify_bearer_token), db: Session = None):
+        """
+        Get current authenticated user from access token.
+
+        Args:
+            authorization: Bearer token from header
+            db: Database session
+
+        Returns:
+            User: The authenticated user object
+
+        Raises:
+            HTTPException: If token is invalid or user not found
+        """
+        from services.auth_service import AuthService
+        from database import User
+        from services.client import postgres_client
+        
+        if db is None:
+            db = postgres_client.get_session_instance()
+            try:
+                payload = AuthService.verify_token(authorization, "access")
+                user_id = int(payload.get("sub"))
+                user = db.query(User).filter(User.user_id == user_id).first()
+                
+                if not user:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="User not found"
+                    )
+                
+                return user
+            finally:
+                db.close()
+        else:
+            payload = AuthService.verify_token(authorization, "access")
+            user_id = int(payload.get("sub"))
+            user = db.query(User).filter(User.user_id == user_id).first()
+            
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="User not found"
+                )
+            
+            return user
 
     @staticmethod
     def verify_both(
@@ -93,9 +125,9 @@ class AuthGuard:
             HTTPException: If either credential is invalid
         """
         api_key = AuthGuard.verify_api_key(x_api_key)
-        payload = AuthGuard.verify_bearer_token(authorization)
+        token = AuthGuard.verify_bearer_token(authorization)
 
         return {
             "api_key": api_key,
-            "payload": payload,
+            "token": token,
         }

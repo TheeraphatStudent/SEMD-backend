@@ -16,6 +16,7 @@ from routers import (
 )
 from config.settings import settings
 from models import GetDefaultApiEndpoint, GetDefaultHealthCheck
+import yaml
 
 # Create FastAPI application
 app = FastAPI(
@@ -23,6 +24,7 @@ app = FastAPI(
     version=settings.app_version,
     openapi_url='/openapi.json',
     docs_url='/docs',
+    root_path='/api/v1',
     debug=settings.debug
 )
 
@@ -71,3 +73,8 @@ app.include_router(UserStatRoute().get_router())
 app.include_router(ApiKeyStatRoute().get_router())
 app.include_router(ThirdPartyStatRoute().get_router())
 app.include_router(UrlFlagStatRoute().get_router())
+
+# ----------------- Write document
+openapi_yaml = yaml.dump(app.openapi(), sort_keys=False)
+with open("openapi.yaml", "w") as f:
+    f.write(openapi_yaml)

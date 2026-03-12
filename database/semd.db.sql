@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
     username        VARCHAR(32) UNIQUE NOT NULL,
     email           VARCHAR(64) UNIQUE NOT NULL,
     full_name       VARCHAR(512) NOT NULL,
+    birthday        TIMESTAMPTZ NULL,
     password_hash   VARCHAR(1024) NOT NULL,
     role            role_type NOT NULL DEFAULT 'MEMBER',
     
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS users (
     gh_acc_token    TEXT NULL,
     gh_re_token     TEXT NULL,
     twofa_secret    TEXT NULL,
+    is_2fa_enabled  BOOLEAN NOT NULL DEFAULT FALSE,
     
     -- Extension & Profile
     ex_acc_token     TEXT NULL,
@@ -64,6 +66,17 @@ CREATE TABLE IF NOT EXISTS users (
     
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ตาราง Refresh Tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    refresh_tokens_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id                 BIGINT REFERENCES users(user_id) ON DELETE CASCADE NOT NULL,
+    token_hash              VARCHAR(64) NOT NULL UNIQUE,
+    jti                     UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    expires_at              TIMESTAMPTZ NOT NULL,
+    is_revoked              BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ตารางจัดการบริการ (Service Config)
@@ -91,7 +104,6 @@ CREATE TABLE IF NOT EXISTS model_registry (
     mlflow_run_id        VARCHAR(64) NOT NULL,
     mlflow_model_version INT NULL,
     experiment_id        VARCHAR(64) NULL,
-    stage                model_stage_type NOT NULL DEFAULT 'NONE',
     
     -- Artifact URIs
     model_uri            TEXT NOT NULL,
@@ -190,6 +202,7 @@ CREATE TABLE IF NOT EXISTS usage_log (
 -- ตารางบริการภายนอก (Third Service Conf)
 CREATE TABLE IF NOT EXISTS third_service_conf (
     third_service_conf_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    service_conf_id      BIGINT UNIQUE REFERENCES service_conf(service_conf_id) ON DELETE CASCADE,
     service_name          VARCHAR(64) NOT NULL,
     base_url              TEXT NOT NULL,
     http_method           VARCHAR(8) NOT NULL DEFAULT 'GET',
