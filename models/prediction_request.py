@@ -16,3 +16,8 @@ class PredictionRequest(BaseModel):
         None,
         description="Upload a CSV file with URLs in the first column or 'url' column"
     )
+    service_id: Optional[int] = Field(
+        None,
+        description="Service ID to use for prediction",
+        example=1
+    )

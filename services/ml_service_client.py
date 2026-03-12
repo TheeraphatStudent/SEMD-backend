@@ -1,4 +1,5 @@
 import uuid
+import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
@@ -16,6 +17,8 @@ class MLServiceClient:
         self.training_queue = "ml_training_queue"
         self.prediction_queue = "ml_prediction_queue"
         self.result_queue = "ml_result_queue"
+        self.result_cache_prefix = "ml_result:"
+        self.default_timeout = 30
     
     def submit_training_job(
         self,
@@ -94,28 +97,68 @@ class MLServiceClient:
         
         return job_id
     
-    def get_job_result(self, job_id: str, timeout: int = 300) -> Optional[Dict[str, Any]]:
-        cache_key = f"ml_result:{job_id}"
+    def get_job_result(self, job_id: str, timeout: int = 30) -> Optional[Dict[str, Any]]:
+        cache_key = f"{self.result_cache_prefix}{job_id}"
         
         result = redis_client.get_cache(cache_key)
         if result:
+            logger.info(f"Found cached result for job: {job_id}")
             return result
         
-        import time
         start_time = time.time()
+        poll_interval = 0.5
         
         while time.time() - start_time < timeout:
-            result_data = redis_client.pop_from_queue(self.result_queue, timeout=5)
-            
-            if result_data and result_data.get('job_id') == job_id:
-                redis_client.set_cache(cache_key, result_data, ttl=3600)
-                return result_data
-            
-            if result_data:
-                other_cache_key = f"ml_result:{result_data.get('job_id')}"
-                redis_client.set_cache(other_cache_key, result_data, ttl=3600)
+            result = redis_client.get_cache(cache_key)
+            if result:
+                logger.info(f"Found result for job: {job_id}")
+                return result
+            time.sleep(poll_interval)
         
+        logger.warning(f"Timeout waiting for job result: {job_id}")
         return None
+    
+    def predict_url_sync(
+        self,
+        url: str,
+        user_id: Optional[int] = None,
+        model_id: Optional[str] = None,
+        timeout: int = 30
+    ) -> Dict[str, Any]:
+        job_id = self.submit_prediction_job(url, user_id, model_id)
+        
+        result = self.get_job_result(job_id, timeout)
+        
+        if result is None:
+            return {
+                "job_id": job_id,
+                "status": "timeout",
+                "error": f"ML service did not respond within {timeout} seconds",
+                "url": url
+            }
+        
+        return result
+    
+    def predict_urls_sync(
+        self,
+        urls: List[str],
+        user_id: Optional[int] = None,
+        model_id: Optional[str] = None,
+        timeout: int = 60
+    ) -> Dict[str, Any]:
+        job_id = self.submit_batch_prediction_job(urls, user_id, model_id)
+        
+        result = self.get_job_result(job_id, timeout)
+        
+        if result is None:
+            return {
+                "job_id": job_id,
+                "status": "timeout",
+                "error": f"ML service did not respond within {timeout} seconds",
+                "urls": urls
+            }
+        
+        return result
     
     def trigger_model_retraining(
         self,

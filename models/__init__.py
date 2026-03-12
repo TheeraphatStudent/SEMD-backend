@@ -24,6 +24,10 @@ from .third_service_conf_model import ThirdServiceConfModelDb
 from .prediction_response import PredictionResponse, PredictionDetailResponse
 from .prediction_request import PredictionRequest
 from .ml_response import MLServiceResponse
+from .ml_message import (
+    JobType, JobStatus, PredictionJobRequest, PredictionDetail,
+    SinglePredictionResult, PredictionJobResult
+)
 from .report_response import ReportResponse, ReportListResponse
 from .stats import (
     ReportStatResponse, ReportStatListResponse, ReportStatTrendResponse,
@@ -72,6 +76,14 @@ __all__ = [
     "PredictionRequest",
     "PredictionResponse",
     "PredictionDetailResponse",
+    
+    # ML Message Protocol
+    "JobType",
+    "JobStatus",
+    "PredictionJobRequest",
+    "PredictionDetail",
+    "SinglePredictionResult",
+    "PredictionJobResult",
 
     # Report
     "ReportModelItem",

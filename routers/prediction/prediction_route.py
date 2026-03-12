@@ -1,31 +1,49 @@
 from routers import BaseRoute
-from fastapi import UploadFile, HTTPException
+from fastapi import HTTPException
 from models import PredictionResponse, PredictionRequest
-from typing import Any
-
-# Batch processing
+from services.ml_service_client import ml_service_client
+from typing import Any, List
 import csv
 import io
+import logging
 
-import pickle
-import os
+logger = logging.getLogger(__name__)
+
 
 class PredictionRoute(BaseRoute):
     def __init__(self):
         super().__init__(
             prefix="/prediction",
             tags=["prediction"],
-            responses={404: {"description": "Not found"}, 501: {"description": "Not implemented"}, 422: {"description": "Validation error"}}
+            responses={
+                404: {"description": "Not found"}, 
+                501: {"description": "Not implemented"}, 
+                422: {"description": "Validation error"},
+                503: {"description": "ML service unavailable"}
+            }
         )
 
         self.router.post(
             "/predict", 
             response_model=PredictionResponse,
             summary="Predict URL",
-            description="Predict if a URL is malicious or not"
+            description="Predict if a URL is malicious or not using ML service"
         )(self.predict)
 
     async def predict(self, request: PredictionRequest):
+        urls = await self._extract_urls(request)
+        
+        if not urls:
+            raise HTTPException(status_code=422, detail="No URLs provided")
+
+        if len(urls) == 1:
+            result = self._predict_single(urls[0])
+            return PredictionResponse(data=[result])
+        else:
+            results = self._predict_batch(urls)
+            return PredictionResponse(data=results)
+
+    async def _extract_urls(self, request: PredictionRequest) -> List[str]:
         urls = []
         
         if request.url:
@@ -52,34 +70,59 @@ class PredictionRoute(BaseRoute):
                     if first_value:
                         urls.append(first_value)
         
-        if not urls:
-            raise HTTPException(status_code=422, detail="No URLs provided")
+        return urls
 
-        model_path = os.path.join(os.path.dirname(__file__), "../../../semd-ml/models/model.pkl")
+    def _predict_single(self, url: str) -> dict:
+        logger.info(f"Predicting single URL: {url}")
         
-        try:
-            with open(model_path, 'rb') as f:
-                model = pickle.load(f)
-        except FileNotFoundError:
-            raise HTTPException(status_code=500, detail="Model file not found")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error loading model: {str(e)}")
+        ml_result = ml_service_client.predict_url_sync(url, timeout=30)
+        
+        if ml_result.get("status") == "timeout":
+            raise HTTPException(
+                status_code=503, 
+                detail="ML service did not respond in time"
+            )
+        
+        if ml_result.get("status") == "failed":
+            raise HTTPException(
+                status_code=500, 
+                detail=ml_result.get("error", "Prediction failed")
+            )
+        
+        return self._format_result(ml_result)
 
+    def _predict_batch(self, urls: List[str]) -> List[dict]:
+        logger.info(f"Predicting batch of {len(urls)} URLs")
+        
+        ml_result = ml_service_client.predict_urls_sync(urls, timeout=60)
+        
+        if ml_result.get("status") == "timeout":
+            raise HTTPException(
+                status_code=503, 
+                detail="ML service did not respond in time"
+            )
+        
+        if ml_result.get("status") == "failed":
+            raise HTTPException(
+                status_code=500, 
+                detail=ml_result.get("error", "Batch prediction failed")
+            )
+        
         results = []
-        for url in urls:
-            try:
-                result = model.predict([url])[0]
-                is_malicious = bool(result)
-                confidence = 0.95 if not is_malicious else 0.87
-                results.append({
-                    "url": url,
-                    "is_malicious": is_malicious,
-                    "confidence": confidence
-                })
-            except Exception as e:
-                results.append({
-                    "url": url,
-                    "error": f"Prediction error: {str(e)}"
-                })
+        for item in ml_result.get("results", []):
+            results.append(self._format_result(item))
+        
+        return results
 
-        return PredictionResponse(data=results)
+    def _format_result(self, ml_result: dict) -> dict:
+        prediction = ml_result.get("prediction", {})
+        
+        return {
+            "url": ml_result.get("url", ""),
+            "is_malicious": prediction.get("is_malicious", False),
+            "confidence": prediction.get("confidence", 0.0),
+            "predicted_class": prediction.get("class", "unknown"),
+            "suggested_desc": ml_result.get("suggested_desc", ""),
+            "job_id": ml_result.get("job_id"),
+            "model_id": ml_result.get("model_id")
+        }
