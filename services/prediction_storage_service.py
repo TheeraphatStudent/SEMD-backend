@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional
 from decimal import Decimal
 
 from database import Prediction
-from libs.shared import is_class_malicious, normalize_class_name
+from libs.shared import is_class_malicious, normalize_class_name, map_prediction_class
 
 class PredictionStorageService:
     def __init__(self, db: AsyncSession):
@@ -18,9 +18,21 @@ class PredictionStorageService:
     ) -> Prediction:
         mapped_data = self._map_prediction_result(prediction_result, mapping_json or {})
         
-        class_name = mapped_data.get('class', 'unknown')
-        normalized_class = normalize_class_name(class_name)
-        is_malicious = mapped_data.get('is_malicious', is_class_malicious(normalized_class))
+        class_name = mapped_data.get('class')
+        is_malicious_mapped = mapped_data.get('is_malicious')
+        
+        if class_name is not None and is_malicious_mapped is not None:
+            normalized_class = normalize_class_name(class_name)
+            is_malicious = is_malicious_mapped
+        else:
+            prediction_value = (
+                mapped_data.get('prediction') or 
+                mapped_data.get('class') or 
+                prediction_result.get('prediction') or 
+                prediction_result.get('class') or
+                'unknown'
+            )
+            is_malicious, normalized_class = map_prediction_class(str(prediction_value))
         
         prediction = Prediction(
             user_id=user_id,
@@ -62,7 +74,7 @@ class PredictionStorageService:
                         if isinstance(value, bool):
                             mapped_data[field_name] = value
                         elif isinstance(value, str):
-                            mapped_data[field_name] = value.lower() in ['true', '1', 'yes', 'malicious']
+                            mapped_data[field_name] = value.lower() in ['true', '1', 'yes', 'malicious', 'phishing', 'spam', 'scam']
                         else:
                             mapped_data[field_name] = bool(value)
                 elif field_name == 'class':
