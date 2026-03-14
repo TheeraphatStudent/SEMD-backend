@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from uuid import UUID, uuid4
 
-class RefreshTokenModelDb(BaseModel):
+class RefreshTokenModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     refresh_tokens_id: Optional[int] = None

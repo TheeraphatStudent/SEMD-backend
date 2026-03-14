@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from libs.types.enums import ModelStageType
 
-class ModelRegistryModelDb(BaseModel):
+class ModelRegistryModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     model_registry_id: Optional[int] = None

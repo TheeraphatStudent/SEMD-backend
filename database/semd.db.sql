@@ -31,7 +31,7 @@ BEGIN
 
     -- สำหรับตาราง service_conf
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'service_type') THEN
-        CREATE TYPE service_type AS ENUM ('REST_API', 'WEB_HOOK', 'SDK');
+        CREATE TYPE service_type AS ENUM ('REST_API');
     END IF;
 END $$;
 
@@ -206,7 +206,6 @@ CREATE TABLE IF NOT EXISTS third_service_conf (
     service_name          VARCHAR(64) NOT NULL,
     base_url              TEXT NOT NULL,
     http_method           VARCHAR(8) NOT NULL DEFAULT 'GET',
-    secret_hash           TEXT NOT NULL,                  -- Format: key1:value1;key2:value2;
     headers_json          JSONB NOT NULL DEFAULT '{}',
     config_json           JSONB NOT NULL DEFAULT '{}',
     is_active             BOOLEAN NOT NULL DEFAULT TRUE,

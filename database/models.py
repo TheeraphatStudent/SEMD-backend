@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, Text, Integer, TIMESTAMP, UUID, Numeric, JSON
+from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, Text, Integer, TIMESTAMP, UUID, Numeric, JSON, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -50,7 +50,7 @@ class ServiceConf(Base):
     service_conf_id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, nullable=True)
     service_name = Column(String(32), nullable=False)
-    service_type = Column(String(20), nullable=False)
+    service_type = Column(Enum('REST_API', name='service_type'), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     version_no = Column(String(12), nullable=False)
     config_uri = Column(Text, nullable=False)
@@ -166,7 +166,6 @@ class ThirdServiceConf(Base):
     service_name = Column(String(64), nullable=False)
     base_url = Column(Text, nullable=False)
     http_method = Column(String(8), nullable=False, default='GET')
-    secret_hash = Column(Text, nullable=False)
     headers_json = Column(JSON, nullable=False, default={})
     config_json = Column(JSON, nullable=False, default={})
     is_active = Column(Boolean, nullable=False, default=True)

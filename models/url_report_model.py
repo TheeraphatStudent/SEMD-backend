@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from libs.types.enums import FlagType, ReportStatusType
 
-class UrlReportModelDb(BaseModel):
+class UrlReportModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     url_report_id: Optional[int] = None

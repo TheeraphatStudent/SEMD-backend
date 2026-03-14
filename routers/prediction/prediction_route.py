@@ -1,8 +1,11 @@
 from routers import BaseRoute
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from sqlalchemy.orm import Session
 from models import PredictionResponse, PredictionRequest
-from services.ml_service_client import ml_service_client
-from typing import Any, List
+from control.prediction_control import PredictionControl
+from guard.auth_guard import AuthGuard, get_db
+from database import User
+from typing import List
 import csv
 import io
 import logging
@@ -27,20 +30,27 @@ class PredictionRoute(BaseRoute):
             "/predict", 
             response_model=PredictionResponse,
             summary="Predict URL",
-            description="Predict if a URL is malicious or not using ML service"
+            description="Predict if a URL is malicious or not using configured service (ML model or third-party)"
         )(self.predict)
 
-    async def predict(self, request: PredictionRequest):
+    async def predict(
+        self,
+        request: PredictionRequest,
+        current_user: User = Depends(AuthGuard.get_current_user),
+        db: Session = Depends(get_db)
+    ):
         urls = await self._extract_urls(request)
         
         if not urls:
             raise HTTPException(status_code=422, detail="No URLs provided")
 
-        if len(urls) == 1:
-            result = self._predict_single(urls[0])
-            return PredictionResponse(data=[result])
+        control = PredictionControl(db, current_user.user_id)
+        
+        if request.service_id:
+            results = await control.predict_with_service(request.service_id, urls)
+            return PredictionResponse(data=results)
         else:
-            results = self._predict_batch(urls)
+            results = [control.predict_default(url) for url in urls]
             return PredictionResponse(data=results)
 
     async def _extract_urls(self, request: PredictionRequest) -> List[str]:
@@ -71,58 +81,3 @@ class PredictionRoute(BaseRoute):
                         urls.append(first_value)
         
         return urls
-
-    def _predict_single(self, url: str) -> dict:
-        logger.info(f"Predicting single URL: {url}")
-        
-        ml_result = ml_service_client.predict_url_sync(url, timeout=30)
-        
-        if ml_result.get("status") == "timeout":
-            raise HTTPException(
-                status_code=503, 
-                detail="ML service did not respond in time"
-            )
-        
-        if ml_result.get("status") == "failed":
-            raise HTTPException(
-                status_code=500, 
-                detail=ml_result.get("error", "Prediction failed")
-            )
-        
-        return self._format_result(ml_result)
-
-    def _predict_batch(self, urls: List[str]) -> List[dict]:
-        logger.info(f"Predicting batch of {len(urls)} URLs")
-        
-        ml_result = ml_service_client.predict_urls_sync(urls, timeout=60)
-        
-        if ml_result.get("status") == "timeout":
-            raise HTTPException(
-                status_code=503, 
-                detail="ML service did not respond in time"
-            )
-        
-        if ml_result.get("status") == "failed":
-            raise HTTPException(
-                status_code=500, 
-                detail=ml_result.get("error", "Batch prediction failed")
-            )
-        
-        results = []
-        for item in ml_result.get("results", []):
-            results.append(self._format_result(item))
-        
-        return results
-
-    def _format_result(self, ml_result: dict) -> dict:
-        prediction = ml_result.get("prediction", {})
-        
-        return {
-            "url": ml_result.get("url", ""),
-            "is_malicious": prediction.get("is_malicious", False),
-            "confidence": prediction.get("confidence", 0.0),
-            "predicted_class": prediction.get("class", "unknown"),
-            "suggested_desc": ml_result.get("suggested_desc", ""),
-            "job_id": ml_result.get("job_id"),
-            "model_id": ml_result.get("model_id")
-        }

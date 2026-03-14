@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from decimal import Decimal
 
-class PredictionModelDb(BaseModel):
+class PredictionModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     prediction_id: Optional[int] = None
