@@ -10,29 +10,13 @@ from models.auth_model import (
 from models.base_response_model import BaseResponseModel
 from fastapi import HTTPException, Depends, Query
 from sqlalchemy.orm import Session
-from typing import Union, Optional
+from typing import Union
 
-from services.client import postgres_client
 from control.auth_control import AuthControl
-from guard.auth_guard import AuthGuard
+from guard.auth_guard import AuthGuard, get_db
 from database import User
 from libs.types.enums import OAuthProviderType
 
-def get_db():
-    db = postgres_client.get_session_instance()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def get_current_user(authorization: str = Depends(AuthGuard.verify_bearer_token), db: Session = Depends(get_db)) -> User:
-    from services.auth_service import AuthService
-    payload = AuthService.verify_token(authorization.split()[1] if " " in authorization else authorization, "access")
-    user_id = int(payload.get("sub"))
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    return user
 
 class AuthRoute(BaseRoute):
     def __init__(self):
@@ -166,13 +150,13 @@ class AuthRoute(BaseRoute):
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    async def setup_2fa(self, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    async def setup_2fa(self, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
         try:
             return AuthControl.setup_2fa(current_user, db)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    async def enable_2fa(self, request: TwoFAEnableRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    async def enable_2fa(self, request: TwoFAEnableRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
         try:
             AuthControl.enable_2fa(request, current_user, db)
             return BaseResponseModel(status=200, message="2FA enabled successfully")
@@ -213,7 +197,7 @@ class AuthRoute(BaseRoute):
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     
-    async def create_user(self, request: CreateUserRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    async def create_user(self, request: CreateUserRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
         try:
             return AuthControl.create_user(request, current_user, db)
         except Exception as e:

@@ -441,14 +441,24 @@ paths:
       tags:
       - prediction
       summary: Predict URL
-      description: Predict if a URL is malicious or not using ML service
+      description: Predict if a URL is malicious or not using configured service (ML
+        model or third-party)
       operationId: predict_prediction_predict_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/PredictionRequest'
-        required: true
       responses:
         '200':
           description: Successful Response
@@ -651,6 +661,448 @@ paths:
           description: Not found
         '501':
           description: Not implemented
+        '422':
+          description: Validation error
+  /setting/third-service/:
+    get:
+      tags:
+      - third-service
+      summary: List Third-Party Services
+      description: List all third-party service configurations for the current user
+      operationId: list_third_services_setting_third_service__get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ThirdServiceResponse'
+                title: Response List Third Services Setting Third Service  Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - third-service
+      summary: Create Third-Party Service
+      description: Create a new third-party service configuration
+      operationId: create_third_service_setting_third_service__post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceCreateRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdServiceResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/third-service/{id}:
+    get:
+      tags:
+      - third-service
+      summary: Get Third-Party Service
+      description: Retrieve a third-party service configuration by ID
+      operationId: get_third_service_setting_third_service__id__get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdServiceResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - third-service
+      summary: Update Third-Party Service
+      description: Update a third-party service configuration
+      operationId: update_third_service_setting_third_service__id__put
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdServiceResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - third-service
+      summary: Delete Third-Party Service
+      description: Soft delete a third-party service (sets is_active=False)
+      operationId: delete_third_service_setting_third_service__id__delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/third-service/{id}/execute:
+    post:
+      tags:
+      - third-service
+      summary: Execute Third-Party Service
+      description: Execute a third-party service with runtime variables
+      operationId: execute_third_service_setting_third_service__id__execute_post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceExecuteRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Execute Third Service Setting Third Service  Id  Execute
+                  Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/third-service/{id}/rest-api/test:
+    post:
+      tags:
+      - third-service
+      summary: Test Third Service
+      description: Test a third-party service API
+      operationId: test_third_service_setting_third_service__id__rest_api_test_post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceExecuteRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Test Third Service Setting Third Service  Id  Rest
+                  Api Test Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/:
+    get:
+      tags:
+      - service-configuration
+      summary: List Service Configurations
+      description: Get all service configurations for the current user
+      operationId: list_services_setting_service__get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceConfModel'
+                title: Response List Services Setting Service  Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/{service_id}:
+    get:
+      tags:
+      - service-configuration
+      summary: Get Service Configuration
+      description: Get a specific service configuration by ID
+      operationId: get_service_setting_service__service_id__get
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Service Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/{service_id}/activate:
+    post:
+      tags:
+      - service-configuration
+      summary: Activate Service
+      description: Activate a service configuration
+      operationId: activate_service_setting_service__service_id__activate_post
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Service Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/{service_id}/deactivate:
+    post:
+      tags:
+      - service-configuration
+      summary: Deactivate Service
+      description: Deactivate a service configuration
+      operationId: deactivate_service_setting_service__service_id__deactivate_post
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Service Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/active/list:
+    get:
+      tags:
+      - service-configuration
+      summary: List Active Services
+      description: Get all active service configurations
+      operationId: list_active_services_setting_service_active_list_get
+      parameters:
+      - name: service_type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by service type
+          title: Service Type
+        description: Filter by service type
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceConfModel'
+                title: Response List Active Services Setting Service Active List Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
         '422':
           description: Validation error
   /stat/report:
@@ -1816,7 +2268,7 @@ components:
           - type: integer
           - type: 'null'
           title: Service Id
-          description: Service ID to use for prediction
+          description: Service ID to use for predictor
           example: 1
       type: object
       title: PredictionRequest
@@ -2338,6 +2790,61 @@ components:
       - ADMIN
       - SUPER_ADMIN
       title: RoleType
+    ServiceConfModel:
+      properties:
+        service_conf_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Conf Id
+        user_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: User Id
+        service_name:
+          type: string
+          maxLength: 32
+          title: Service Name
+        service_type:
+          $ref: '#/components/schemas/ServiceType'
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+        version_no:
+          type: string
+          maxLength: 12
+          title: Version No
+        config_uri:
+          type: string
+          title: Config Uri
+        config_json:
+          additionalProperties: true
+          type: object
+          title: Config Json
+          default: {}
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - service_name
+      - service_type
+      - version_no
+      - config_uri
+      title: ServiceConfModel
+    ServiceType:
+      type: string
+      enum:
+      - ML_MODEL
+      - REST_API
+      title: ServiceType
     SystemHealthItem:
       properties:
         status:
@@ -2775,6 +3282,169 @@ components:
       - message
       - data
       title: ThirdPartyTrendResponse
+    ThirdServiceCreateRequest:
+      properties:
+        service_name:
+          type: string
+          maxLength: 64
+          title: Service Name
+          example: Cloudflare URL Scanner
+        base_url:
+          type: string
+          title: Base Url
+          description: Base URL with optional {{variable}} placeholders
+          example: https://api.cloudflare.com/client/v4/accounts/{{account_id}}/urlscanner/v2/scan
+        http_method:
+          type: string
+          maxLength: 8
+          title: Http Method
+          default: POST
+        headers_json:
+          additionalProperties:
+            type: string
+          type: object
+          title: Headers Json
+          description: HTTP headers including authentication (e.g., Authorization,
+            API keys)
+          example:
+            Authorization: Bearer your_token_here
+            Content-Type: application/json
+        config_json:
+          additionalProperties: true
+          type: object
+          title: Config Json
+          description: Configuration for body template and URL template
+          example:
+            body_template:
+            - input: url
+              key: url
+            response_mapping:
+              is_malicious: result.malicious
+            url_template:
+              path_params:
+                account_id: your_account_id
+              query_params:
+                url: url
+        mapping_json:
+          additionalProperties: true
+          type: object
+          title: Mapping Json
+          description: Response mapping configuration for extracting prediction data
+          example:
+            class: data.category
+            is_malicious: data.is_malicious
+            suggested_desc: data.description
+      type: object
+      required:
+      - service_name
+      - base_url
+      title: ThirdServiceCreateRequest
+    ThirdServiceExecuteRequest:
+      properties:
+        vars:
+          additionalProperties: true
+          type: object
+          title: Vars
+          description: Runtime variables to resolve body template
+      type: object
+      required:
+      - vars
+      title: ThirdServiceExecuteRequest
+    ThirdServiceResponse:
+      properties:
+        third_service_conf_id:
+          type: integer
+          title: Third Service Conf Id
+        service_conf_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Conf Id
+        service_name:
+          type: string
+          title: Service Name
+        base_url:
+          type: string
+          title: Base Url
+        http_method:
+          type: string
+          title: Http Method
+        headers_json:
+          additionalProperties: true
+          type: object
+          title: Headers Json
+        config_json:
+          additionalProperties: true
+          type: object
+          title: Config Json
+        is_active:
+          type: boolean
+          title: Is Active
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - third_service_conf_id
+      - service_name
+      - base_url
+      - http_method
+      - headers_json
+      - config_json
+      - is_active
+      - created_at
+      - updated_at
+      title: ThirdServiceResponse
+    ThirdServiceUpdateRequest:
+      properties:
+        service_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Service Name
+        base_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Base Url
+        http_method:
+          anyOf:
+          - type: string
+            maxLength: 8
+          - type: 'null'
+          title: Http Method
+        headers_json:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Headers Json
+        config_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Config Json
+        mapping_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Mapping Json
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+      type: object
+      title: ThirdServiceUpdateRequest
     TokenPairResponse:
       properties:
         status:

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
-class AccessKeyModelDb(BaseModel):
+class AccessKeyModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     access_key_id: Optional[int] = None

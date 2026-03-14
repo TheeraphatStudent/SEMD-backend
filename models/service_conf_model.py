@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from libs.types.enums import ServiceType
 
-class ServiceConfModelDb(BaseModel):
+class ServiceConfModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     service_conf_id: Optional[int] = None

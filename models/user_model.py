@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from libs.types.enums import RoleType
 
-class UserModelDb(BaseModel):
+class UserModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     user_id: Optional[int] = None

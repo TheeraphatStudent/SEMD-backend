@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, Text, Integer, TIMESTAMP, UUID, Numeric, JSON
+from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, Text, Integer, TIMESTAMP, UUID, Numeric, JSON, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -50,7 +50,7 @@ class ServiceConf(Base):
     service_conf_id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, nullable=True)
     service_name = Column(String(32), nullable=False)
-    service_type = Column(String(20), nullable=False)
+    service_type = Column(Enum('REST_API', name='service_type'), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     version_no = Column(String(12), nullable=False)
     config_uri = Column(Text, nullable=False)
@@ -108,6 +108,9 @@ class Prediction(Base):
     precision_score = Column(Numeric(10, 2), nullable=True)
     f1_score = Column(Numeric(10, 2), nullable=True)
     
+    is_malicious = Column(Boolean, nullable=False)
+    predict_class = Column(String(64), nullable=False)
+    
     suggested_desc = Column(String(512), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
@@ -155,7 +158,7 @@ class UsageLog(Base):
     service_id = Column(BigInteger, nullable=True)
     access_key_id = Column(BigInteger, nullable=True)
     prediction_id = Column(BigInteger, nullable=True)
-    type = Column(String(20), nullable=False)
+    type = Column(Enum('PREDICT', 'ACCESS_KEY', name='usage_log_type'), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
 class ThirdServiceConf(Base):
@@ -166,9 +169,9 @@ class ThirdServiceConf(Base):
     service_name = Column(String(64), nullable=False)
     base_url = Column(Text, nullable=False)
     http_method = Column(String(8), nullable=False, default='GET')
-    secret_hash = Column(Text, nullable=False)
     headers_json = Column(JSON, nullable=False, default={})
     config_json = Column(JSON, nullable=False, default={})
+    mapping_json = Column(JSON, nullable=False, default={})
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())

@@ -18,6 +18,6 @@ class PredictionRequest(BaseModel):
     )
     service_id: Optional[int] = Field(
         None,
-        description="Service ID to use for prediction",
+        description="Service ID to use for predictor",
         example=1
     )

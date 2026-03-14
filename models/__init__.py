@@ -10,17 +10,22 @@ from .auth_model import (
 )
 from .base_response_model import BaseResponseModel
 from .default_model import GetDefaultApiEndpoint, GetDefaultHealthCheck
-from .prediction_model import PredictionModelDb
-from .user_model import UserModelDb
-from .refresh_model import RefreshTokenModelDb
-from .service_conf_model import ServiceConfModelDb
-from .model_registry_model import ModelRegistryModelDb
-from .access_key_model import AccessKeyModelDb
-from .url_flag_model import UrlFlagModelDb
-from .url_report_model import UrlReportModelDb
-from .activity_log_model import ActivityLogModelDb
-from .usage_log_model import UsageLogModelDb
-from .third_service_conf_model import ThirdServiceConfModelDb
+from .prediction_model import PredictionModel as PredictionModelDb
+from .user_model import UserModel as UserModelDb
+from .refresh_model import RefreshTokenModel as RefreshTokenModelDb
+from .service_conf_model import ServiceConfModel as ServiceConfModelDb
+from .model_registry_model import ModelRegistryModel as ModelRegistryModelDb
+from .access_key_model import AccessKeyModel as AccessKeyModelDb
+from .url_flag_model import UrlFlagModel as UrlFlagModelDb
+from .url_report_model import UrlReportModel as UrlReportModelDb
+from .activity_log_model import ActivityLogModel as ActivityLogModelDb
+from .usage_log_model import UsageLogModel as UsageLogModelDb
+from .third_service_conf_model import ThirdServiceConfModel as ThirdServiceConfModelDb
+from .third_service_model import (
+    BodyTemplateItem, UrlTemplateConfig, ThirdServiceConfigJson,
+    ThirdServiceCreateRequest, ThirdServiceUpdateRequest,
+    ThirdServiceExecuteRequest, ThirdServiceResponse
+)
 from .prediction_response import PredictionResponse, PredictionDetailResponse
 from .prediction_request import PredictionRequest
 from .ml_response import MLServiceResponse
@@ -145,5 +150,14 @@ __all__ = [
     "UrlReportModelDb",
     "ActivityLogModelDb",
     "UsageLogModelDb",
-    "ThirdServiceConfModelDb"
+    "ThirdServiceConfModelDb",
+    
+    # Third Service Models
+    "BodyTemplateItem",
+    "UrlTemplateConfig", 
+    "ThirdServiceConfigJson",
+    "ThirdServiceCreateRequest",
+    "ThirdServiceUpdateRequest",
+    "ThirdServiceExecuteRequest",
+    "ThirdServiceResponse"
 ]
