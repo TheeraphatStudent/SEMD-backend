@@ -48,3 +48,24 @@ class ThirdServiceControl:
         
         executor = ThirdServiceExecutor(conf)
         return await executor.execute(vars)
+    
+    async def test_execute(self, id: int, vars: Dict[str, Any]) -> Dict[str, Any]:
+        conf = await self.service.get_third_service_by_user(self.user_id, id)
+        
+        if not conf.is_active:
+            from fastapi import HTTPException, status
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Third service is not active"
+            )
+        
+        executor = ThirdServiceExecutor(conf)
+        result = await executor.execute(vars)
+        
+        return {
+            "test_result": result,
+            "service_name": conf.service_name,
+            "url": conf.base_url,
+            "method": conf.http_method,
+            "vars_used": vars
+        }

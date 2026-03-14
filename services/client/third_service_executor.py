@@ -137,12 +137,19 @@ class ThirdServiceExecutor:
                         params=params
                     )
                 else:
-                    response = await client.request(
-                        method=method,
-                        url=resolved_url,
-                        headers=headers,
-                        json=body if body else None
-                    )
+                    if body and len(body) > 0:
+                        response = await client.request(
+                            method=method,
+                            url=resolved_url,
+                            headers=headers,
+                            json=body
+                        )
+                    else:
+                        response = await client.request(
+                            method=method,
+                            url=resolved_url,
+                            headers=headers
+                        )
                 
                 response.raise_for_status()
                 response_data = response.json()
@@ -150,6 +157,8 @@ class ThirdServiceExecutor:
                 return self.map_response(response_data)
                 
         except httpx.HTTPStatusError as e:
+            print(e)
+
             raise HTTPException(
                 status_code=e.response.status_code,
                 detail=f"Third-party service error: {e.response.text}"

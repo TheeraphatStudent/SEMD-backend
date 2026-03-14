@@ -35,6 +35,7 @@ class ThirdServiceService:
             http_method=data.http_method,
             headers_json=data.headers_json,
             config_json=data.config_json,
+            mapping_json=data.mapping_json,
             is_active=True
         )
         

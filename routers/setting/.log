@@ -1,0 +1,135 @@
+Traceback (most recent call last):
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1134, in __call__
+    await super().__call__(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 87, in __call__
+    await self.app(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 119, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 105, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 414, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/dependencies/utils.py", line 639, in solve_dependencies
+    solved = await _solve_generator(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/dependencies/utils.py", line 553, in _solve_generator
+    return await stack.enter_async_context(cm)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/contextlib.py", line 659, in enter_async_context
+    result = await _enter(cm)
+             ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/guard/auth_guard.py", line 23, in get_async_db
+    db = postgres_client.get_async_session_instance()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/services/client/postgres_client.py", line 75, in get_async_session_instance
+    return self.AsyncSessionLocal()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1762, in __call__
+    return self.class_(**local_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 270, in __init__
+    self.sync_session_class(bind=sync_bind, binds=sync_binds, **kw)
+TypeError: Session.__init__() got an unexpected keyword argument 'predict_class'
+ERROR:uvicorn.error:Exception in ASGI application
+Traceback (most recent call last):
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1134, in __call__
+    await super().__call__(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 87, in __call__
+    await self.app(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 119, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 105, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 414, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/dependencies/utils.py", line 639, in solve_dependencies
+    solved = await _solve_generator(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/fastapi/dependencies/utils.py", line 553, in _solve_generator
+    return await stack.enter_async_context(cm)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/contextlib.py", line 659, in enter_async_context
+    result = await _enter(cm)
+             ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/guard/auth_guard.py", line 23, in get_async_db
+    db = postgres_client.get_async_session_instance()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/services/client/postgres_client.py", line 75, in get_async_session_instance
+    return self.AsyncSessionLocal()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1762, in __call__
+    return self.class_(**local_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/c/Users/th33r/Desktop/Project/final_project/SEMD/semd-backend/.venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 270, in __init__
+    self.sync_session_class(bind=sync_bind, binds=sync_binds, **kw)
+TypeError: Session.__init__() got an unexpected keyword argument 'predict_class'

@@ -13,37 +13,50 @@ class PredictionControl:
         self.prediction_service = PredictionService(db)
         self.usage_log_service = UsageLogService(db)
     
-    async def predict_with_service(self, service_id: int, urls: List[str]) -> List[Dict[str, Any]]:
-        results = await self.prediction_service.predict_with_service(
-            service_id=service_id,
-            urls=urls,
-            user_id=self.user_id
-        )
-        
-        for _ in results:
-            await self.usage_log_service.log_prediction_usage(
+    async def predict(self, urls: List[str], service_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        if service_id:
+            results = await self.prediction_service.predict_with_service(
                 service_id=service_id,
-                access_key_id=self.access_key_id,
-                prediction_id=None
+                urls=urls,
+                user_id=self.user_id
             )
-        
-        return results
-    
-    def predict_default(self, url: str) -> Dict[str, Any]:
-        return PredictionService.predict_url_default(url)
-    
-    async def predict_default_async(self, urls: List[str]) -> List[Dict[str, Any]]:
-        results = []
-        
-        for url in urls:
-            result = PredictionService.predict_url_default(url)
-            results.append(result)
             
-            if self.access_key_id:
+            for result in results:
+                prediction_id = result.get('prediction_id')
+                await self.usage_log_service.log_prediction_usage(
+                    service_id=service_id,
+                    access_key_id=self.access_key_id,
+                    prediction_id=prediction_id
+                )
+        else:
+            results = []
+            
+            for url in urls:
+                mock_result = PredictionService.generate_mock_prediction(url)
+                
+                prediction_record = await self.prediction_service.prediction_storage.create_prediction_record(
+                    user_id=self.user_id,
+                    url=url,
+                    prediction_result=mock_result,
+                    mapping_json={
+                        "is_malicious": "is_malicious",
+                        "class": "class",
+                        "suggested_desc": "suggested"
+                    }
+                )
+                
+                result = {
+                    "id": str(prediction_record.prediction_id),
+                    "url": url,
+                    "prediction_id": prediction_record.prediction_id,
+                    "result": mock_result
+                }
+                results.append(result)
+                
                 await self.usage_log_service.log_prediction_usage(
                     service_id=None,
                     access_key_id=self.access_key_id,
-                    prediction_id=None
+                    prediction_id=prediction_record.prediction_id
                 )
         
         return results

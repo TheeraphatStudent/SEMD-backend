@@ -49,14 +49,14 @@ class PredictionRoute(BaseRoute):
         control = PredictionControl(db, current_user.user_id, access_key_id)
         
         if request.service_id:
-            results = await control.predict_with_service(request.service_id, urls)
+            results = await control.predict(urls, request.service_id)
             return PredictionResponse(
                 status=200,
                 message="Prediction completed successfully",
                 data=results
             )
         else:
-            results = await control.predict_default_async(urls)
+            results = await control.predict(urls)
             return PredictionResponse(
                 status=200,
                 message="Prediction completed successfully",

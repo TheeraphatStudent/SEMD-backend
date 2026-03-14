@@ -65,6 +65,13 @@ class ThirdServiceRoute(BaseRoute):
             description="Execute a third-party service with runtime variables"
         )(self.execute_third_service)
 
+        self.router.post(
+            "/{id}/rest-api/test",
+            response_model=Dict[str, Any],
+            summary="Test Third Service",
+            description="Test a third-party service API"
+        )(self.test_third_service)
+
     async def list_third_services(
         self,
         current_user: User = Depends(AuthGuard.get_current_user),
@@ -123,3 +130,13 @@ class ThirdServiceRoute(BaseRoute):
     ):
         control = ThirdServiceControl(db, current_user.user_id)
         return await control.execute(id, request.vars)
+
+    async def test_third_service(
+        self,
+        id: int,
+        request: ThirdServiceExecuteRequest,
+        current_user: User = Depends(AuthGuard.get_current_user),
+        db: AsyncSession = Depends(get_async_db)
+    ):
+        control = ThirdServiceControl(db, current_user.user_id)
+        return await control.test_execute(id, request.vars)

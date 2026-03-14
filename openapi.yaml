@@ -882,6 +882,50 @@ paths:
           description: Unauthorized
         '422':
           description: Validation error
+  /setting/third-service/{id}/rest-api/test:
+    post:
+      tags:
+      - third-service
+      summary: Test Third Service
+      description: Test a third-party service API
+      operationId: test_third_service_setting_third_service__id__rest_api_test_post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceExecuteRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Test Third Service Setting Third Service  Id  Rest
+                  Api Test Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
   /setting/service/:
     get:
       tags:
@@ -3281,6 +3325,15 @@ components:
                 account_id: your_account_id
               query_params:
                 url: url
+        mapping_json:
+          additionalProperties: true
+          type: object
+          title: Mapping Json
+          description: Response mapping configuration for extracting prediction data
+          example:
+            class: data.category
+            is_malicious: data.is_malicious
+            suggested_desc: data.description
       type: object
       required:
       - service_name
@@ -3379,6 +3432,12 @@ components:
             type: object
           - type: 'null'
           title: Config Json
+        mapping_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Mapping Json
         is_active:
           anyOf:
           - type: boolean

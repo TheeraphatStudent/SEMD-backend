@@ -146,6 +146,10 @@ CREATE TABLE IF NOT EXISTS prediction (
     precision_score NUMERIC(10, 2) NULL,
     f1_score        NUMERIC(10, 2) NULL,
 
+    -- Result
+    is_malicious    BOOLEAN NOT NULL,
+    predict_class   VARCHAR(64) NOT NULL,
+
     -- Suggested Description
     suggested_desc  VARCHAR(512) NULL,
     
@@ -208,6 +212,7 @@ CREATE TABLE IF NOT EXISTS third_service_conf (
     http_method           VARCHAR(8) NOT NULL DEFAULT 'GET',
     headers_json          JSONB NOT NULL DEFAULT '{}',
     config_json           JSONB NOT NULL DEFAULT '{}',
+    mapping_json          JSONB NOT NULL DEFAULT '{}',
     is_active             BOOLEAN NOT NULL DEFAULT TRUE,
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()

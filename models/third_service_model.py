@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime
 import re
 
+from libs.shared import MALICIOUS_CLASSES, is_class_malicious, normalize_class_name
 
 class BodyTemplateItem(BaseModel):
     key: str = Field(..., description="Key name in the request body")
@@ -86,6 +87,26 @@ class ThirdServiceCreateRequest(BaseModel):
             "response_mapping": {"is_malicious": "result.malicious"}
         }
     )
+    mapping_json: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Response mapping configuration for extracting prediction data",
+        example={
+            "is_malicious": "data.is_malicious",
+            "class": "data.category", 
+            "suggested_desc": "data.description"
+        }
+    )
+
+    @field_validator('mapping_json')
+    @classmethod
+    def validate_mapping_json(cls, validate):
+        if validate is not None and isinstance(validate, dict) and validate:
+            required_fields = ['is_malicious', 'class', 'suggested_desc']
+            missing_fields = [field for field in required_fields if field not in validate]
+            if missing_fields:
+                raise ValueError(f"Fields are required: {', '.join(missing_fields)}")
+        return validate
+
 
 class ThirdServiceUpdateRequest(BaseModel):
     service_name: Optional[str] = Field(None, max_length=64)
@@ -93,6 +114,17 @@ class ThirdServiceUpdateRequest(BaseModel):
     http_method: Optional[str] = Field(None, max_length=8)
     headers_json: Optional[Dict[str, str]] = None
     config_json: Optional[Dict[str, Any]] = None
+    mapping_json: Optional[Dict[str, Any]] = None
+
+    @field_validator('mapping_json')
+    @classmethod
+    def validate_mapping_json(cls, validate):
+        if validate is not None and isinstance(validate, dict):
+            required_fields = ['is_malicious', 'class', 'suggested_desc']
+            missing_fields = [field for field in required_fields if field not in validate]
+            if missing_fields:
+                raise ValueError(f"Fields are required: {', '.join(missing_fields)}")
+        return validate
     is_active: Optional[bool] = None
 
 class ThirdServiceExecuteRequest(BaseModel):

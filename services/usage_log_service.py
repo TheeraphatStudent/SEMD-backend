@@ -4,6 +4,7 @@ from typing import Optional
 from datetime import datetime
 
 from database import UsageLog
+from libs.types.enums import UsageLogType
 
 class UsageLogService:
     def __init__(self, db: AsyncSession):
@@ -19,7 +20,7 @@ class UsageLogService:
             service_id=service_id,
             access_key_id=access_key_id,
             prediction_id=prediction_id,
-            type="PREDICT"
+            type=UsageLogType.PREDICT
         )
         
         self.db.add(usage_log)
@@ -37,7 +38,7 @@ class UsageLogService:
             service_id=service_id,
             access_key_id=access_key_id,
             prediction_id=None,
-            type="ACCESS_KEY"
+            type=UsageLogType.ACCESS_KEY
         )
         
         self.db.add(usage_log)
@@ -54,6 +55,7 @@ class UsageLogService:
     ) -> list[UsageLog]:
         stmt = (
             select(UsageLog)
+            .where(UsageLog.user_id == user_id)
             .order_by(UsageLog.created_at.desc())
             .limit(limit)
             .offset(offset)

@@ -129,23 +129,11 @@ POST http://localhost:8000/setting/third-service/
 ```json
 {
   "service_name": "Thai PhishTank - Phishing URL Check",
-  "base_url": "https://thaiphishtank.org/api/phishing-url",
+  "base_url": "https://thaiphishtank.org/api/phishing-url&url={{url}}&api_key={{api_key}}",
   "http_method": "GET",
   "secret_hash": "",
   "headers_json": {},
-  "config_json": {
-    "body_template": [],
-    "url_template": {
-      "query_params": {
-        "url": "url",
-        "api_key": "thai_phishtank_api_key"
-      }
-    },
-    "response_mapping": {
-      "is_phishing": "data.is_phishing",
-      "confidence": "data.confidence"
-    }
-  }
+  "config_json": {}
 }
 ```
 

@@ -12,6 +12,7 @@ from fastapi import HTTPException, status
 
 from database import ServiceConf, ThirdServiceConf
 from services.client.third_service_executor import ThirdServiceExecutor
+from services.prediction_storage_service import PredictionStorageService
 from libs.types.enums import ServiceType
 
 
@@ -19,6 +20,7 @@ class PredictionService:
     
     def __init__(self, db: AsyncSession = None):
         self.db = db
+        self.prediction_storage = PredictionStorageService(db)
     
     async def predict_with_service(
         self, 
@@ -45,19 +47,25 @@ class PredictionService:
                 detail="Access denied to this service configuration"
             )
         
-        if service_conf.service_type == ServiceType.ML_MODEL.value:
-            return await self._predict_with_ml_model(service_conf, urls)
-        elif service_conf.service_type == ServiceType.REST_API.value:
-            return await self._predict_with_third_party(service_conf, urls)
+        conf_id = service_conf.service_conf_id
+        conf_name = service_conf.service_name
+        conf_type = service_conf.service_type
+        
+        if conf_type == ServiceType.ML_MODEL.value:
+            return await self._predict_with_ml_model(conf_id, conf_name, conf_type, urls)
+        elif conf_type == ServiceType.REST_API.value:
+            return await self._predict_with_third_party(conf_id, conf_name, conf_type, urls, user_id)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported service type: {service_conf.service_type}"
+                detail=f"Unsupported service type: {conf_type}"
             )
     
     async def _predict_with_ml_model(
         self, 
-        service_conf: ServiceConf, 
+        service_conf_id: int,
+        service_name: str,
+        service_type: str,
         urls: List[str]
     ) -> List[Dict[str, Any]]:
         from services.ml_service_client import ml_service_client
@@ -80,9 +88,9 @@ class PredictionService:
             
             results.append({
                 "url": url,
-                "service_id": service_conf.service_conf_id,
-                "service_name": service_conf.service_name,
-                "service_type": service_conf.service_type,
+                "service_id": service_conf_id,
+                "service_name": service_name,
+                "service_type": service_type,
                 **ml_result
             })
         
@@ -90,11 +98,14 @@ class PredictionService:
     
     async def _predict_with_third_party(
         self, 
-        service_conf: ServiceConf, 
-        urls: List[str]
+        service_conf_id: int,
+        service_name: str,
+        service_type: str,
+        urls: List[str],
+        user_id: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         stmt = select(ThirdServiceConf).where(
-            ThirdServiceConf.service_conf_id == service_conf.service_conf_id,
+            ThirdServiceConf.service_conf_id == service_conf_id,
             ThirdServiceConf.is_active == True
         )
         result = await self.db.execute(stmt)
@@ -106,21 +117,34 @@ class PredictionService:
                 detail="Third-party service configuration not found"
             )
         
+        third_service_id = third_service.third_service_conf_id
+        third_service_name = third_service.service_name
+        config_json = third_service.config_json
+        mapping_json = third_service.mapping_json
+        
         executor = ThirdServiceExecutor(third_service)
         results = []
         
         for url in urls:
-            runtime_vars = self._build_runtime_vars(url, third_service.config_json)
-            result = await executor.execute(runtime_vars)
+            runtime_vars = self._build_runtime_vars(url, config_json)
+            prediction_result = await executor.execute(runtime_vars)
+            
+            prediction_record = await self.prediction_storage.create_prediction_record(
+                user_id=user_id,
+                url=url,
+                prediction_result=prediction_result,
+                mapping_json=mapping_json
+            )
             
             results.append({
                 "url": url,
-                "service_id": service_conf.service_conf_id,
-                "service_name": service_conf.service_name,
-                "service_type": service_conf.service_type,
-                "third_service_id": third_service.third_service_conf_id,
-                "third_service_name": third_service.service_name,
-                "result": result
+                "service_id": service_conf_id,
+                "service_name": service_name,
+                "service_type": service_type,
+                "third_service_id": third_service_id,
+                "third_service_name": third_service_name,
+                "prediction_id": prediction_record.prediction_id,
+                "result": prediction_result
             })
         
         return results
@@ -143,29 +167,5 @@ class PredictionService:
                     vars_dict[var_name] = url
         
         return vars_dict
-    
-    @classmethod
-    def generate_mock_prediction(cls, url: str) -> dict:
-        is_malicious = "true" if "malicious" in url.lower() else "false"
-        accuracy = 0.95 if is_malicious == "true" else 0.87
-        suggested = "block" if is_malicious == "true" else "safe"
-
-        return {
-            "is_malicious": is_malicious,
-            "accuracy": accuracy,
-            "suggested": suggested,
-        }
-
-    @classmethod
-    def predict_url_default(cls, url: str) -> dict:
-        prediction_id = str(uuid.uuid4())
-        prediction_result = cls.generate_mock_prediction(url)
-        
-        return {
-            "id": prediction_id,
-            "url": url,
-            "result": prediction_result,
-        }
-
 
 prediction_service = PredictionService()

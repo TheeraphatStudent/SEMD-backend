@@ -1,10 +1,10 @@
 from routers import BaseRoute
-from fastapi import Depends, Query
-from sqlalchemy.orm import Session
-from typing import List, Optional
+from fastapi import Depends, status, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Dict, Any, List, Optional
 
 from control.service_conf_control import ServiceConfControl
-from guard.auth_guard import AuthGuard, get_db
+from guard.auth_guard import AuthGuard, get_async_db
 from database import User
 from models.service_conf_model import ServiceConfModel
 
@@ -52,51 +52,51 @@ class ServiceConfRoute(BaseRoute):
             description="Get all active service configurations"
         )(self.list_active_services)
 
-    def list_services(
+    async def list_services(
         self,
         current_user: User = Depends(AuthGuard.get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db)
     ):
         control = ServiceConfControl(db, current_user.user_id)
-        services = control.list_services()
+        services = await control.list_services()
         return [ServiceConfModel.model_validate(s) for s in services]
 
-    def get_service(
+    async def get_service(
         self,
         service_id: int,
         current_user: User = Depends(AuthGuard.get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db)
     ):
         control = ServiceConfControl(db, current_user.user_id)
-        service = control.get_service(service_id)
+        service = await control.get_service(service_id)
         return ServiceConfModel.model_validate(service)
 
-    def activate_service(
+    async def activate_service(
         self,
         service_id: int,
         current_user: User = Depends(AuthGuard.get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db)
     ):
         control = ServiceConfControl(db, current_user.user_id)
-        service = control.activate_service(service_id)
+        service = await control.activate_service(service_id)
         return ServiceConfModel.model_validate(service)
 
-    def deactivate_service(
+    async def deactivate_service(
         self,
         service_id: int,
         current_user: User = Depends(AuthGuard.get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db)
     ):
         control = ServiceConfControl(db, current_user.user_id)
-        service = control.deactivate_service(service_id)
+        service = await control.deactivate_service(service_id)
         return ServiceConfModel.model_validate(service)
 
-    def list_active_services(
+    async def list_active_services(
         self,
-        service_type: Optional[str] = Query(None, description="Filter by service type"),
         current_user: User = Depends(AuthGuard.get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db),
+        service_type: Optional[str] = Query(None, description="Filter by service type")
     ):
         control = ServiceConfControl(db, current_user.user_id)
-        services = control.get_active_services(service_type)
+        services = await control.get_active_services(service_type)
         return [ServiceConfModel.model_validate(s) for s in services]
