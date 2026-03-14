@@ -129,11 +129,12 @@ class ThirdServiceExecutor:
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 if method == "GET":
+                    params = body if body and len(body) > 0 else None
                     response = await client.request(
                         method=method,
                         url=resolved_url,
                         headers=headers,
-                        params=body if body else None
+                        params=params
                     )
                 else:
                     response = await client.request(

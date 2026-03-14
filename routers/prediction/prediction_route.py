@@ -48,10 +48,18 @@ class PredictionRoute(BaseRoute):
         
         if request.service_id:
             results = await control.predict_with_service(request.service_id, urls)
-            return PredictionResponse(data=results)
+            return PredictionResponse(
+                status=200,
+                message="Prediction completed successfully",
+                data=results
+            )
         else:
             results = [control.predict_default(url) for url in urls]
-            return PredictionResponse(data=results)
+            return PredictionResponse(
+                status=200,
+                message="Prediction completed successfully",
+                data=results
+            )
 
     async def _extract_urls(self, request: PredictionRequest) -> List[str]:
         urls = []
