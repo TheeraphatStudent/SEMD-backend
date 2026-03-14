@@ -1,11 +1,11 @@
 from routers import BaseRoute
 from fastapi import HTTPException, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from models import PredictionResponse, PredictionRequest
 from control.prediction_control import PredictionControl
-from guard.auth_guard import AuthGuard, get_db
+from guard.auth_guard import AuthGuard, get_async_db
 from database import User
-from typing import List
+from typing import List, Optional
 import csv
 import io
 import logging
@@ -37,14 +37,16 @@ class PredictionRoute(BaseRoute):
         self,
         request: PredictionRequest,
         current_user: User = Depends(AuthGuard.get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db)
     ):
         urls = await self._extract_urls(request)
         
         if not urls:
             raise HTTPException(status_code=422, detail="No URLs provided")
 
-        control = PredictionControl(db, current_user.user_id)
+        access_key_id = None
+        
+        control = PredictionControl(db, current_user.user_id, access_key_id)
         
         if request.service_id:
             results = await control.predict_with_service(request.service_id, urls)
@@ -54,7 +56,7 @@ class PredictionRoute(BaseRoute):
                 data=results
             )
         else:
-            results = [control.predict_default(url) for url in urls]
+            results = await control.predict_default_async(urls)
             return PredictionResponse(
                 status=200,
                 message="Prediction completed successfully",

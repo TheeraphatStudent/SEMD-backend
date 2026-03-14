@@ -6,7 +6,8 @@ Supports both ML model and third-party service predictions.
 import uuid
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from fastapi import HTTPException, status
 
 from database import ServiceConf, ThirdServiceConf
@@ -16,7 +17,7 @@ from libs.types.enums import ServiceType
 
 class PredictionService:
     
-    def __init__(self, db: Session = None):
+    def __init__(self, db: AsyncSession = None):
         self.db = db
     
     async def predict_with_service(
@@ -25,10 +26,12 @@ class PredictionService:
         urls: List[str],
         user_id: Optional[int] = None
     ) -> List[Dict[str, Any]]:
-        service_conf = self.db.query(ServiceConf).filter(
+        stmt = select(ServiceConf).where(
             ServiceConf.service_conf_id == service_id,
             ServiceConf.is_active == True
-        ).first()
+        )
+        result = await self.db.execute(stmt)
+        service_conf = result.scalar_one_or_none()
         
         if not service_conf:
             raise HTTPException(
@@ -90,10 +93,12 @@ class PredictionService:
         service_conf: ServiceConf, 
         urls: List[str]
     ) -> List[Dict[str, Any]]:
-        third_service = self.db.query(ThirdServiceConf).filter(
+        stmt = select(ThirdServiceConf).where(
             ThirdServiceConf.service_conf_id == service_conf.service_conf_id,
             ThirdServiceConf.is_active == True
-        ).first()
+        )
+        result = await self.db.execute(stmt)
+        third_service = result.scalar_one_or_none()
         
         if not third_service:
             raise HTTPException(
