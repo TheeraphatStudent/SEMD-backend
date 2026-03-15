@@ -129,9 +129,13 @@ CREATE TABLE IF NOT EXISTS model_registry (
 CREATE TABLE IF NOT EXISTS access_key (
     access_key_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id         BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    key_name        VARCHAR(64) NULL,
     access_key_hash TEXT NOT NULL,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    usage_limit     BIGINT NULL,
     expired_at      TIMESTAMPTZ NOT NULL,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ตารางผลการทำนาย (Prediction)
@@ -217,3 +221,30 @@ CREATE TABLE IF NOT EXISTS third_service_conf (
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ตารางบันทึกการเปลี่ยนแปลง URL Report (URL Reported Action Log)
+CREATE TABLE IF NOT EXISTS url_reported (
+    url_reported_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    url_report_id       BIGINT REFERENCES url_report(url_report_id) ON DELETE CASCADE NOT NULL,
+    user_id             BIGINT REFERENCES users(user_id) ON DELETE SET NULL NOT NULL,
+    action              VARCHAR(32) NOT NULL,
+    old_status          rp_status_type NULL,
+    new_status          rp_status_type NULL,
+    remark              VARCHAR(256) NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ตารางบันทึกการ Config ของระบบ
+CREATE TABLE IF NOT EXISTS system_config (
+    system_config_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    config_key          VARCHAR(64) NOT NULL UNIQUE,
+    config_value        TEXT NOT NULL,
+    description         VARCHAR(256) NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO system_config (config_key, config_value, description) VALUES
+('global_max_requests_per_access_key', '10000', 'จำนวนสูงสุดที่ Access Key สามารถร้องขอได้'),
+('system_retrained_model_count', '2000', 'จำนวน URL ที่ถูก Predict ที่โมเดลสามารถรีเทรนได้'),
+('system_retrained_model_is_active', 'false', 'สถานะการรีเทรนโมเดล');

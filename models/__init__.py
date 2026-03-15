@@ -18,6 +18,16 @@ from .model_registry_model import ModelRegistryModel as ModelRegistryModelDb
 from .access_key_model import AccessKeyModel as AccessKeyModelDb
 from .url_flag_model import UrlFlagModel as UrlFlagModelDb
 from .url_report_model import UrlReportModel as UrlReportModelDb
+from .url_reported_model import UrlReportedModel as UrlReportedModelDb
+from .url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
+from .url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
+from .access_key_request import (
+    AccessKeyCreateRequest, AccessKeyAdminCreateRequest, AccessKeyAdminUpdateRequest
+)
+from .user_request import (
+    UserUpdateRequest, PasswordResetRequest,
+    AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
+)
 from .activity_log_model import ActivityLogModel as ActivityLogModelDb
 from .usage_log_model import UsageLogModel as UsageLogModelDb
 from .third_service_conf_model import ThirdServiceConfModel as ThirdServiceConfModelDb
@@ -148,9 +158,30 @@ __all__ = [
     "AccessKeyModelDb",
     "UrlFlagModelDb",
     "UrlReportModelDb",
+    "UrlReportedModelDb",
     "ActivityLogModelDb",
     "UsageLogModelDb",
     "ThirdServiceConfModelDb",
+    
+    # URL Report Request Models
+    "UrlReportCreateRequest",
+    "UrlReportUpdateRequest",
+    
+    # URL Flag Request Models
+    "UrlFlagCreateRequest",
+    "UrlFlagUpdateRequest",
+    
+    # Access Key Request Models
+    "AccessKeyCreateRequest",
+    "AccessKeyAdminCreateRequest",
+    "AccessKeyAdminUpdateRequest",
+    
+    # User Request Models
+    "UserUpdateRequest",
+    "PasswordResetRequest",
+    "AdminCreateUserRequest",
+    "AdminUpdateUserRequest",
+    "AdminPasswordResetRequest",
     
     # Third Service Models
     "BodyTemplateItem",

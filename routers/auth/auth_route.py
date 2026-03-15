@@ -7,6 +7,8 @@ from models.auth_model import (
     OAuthAuthorizationResponse, OAuthCallbackRequest, RegisterRequest,
     RegisterResponse, CreateUserRequest, CreateUserResponse
 )
+from models.user_request import UserUpdateRequest, PasswordResetRequest
+from models.user_model import UserModel
 from models.base_response_model import BaseResponseModel
 from fastapi import HTTPException, Depends, Query
 from sqlalchemy.orm import Session
@@ -118,6 +120,27 @@ class AuthRoute(BaseRoute):
             summary="OAuth Callback",
             description="Handle OAuth callback from provider. Exchanges authorization code for tokens."
         )(self.oauth_callback)
+        
+        self.router.get(
+            "/me",
+            response_model=UserModel,
+            summary="Get My Profile",
+            description="Get current user's profile information. Requires authentication."
+        )(self.get_me)
+        
+        self.router.put(
+            "/me",
+            response_model=UserModel,
+            summary="Update My Profile",
+            description="Update current user's profile information. Requires authentication."
+        )(self.update_me)
+        
+        self.router.post(
+            "/me/reset-password",
+            response_model=BaseResponseModel,
+            summary="Reset My Password",
+            description="Reset current user's password. Requires current password verification."
+        )(self.reset_password)
 
     async def login(self, request: AuthLoginRequest, db: Session = Depends(get_db)):
         try:
@@ -200,5 +223,28 @@ class AuthRoute(BaseRoute):
     async def create_user(self, request: CreateUserRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
         try:
             return AuthControl.create_user(request, current_user, db)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    async def get_me(self, current_user: User = Depends(AuthGuard.get_current_user)):
+        try:
+            return AuthControl.get_user_profile(current_user)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    async def update_me(self, request: UserUpdateRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
+        try:
+            return AuthControl.update_user_profile(current_user, request, db)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    async def reset_password(self, request: PasswordResetRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
+        try:
+            AuthControl.reset_password(current_user, request, db)
+            return BaseResponseModel(status=200, message="Password reset successfully")
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

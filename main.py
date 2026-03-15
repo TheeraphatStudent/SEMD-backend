@@ -10,9 +10,9 @@ This application demonstrates:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
-    AuthRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
-    ThirdServiceRoute, ServiceConfRoute, ReportStatRoute, PredictionStatRoute, UserStatRoute, 
-    ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
+    AuthRoute, UserRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
+    ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, SystemConfigRoute,
+    ReportStatRoute, PredictionStatRoute, UserStatRoute, ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
 )
 from config.settings import settings
 from models import GetDefaultApiEndpoint, GetDefaultHealthCheck
@@ -62,6 +62,7 @@ async def health_check():
 
 # ----------------- Include routers
 app.include_router(AuthRoute().get_router())
+app.include_router(UserRoute().get_router())
 app.include_router(MLRoute().get_router())
 app.include_router(PredictionRoute().get_router())
 app.include_router(ReportRoute().get_router())
@@ -69,6 +70,9 @@ app.include_router(DashboardRoute().get_router())
 app.include_router(SettingRoute().get_router())
 app.include_router(ThirdServiceRoute().get_router())
 app.include_router(ServiceConfRoute().get_router())
+app.include_router(UrlFlagRoute().get_router())
+app.include_router(AccessKeyRoute().get_router())
+app.include_router(SystemConfigRoute().get_router())
 
 app.include_router(ReportStatRoute().get_router())
 app.include_router(PredictionStatRoute().get_router())

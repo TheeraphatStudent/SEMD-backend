@@ -92,9 +92,13 @@ class AccessKey(Base):
     
     access_key_id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, nullable=True)
+    key_name = Column(String(64), nullable=True)
     access_key_hash = Column(Text, nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    usage_limit = Column(BigInteger, nullable=True)
     expired_at = Column(TIMESTAMP(timezone=True), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
 class Prediction(Base):
     __tablename__ = 'prediction'
@@ -173,5 +177,27 @@ class ThirdServiceConf(Base):
     config_json = Column(JSON, nullable=False, default={})
     mapping_json = Column(JSON, nullable=False, default={})
     is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+class UrlReported(Base):
+    __tablename__ = 'url_reported'
+    
+    url_reported_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    url_report_id = Column(BigInteger, nullable=False)
+    user_id = Column(BigInteger, nullable=False)
+    action = Column(String(32), nullable=False)
+    old_status = Column(String(20), nullable=True)
+    new_status = Column(String(20), nullable=True)
+    remark = Column(String(256), nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+
+class SystemConfig(Base):
+    __tablename__ = 'system_config'
+    
+    system_config_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    config_key = Column(String(64), nullable=False, unique=True)
+    config_value = Column(Text, nullable=False)
+    description = Column(String(256), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
