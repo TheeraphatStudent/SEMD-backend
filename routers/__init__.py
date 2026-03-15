@@ -7,6 +7,7 @@ from .prediction import PredictionRoute
 from .report import ReportRoute
 from .dashboard import DashboardRoute
 from .setting import SettingRoute, ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, SystemConfigRoute
+from .queue import QueueRoute
 from .stat import (
     ReportStatRoute,
     PredictionStatRoute,
@@ -30,6 +31,7 @@ __all__ = [
     "UrlFlagRoute",
     "AccessKeyRoute",
     "SystemConfigRoute",
+    "QueueRoute",
     "ReportStatRoute",
     "PredictionStatRoute",
     "UserStatRoute",

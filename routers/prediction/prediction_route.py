@@ -46,7 +46,7 @@ class PredictionRoute(BaseRoute):
 
         access_key_id = None
         
-        control = PredictionControl(db, current_user.user_id, access_key_id)
+        control = PredictionControl(db, current_user.user_id, access_key_id, user=current_user)
         
         if request.service_id:
             results = await control.predict(urls, request.service_id)

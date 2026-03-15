@@ -4,13 +4,15 @@ from typing import Dict, Any, List, Optional
 from services.prediction_service import PredictionService
 from services.usage_log_service import UsageLogService
 from services.url_flag_service import UrlFlagService
-
+from services.queue_service import QueueService
+from database import User
 
 class PredictionControl:
-    def __init__(self, db: AsyncSession, user_id: int = None, access_key_id: Optional[int] = None):
+    def __init__(self, db: AsyncSession, user_id: int = None, access_key_id: Optional[int] = None, user: Optional[User] = None):
         self.db = db
         self.user_id = user_id
         self.access_key_id = access_key_id
+        self.user = user
         self.prediction_service = PredictionService(db)
         self.usage_log_service = UsageLogService(db)
     
@@ -36,6 +38,8 @@ class PredictionControl:
                 if flag_info['is_flag']:
                     result['flag_type'] = flag_info['flag_type']
                     result['flag_id'] = flag_info['flag_id']
+                
+                QueueService.add_to_retrain_queue(url, self.user)
         else:
             results = []
             
@@ -74,6 +78,8 @@ class PredictionControl:
                     access_key_id=self.access_key_id,
                     prediction_id=prediction_record.prediction_id
                 )
+
+                QueueService.add_to_retrain_queue(url, self.user)
         
         return results
     
