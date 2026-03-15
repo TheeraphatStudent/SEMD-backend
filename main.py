@@ -10,7 +10,7 @@ This application demonstrates:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
-    AuthRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
+    AuthRoute, UserRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
     ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, ReportStatRoute, PredictionStatRoute, UserStatRoute, 
     ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
 )
@@ -62,6 +62,7 @@ async def health_check():
 
 # ----------------- Include routers
 app.include_router(AuthRoute().get_router())
+app.include_router(UserRoute().get_router())
 app.include_router(MLRoute().get_router())
 app.include_router(PredictionRoute().get_router())
 app.include_router(ReportRoute().get_router())

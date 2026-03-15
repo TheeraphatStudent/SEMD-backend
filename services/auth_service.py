@@ -11,6 +11,10 @@ from fastapi import HTTPException, status
 from config.settings import settings
 from database import User, RefreshToken
 from models.auth_model import TokenPairResponse
+from models.user_request import (
+    UserUpdateRequest, PasswordResetRequest,
+    AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
+)
 from libs.types.enums import RoleType
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -257,5 +261,250 @@ class AuthService:
         db.refresh(new_user)
         
         return new_user
+    
+    @classmethod
+    def update_user_profile(cls, user: User, request: UserUpdateRequest, db: Session) -> User:
+        if request.username and request.username != user.username:
+            existing_user = db.query(User).filter(
+                User.username == request.username,
+                User.user_id != user.user_id
+            ).first()
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists"
+                )
+        
+        if request.email and request.email != user.email:
+            existing_user = db.query(User).filter(
+                User.email == request.email,
+                User.user_id != user.user_id
+            ).first()
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already exists"
+                )
+
+        user = {
+            "username": request.username,
+            "email": request.email,
+            "full_name": request.full_name,
+            "birthday": request.birthday,
+            "profile_img_uri": request.profile_img_uri
+        }
+
+        user.updated_at = datetime.now(timezone.utc)
+        
+        db.commit()
+        db.refresh(user)
+        
+        return user
+    
+    @classmethod
+    def reset_user_password(cls, user: User, request: PasswordResetRequest, db: Session) -> bool:
+        if request.new_password != request.confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password and confirm password do not match"
+            )
+        
+        if not cls.verify_password(request.current_password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect"
+            )
+        
+        if cls.verify_password(request.new_password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password must be different from current password"
+            )
+        
+        user.password_hash = cls.hash_password(request.new_password)
+        user.updated_at = datetime.utcnow()
+        
+        db.commit()
+        
+        return True
+    
+    @classmethod
+    def admin_create_user(cls, request: AdminCreateUserRequest, admin_user: User, db: Session) -> User:
+        if request.role == RoleType.ADMIN and admin_user.role != RoleType.SUPER_ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only Master Admin can create Admin users"
+            )
+        
+        existing_user = db.query(User).filter(User.username == request.username).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already exists"
+            )
+        
+        existing_user = db.query(User).filter(User.email == request.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already exists"
+            )
+        
+        hashed_password = cls.hash_password(request.password)
+        
+        new_user = User(
+            username=request.username,
+            email=request.email,
+            full_name=request.full_name,
+            password_hash=hashed_password,
+            role=request.role.value,
+            birthday=request.birthday,
+            profile_img_uri=request.profile_img_uri
+        )
+        
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        return new_user
+    
+    @classmethod
+    def admin_update_user(cls, user_id: int, request: AdminUpdateUserRequest, admin_user: User, db: Session) -> User:
+        target_user = db.query(User).filter(User.user_id == user_id).first()
+        if not target_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} not found"
+            )
+        
+        if request.role is not None:
+            if admin_user.role != RoleType.SUPER_ADMIN.value:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only Master Admin can change user roles"
+                )
+            
+            if target_user.role == RoleType.SUPER_ADMIN.value and request.role != RoleType.SUPER_ADMIN:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Cannot change Super Admin role"
+                )
+        
+        if request.username and request.username != target_user.username:
+            existing_user = db.query(User).filter(
+                User.username == request.username,
+                User.user_id != user_id
+            ).first()
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists"
+                )
+        
+        if request.email and request.email != target_user.email:
+            existing_user = db.query(User).filter(
+                User.email == request.email,
+                User.user_id != user_id
+            ).first()
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already exists"
+                )
+        
+        request = {
+            "username": request.username,
+            "email": request.email,
+            "full_name": request.full_name,
+            "birthday": request.birthday,
+            "profile_img_uri": request.profile_img_uri,
+            "role": request.role
+        }
+
+        for key, value in request.model_dump(exclude_none=True).items():
+            setattr(target_user, key, value)
+        
+        target_user.updated_at = datetime.utcnow()
+        
+        db.commit()
+        db.refresh(target_user)
+        
+        return target_user
+    
+    @classmethod
+    def admin_reset_user_password(cls, user_id: int, request: AdminPasswordResetRequest, admin_user: User, db: Session) -> bool:
+        # Get target user
+        target_user = db.query(User).filter(User.user_id == user_id).first()
+        if not target_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} not found"
+            )
+        
+        # Validate passwords match
+        if request.new_password != request.confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password and confirm password do not match"
+            )
+        
+        # Prevent resetting Super Admin password unless requester is Super Admin
+        if target_user.role == RoleType.SUPER_ADMIN.value and admin_user.role != RoleType.SUPER_ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only Master Admin can reset Super Admin password"
+            )
+        
+        # Hash and update password
+        target_user.password_hash = cls.hash_password(request.new_password)
+        target_user.updated_at = datetime.utcnow()
+        
+        db.commit()
+        
+        return True
+    
+    @classmethod
+    def admin_delete_user(cls, user_id: int, admin_user: User, db: Session) -> bool:
+        target_user = db.query(User).filter(User.user_id == user_id).first()
+        if not target_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} not found"
+            )
+        
+        if target_user.role == RoleType.SUPER_ADMIN.value and admin_user.role != RoleType.SUPER_ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only Master Admin can delete Super Admin"
+            )
+        
+        if target_user.user_id == admin_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete your own account"
+            )
+        
+        db.delete(target_user)
+        db.commit()
+        
+        return True
+    
+    @classmethod
+    def get_all_users(cls, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
+        return db.query(User).order_by(User.created_at.desc()).offset(skip).limit(limit).all()
+    
+    @classmethod
+    def count_all_users(cls, db: Session) -> int:
+        return db.query(User).count()
+    
+    @classmethod
+    def get_user_by_id(cls, user_id: int, db: Session) -> User:
+        user = db.query(User).filter(User.user_id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} not found"
+            )
+        return user
 
 auth_service = AuthService()

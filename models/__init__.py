@@ -24,6 +24,10 @@ from .url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
 from .access_key_request import (
     AccessKeyCreateRequest, AccessKeyAdminCreateRequest, AccessKeyAdminUpdateRequest
 )
+from .user_request import (
+    UserUpdateRequest, PasswordResetRequest,
+    AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
+)
 from .activity_log_model import ActivityLogModel as ActivityLogModelDb
 from .usage_log_model import UsageLogModel as UsageLogModelDb
 from .third_service_conf_model import ThirdServiceConfModel as ThirdServiceConfModelDb
@@ -171,6 +175,13 @@ __all__ = [
     "AccessKeyCreateRequest",
     "AccessKeyAdminCreateRequest",
     "AccessKeyAdminUpdateRequest",
+    
+    # User Request Models
+    "UserUpdateRequest",
+    "PasswordResetRequest",
+    "AdminCreateUserRequest",
+    "AdminUpdateUserRequest",
+    "AdminPasswordResetRequest",
     
     # Third Service Models
     "BodyTemplateItem",

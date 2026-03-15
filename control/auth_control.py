@@ -11,6 +11,11 @@ from models.auth_model import (
     OAuthAuthorizationResponse, OAuthCallbackRequest, RegisterRequest,
     RegisterResponse, CreateUserRequest, CreateUserResponse
 )
+from models.user_request import (
+    UserUpdateRequest, PasswordResetRequest,
+    AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
+)
+from models.user_model import UserModel
 from services.auth_service import AuthService
 from services.oauth_service import OAuthService
 from services.two_factor_service import TwoFactorService
@@ -290,5 +295,48 @@ class AuthControl:
             refresh_token=refresh_token,
             token_type="bearer"
         )
+    
+    @classmethod
+    def get_user_profile(cls, current_user: User) -> UserModel:
+        return UserModel.model_validate(current_user)
+    
+    @classmethod
+    def update_user_profile(cls, current_user: User, request: UserUpdateRequest, db: Session) -> UserModel:
+        updated_user = AuthService.update_user_profile(current_user, request, db)
+        return UserModel.model_validate(updated_user)
+    
+    @classmethod
+    def reset_password(cls, current_user: User, request: PasswordResetRequest, db: Session) -> bool:
+        return AuthService.reset_user_password(current_user, request, db)
+    
+    @classmethod
+    def admin_create_user(cls, request: AdminCreateUserRequest, admin_user: User, db: Session) -> UserModel:
+        new_user = AuthService.admin_create_user(request, admin_user, db)
+        return UserModel.model_validate(new_user)
+    
+    @classmethod
+    def admin_get_all_users(cls, db: Session, skip: int = 0, limit: int = 100) -> tuple[list[UserModel], int]:
+        users = AuthService.get_all_users(db, skip, limit)
+        total = AuthService.count_all_users(db)
+        user_models = [UserModel.model_validate(user) for user in users]
+        return user_models, total
+    
+    @classmethod
+    def admin_get_user_by_id(cls, user_id: int, db: Session) -> UserModel:
+        user = AuthService.get_user_by_id(user_id, db)
+        return UserModel.model_validate(user)
+    
+    @classmethod
+    def admin_update_user(cls, user_id: int, request: AdminUpdateUserRequest, admin_user: User, db: Session) -> UserModel:
+        updated_user = AuthService.admin_update_user(user_id, request, admin_user, db)
+        return UserModel.model_validate(updated_user)
+    
+    @classmethod
+    def admin_reset_user_password(cls, user_id: int, request: AdminPasswordResetRequest, admin_user: User, db: Session) -> bool:
+        return AuthService.admin_reset_user_password(user_id, request, admin_user, db)
+    
+    @classmethod
+    def admin_delete_user(cls, user_id: int, admin_user: User, db: Session) -> bool:
+        return AuthService.admin_delete_user(user_id, admin_user, db)
 
 auth_control = AuthControl()

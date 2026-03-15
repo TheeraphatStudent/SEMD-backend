@@ -1,7 +1,7 @@
 # Routers package
 
 from .base_route import BaseRoute
-from .auth import AuthRoute
+from .auth import AuthRoute, UserRoute
 from .ml import MLRoute
 from .prediction import PredictionRoute
 from .report import ReportRoute
@@ -19,6 +19,7 @@ from .stat import (
 __all__ = [
     "BaseRoute",
     "AuthRoute",
+    "UserRoute",
     "MLRoute",
     "PredictionRoute",
     "ReportRoute",
