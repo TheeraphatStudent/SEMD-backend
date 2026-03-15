@@ -217,3 +217,15 @@ CREATE TABLE IF NOT EXISTS third_service_conf (
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ตารางบันทึกการเปลี่ยนแปลง URL Report (URL Reported Action Log)
+CREATE TABLE IF NOT EXISTS url_reported (
+    url_reported_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    url_report_id       BIGINT REFERENCES url_report(url_report_id) ON DELETE CASCADE NOT NULL,
+    user_id             BIGINT REFERENCES users(user_id) ON DELETE SET NULL NOT NULL,
+    action              VARCHAR(32) NOT NULL,
+    old_status          rp_status_type NULL,
+    new_status          rp_status_type NULL,
+    remark              VARCHAR(256) NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

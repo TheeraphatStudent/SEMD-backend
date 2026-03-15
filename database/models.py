@@ -175,3 +175,15 @@ class ThirdServiceConf(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+class UrlReported(Base):
+    __tablename__ = 'url_reported'
+    
+    url_reported_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    url_report_id = Column(BigInteger, nullable=False)
+    user_id = Column(BigInteger, nullable=False)
+    action = Column(String(32), nullable=False)
+    old_status = Column(String(20), nullable=True)
+    new_status = Column(String(20), nullable=True)
+    remark = Column(String(256), nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
