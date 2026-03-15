@@ -6,7 +6,7 @@ from .ml import MLRoute
 from .prediction import PredictionRoute
 from .report import ReportRoute
 from .dashboard import DashboardRoute
-from .setting import SettingRoute, ThirdServiceRoute, ServiceConfRoute
+from .setting import SettingRoute, ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute
 from .stat import (
     ReportStatRoute,
     PredictionStatRoute,
@@ -26,6 +26,8 @@ __all__ = [
     "SettingRoute",
     "ThirdServiceRoute",
     "ServiceConfRoute",
+    "UrlFlagRoute",
+    "AccessKeyRoute",
     "ReportStatRoute",
     "PredictionStatRoute",
     "UserStatRoute",

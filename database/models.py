@@ -92,9 +92,13 @@ class AccessKey(Base):
     
     access_key_id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, nullable=True)
+    key_name = Column(String(64), nullable=True)
     access_key_hash = Column(Text, nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    usage_limit = Column(BigInteger, nullable=True)
     expired_at = Column(TIMESTAMP(timezone=True), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
 class Prediction(Base):
     __tablename__ = 'prediction'

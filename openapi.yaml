@@ -1304,6 +1304,827 @@ paths:
           description: Unauthorized
         '422':
           description: Validation error
+  /setting/url-flag:
+    get:
+      tags:
+      - url-flag
+      summary: Get All URL Flags
+      description: Get all URL flags. Requires authentication.
+      operationId: get_all_flags_setting_url_flag_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - url-flag
+      summary: Create URL Flag
+      description: Create a new URL flag. Requires authentication.
+      operationId: create_flag_setting_url_flag_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlFlagCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/url-flag/me:
+    get:
+      tags:
+      - url-flag
+      summary: Get My URL Flags
+      description: Get URL flags created by the current user.
+      operationId: get_my_flags_setting_url_flag_me_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/url-flag/{flag_id}:
+    get:
+      tags:
+      - url-flag
+      summary: Get URL Flag by ID
+      description: Get a specific URL flag by its ID.
+      operationId: get_flag_by_id_setting_url_flag__flag_id__get
+      parameters:
+      - name: flag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Flag Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - url-flag
+      summary: Update URL Flag
+      description: Update an existing URL flag. Requires authentication.
+      operationId: update_flag_setting_url_flag__flag_id__put
+      parameters:
+      - name: flag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Flag Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlFlagUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - url-flag
+      summary: Delete URL Flag
+      description: Delete an existing URL flag. Requires authentication.
+      operationId: delete_flag_setting_url_flag__flag_id__delete
+      parameters:
+      - name: flag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Flag Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/me:
+    get:
+      tags:
+      - access-key
+      summary: Get My Access Keys
+      description: Get all access keys for the current user with pagination.
+      operationId: get_my_keys_setting_access_key_me_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number (1-indexed)
+          default: 1
+          title: Page
+        description: Page number (1-indexed)
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of items per page
+          default: 20
+          title: Page Size
+        description: Number of items per page
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Field to sort by
+          title: Sort By
+        description: Field to sort by
+      - name: sort_order
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(asc|desc)$
+          description: Sort order (asc or desc)
+          default: desc
+          title: Sort Order
+        description: Sort order (asc or desc)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key:
+    post:
+      tags:
+      - access-key
+      summary: Create Access Key
+      description: Create a new access key. Returns the raw key only once.
+      operationId: create_key_setting_access_key_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/reset:
+    post:
+      tags:
+      - access-key
+      summary: Reset Access Key
+      description: Reset an access key. Old key becomes inactive, new key is generated.
+      operationId: reset_key_setting_access_key__key_id__reset_post
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/usage/monthly:
+    get:
+      tags:
+      - access-key
+      summary: Get Monthly Usage
+      description: Get usage statistics for a specific month.
+      operationId: get_usage_monthly_setting_access_key__key_id__usage_monthly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: integer
+          maximum: 12
+          minimum: 1
+          description: Month (1-12)
+          title: Month
+        description: Month (1-12)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/usage/yearly:
+    get:
+      tags:
+      - access-key
+      summary: Get Yearly Usage
+      description: Get usage statistics for a specific year.
+      operationId: get_usage_yearly_setting_access_key__key_id__usage_yearly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/usage:
+    get:
+      tags:
+      - access-key
+      summary: Get All Time Usage
+      description: Get all-time usage statistics.
+      operationId: get_usage_all_time_setting_access_key__key_id__usage_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get All Access Keys'
+      description: Get all access keys in the system. Admin only.
+      operationId: admin_get_all_keys_setting_access_key_admin_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number (1-indexed)
+          default: 1
+          title: Page
+        description: Page number (1-indexed)
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of items per page
+          default: 20
+          title: Page Size
+        description: Number of items per page
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Field to sort by
+          title: Sort By
+        description: Field to sort by
+      - name: sort_order
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(asc|desc)$
+          description: Sort order (asc or desc)
+          default: desc
+          title: Sort Order
+        description: Sort order (asc or desc)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - access-key
+      summary: '[Admin] Create Access Key for User'
+      description: Create an access key for a specific user with usage limit. Admin
+        only.
+      operationId: admin_create_key_setting_access_key_admin_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyAdminCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}:
+    put:
+      tags:
+      - access-key
+      summary: '[Admin] Update Access Key'
+      description: Update an access key (set limit, activate/deactivate). Admin only.
+      operationId: admin_update_key_setting_access_key_admin__key_id__put
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyAdminUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - access-key
+      summary: '[Admin] Delete Access Key'
+      description: Delete an access key. Admin only.
+      operationId: admin_delete_key_setting_access_key_admin__key_id__delete
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}/usage/monthly:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get Monthly Usage'
+      description: Get usage statistics for any key. Admin only.
+      operationId: admin_get_usage_monthly_setting_access_key_admin__key_id__usage_monthly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: integer
+          maximum: 12
+          minimum: 1
+          description: Month (1-12)
+          title: Month
+        description: Month (1-12)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}/usage/yearly:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get Yearly Usage'
+      description: Get yearly usage statistics for any key. Admin only.
+      operationId: admin_get_usage_yearly_setting_access_key_admin__key_id__usage_yearly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}/usage:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get All Time Usage'
+      description: Get all-time usage statistics for any key. Admin only.
+      operationId: admin_get_usage_all_time_setting_access_key_admin__key_id__usage_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
   /stat/report:
     get:
       tags:
@@ -1762,6 +2583,153 @@ paths:
           description: Validation error
 components:
   schemas:
+    ACLType:
+      type: string
+      enum:
+      - GLOBAL
+      - PRIVATE
+      title: ACLType
+    AccessKeyAdminCreateRequest:
+      properties:
+        user_id:
+          type: integer
+          title: User Id
+          description: User ID to create key for
+        key_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Key Name
+          description: Name for the access key
+        usage_limit:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Usage Limit
+          description: Usage limit for the key (null = unlimited)
+        expired_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expired At
+          description: Expiration date for the key
+      type: object
+      required:
+      - user_id
+      title: AccessKeyAdminCreateRequest
+    AccessKeyAdminUpdateRequest:
+      properties:
+        key_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Key Name
+          description: Name for the access key
+        usage_limit:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Usage Limit
+          description: Usage limit for the key (null = unlimited)
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+          description: Whether the key is active
+        expired_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expired At
+          description: Expiration date for the key
+      type: object
+      title: AccessKeyAdminUpdateRequest
+    AccessKeyCreateRequest:
+      properties:
+        key_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Key Name
+          description: Name for the access key
+        expired_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expired At
+          description: Expiration date for the key
+      type: object
+      title: AccessKeyCreateRequest
+    AccessKeyListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items: {}
+          type: array
+          title: data
+          description: List of Access Keys
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+          title: pagination
+          description: Pagination metadata
+      type: object
+      required:
+      - status
+      - message
+      - data
+      - pagination
+      title: AccessKeyListResponse
+    AccessKeyResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: Access Key data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: AccessKeyResponse
     ApiEndpointStatItem:
       properties:
         endpoint:
@@ -2291,6 +3259,41 @@ components:
       - github
       - google
       title: OAuthProviderType
+    PaginationMeta:
+      properties:
+        page:
+          type: integer
+          title: Page
+          description: Current page number
+        page_size:
+          type: integer
+          title: Page Size
+          description: Number of items per page
+        total_items:
+          type: integer
+          title: Total Items
+          description: Total number of items
+        total_pages:
+          type: integer
+          title: Total Pages
+          description: Total number of pages
+        has_next:
+          type: boolean
+          title: Has Next
+          description: Whether there is a next page
+        has_prev:
+          type: boolean
+          title: Has Prev
+          description: Whether there is a previous page
+      type: object
+      required:
+      - page
+      - page_size
+      - total_items
+      - total_pages
+      - has_next
+      - has_prev
+      title: PaginationMeta
     PreAuthResponse:
       properties:
         status:
@@ -3851,6 +4854,24 @@ components:
       - message
       - data
       title: UrlFlagCategoryResponse
+    UrlFlagCreateRequest:
+      properties:
+        url:
+          type: string
+          title: Url
+          description: URL to flag
+        type:
+          $ref: '#/components/schemas/FlagType'
+          description: Flag type (MALICIOUS or BENIGN)
+          default: BENIGN
+        access_level:
+          $ref: '#/components/schemas/ACLType'
+          description: Access level (GLOBAL or PRIVATE)
+          default: PRIVATE
+      type: object
+      required:
+      - url
+      title: UrlFlagCreateRequest
     UrlFlagDetailItem:
       properties:
         id:
@@ -3932,6 +4953,62 @@ components:
       - message
       - data
       title: UrlFlagDetailResponse
+    UrlFlagListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items: {}
+          type: array
+          title: data
+          description: List of URL Flags
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagListResponse
+    UrlFlagResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: URL Flag data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagResponse
     UrlFlagStatItem:
       properties:
         total_flagged:
@@ -4054,6 +5131,26 @@ components:
       - message
       - data
       title: UrlFlagTrendResponse
+    UrlFlagUpdateRequest:
+      properties:
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: URL to flag
+        type:
+          anyOf:
+          - $ref: '#/components/schemas/FlagType'
+          - type: 'null'
+          description: Flag type (MALICIOUS or BENIGN)
+        access_level:
+          anyOf:
+          - $ref: '#/components/schemas/ACLType'
+          - type: 'null'
+          description: Access level (GLOBAL or PRIVATE)
+      type: object
+      title: UrlFlagUpdateRequest
     UrlReportCreateRequest:
       properties:
         url:

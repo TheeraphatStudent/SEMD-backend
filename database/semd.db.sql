@@ -129,9 +129,13 @@ CREATE TABLE IF NOT EXISTS model_registry (
 CREATE TABLE IF NOT EXISTS access_key (
     access_key_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id         BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    key_name        VARCHAR(64) NULL,
     access_key_hash TEXT NOT NULL,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    usage_limit     BIGINT NULL,
     expired_at      TIMESTAMPTZ NOT NULL,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ตารางผลการทำนาย (Prediction)
