@@ -2492,6 +2492,128 @@ paths:
           description: Unauthorized
         '422':
           description: Validation error
+  /setting/system-config:
+    get:
+      tags:
+      - system-config
+      summary: '[Admin] Get All System Configs'
+      description: Get all system configuration values. Admin only.
+      operationId: get_all_configs_setting_system_config_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /setting/system-config/{config_key}:
+    get:
+      tags:
+      - system-config
+      summary: '[Admin] Get System Config by Key'
+      description: Get a specific system configuration by key. Admin only.
+      operationId: get_config_by_key_setting_system_config__config_key__get
+      parameters:
+      - name: config_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Config Key
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - system-config
+      summary: '[Admin] Update System Config'
+      description: Update a system configuration value by key. Admin only.
+      operationId: update_config_setting_system_config__config_key__put
+      parameters:
+      - name: config_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Config Key
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemConfigUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /stat/report:
     get:
       tags:
@@ -3607,6 +3729,15 @@ components:
           default: 0 / 512GB
       type: object
       title: GetDefaultHealthCheck
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     MLServiceResponse:
       properties:
         status:
@@ -4560,6 +4691,111 @@ components:
       - ML_MODEL
       - REST_API
       title: ServiceType
+    SystemConfigListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/SystemConfigModel'
+          type: array
+          title: data
+          description: List of system configs
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemConfigListResponse
+    SystemConfigModel:
+      properties:
+        system_config_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: System Config Id
+        config_key:
+          type: string
+          title: Config Key
+        config_value:
+          type: string
+          title: Config Value
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - config_key
+      - config_value
+      title: SystemConfigModel
+    SystemConfigResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/SystemConfigModel'
+          title: data
+          description: System config data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemConfigResponse
+    SystemConfigUpdateRequest:
+      properties:
+        config_value:
+          type: string
+          title: Config Value
+          description: New value for the config
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Optional description update
+      type: object
+      required:
+      - config_value
+      title: SystemConfigUpdateRequest
     SystemHealthItem:
       properties:
         status:
@@ -6069,3 +6305,29 @@ components:
           description: Profile image URI
       type: object
       title: UserUpdateRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

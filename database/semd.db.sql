@@ -233,3 +233,18 @@ CREATE TABLE IF NOT EXISTS url_reported (
     remark              VARCHAR(256) NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ตารางบันทึกการ Config ของระบบ
+CREATE TABLE IF NOT EXISTS system_config (
+    system_config_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    config_key          VARCHAR(64) NOT NULL UNIQUE,
+    config_value        TEXT NOT NULL,
+    description         VARCHAR(256) NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO system_config (config_key, config_value, description) VALUES
+('global_max_requests_per_access_key', '10000', 'จำนวนสูงสุดที่ Access Key สามารถร้องขอได้'),
+('system_retrained_model_count', '2000', 'จำนวน URL ที่ถูก Predict ที่โมเดลสามารถรีเทรนได้'),
+('system_retrained_model_is_active', 'false', 'สถานะการรีเทรนโมเดล');

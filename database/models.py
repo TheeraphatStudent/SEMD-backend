@@ -191,3 +191,13 @@ class UrlReported(Base):
     new_status = Column(String(20), nullable=True)
     remark = Column(String(256), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+
+class SystemConfig(Base):
+    __tablename__ = 'system_config'
+    
+    system_config_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    config_key = Column(String(64), nullable=False, unique=True)
+    config_value = Column(Text, nullable=False)
+    description = Column(String(256), nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())

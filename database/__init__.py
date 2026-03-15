@@ -11,7 +11,8 @@ from .models import (
     ActivityLog,
     UsageLog,
     ThirdServiceConf,
-    UrlReported
+    UrlReported,
+    SystemConfig
 )
 
 __all__ = [
@@ -27,5 +28,6 @@ __all__ = [
     "ActivityLog",
     "UsageLog",
     "ThirdServiceConf",
-    "UrlReported"
+    "UrlReported",
+    "SystemConfig"
 ]

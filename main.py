@@ -11,8 +11,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     AuthRoute, UserRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
-    ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, ReportStatRoute, PredictionStatRoute, UserStatRoute, 
-    ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
+    ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, SystemConfigRoute,
+    ReportStatRoute, PredictionStatRoute, UserStatRoute, ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
 )
 from config.settings import settings
 from models import GetDefaultApiEndpoint, GetDefaultHealthCheck
@@ -72,6 +72,7 @@ app.include_router(ThirdServiceRoute().get_router())
 app.include_router(ServiceConfRoute().get_router())
 app.include_router(UrlFlagRoute().get_router())
 app.include_router(AccessKeyRoute().get_router())
+app.include_router(SystemConfigRoute().get_router())
 
 app.include_router(ReportStatRoute().get_router())
 app.include_router(PredictionStatRoute().get_router())
