@@ -4125,14 +4125,14 @@ components:
         text_file:
           anyOf:
           - type: string
-            format: binary
+            contentMediaType: application/octet-stream
           - type: 'null'
           title: Text File
           description: Upload a text file with URLs, one per line
         csv_file:
           anyOf:
           - type: string
-            format: binary
+            contentMediaType: application/octet-stream
           - type: 'null'
           title: Csv File
           description: Upload a CSV file with URLs in the first column or 'url' column
