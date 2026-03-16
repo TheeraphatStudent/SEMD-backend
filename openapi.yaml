@@ -441,7 +441,7 @@ paths:
       tags:
       - prediction
       summary: Predict URL
-      description: Predict if a URL is malicious or not
+      description: Predict if a URL is malicious or not using ML service
       operationId: predict_prediction_predict_post
       requestBody:
         content:
@@ -462,6 +462,8 @@ paths:
           description: Not implemented
         '422':
           description: Validation error
+        '503':
+          description: ML service unavailable
   /report:
     get:
       tags:
@@ -1809,6 +1811,13 @@ components:
           - type: 'null'
           title: Csv File
           description: Upload a CSV file with URLs in the first column or 'url' column
+        service_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Id
+          description: Service ID to use for prediction
+          example: 1
       type: object
       title: PredictionRequest
     PredictionResponse:
