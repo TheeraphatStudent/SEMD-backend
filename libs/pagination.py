@@ -14,7 +14,7 @@ class PaginationParams:
             20, ge=1, le=100, description='Number of items per page'),
         sort_by: Optional[str] = Query(None, description='Field to sort by'),
         sort_order: str = Query(
-            'desc', regex='^(asc|desc)$', description='Sort order (asc or desc)')
+            'desc', pattern='^(asc|desc)$', description='Sort order (asc or desc)')
     ):
         self.page = page
         self.page_size = page_size

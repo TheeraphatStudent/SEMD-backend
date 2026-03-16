@@ -1,11 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import Dict, Any, List, Optional
+from fastapi import HTTPException
 
 from services.prediction_service import PredictionService
 from services.usage_log_service import UsageLogService
 from services.url_flag_service import UrlFlagService
 from services.queue_service import QueueService
-from database import User
+from database import User, ServiceConf
+from libs.types.enums import ServiceType
 
 
 class PredictionControl:
@@ -18,71 +21,49 @@ class PredictionControl:
         self.usage_log_service = UsageLogService(db)
 
     async def predict(self, urls: List[str], service_id: Optional[int] = None) -> List[Dict[str, Any]]:
-        if service_id:
-            results = await self.prediction_service.predict_with_service(
+        if not service_id:
+            service_id = await self._get_default_ml_service()
+            if not service_id:
+                raise HTTPException(
+                    status_code=400,
+                    detail="No service_id provided and no default ML service found. Please configure an ML service or provide a service_id."
+                )
+        
+        results = await self.prediction_service.predict_with_service(
+            service_id=service_id,
+            urls=urls,
+            user_id=self.user_id
+        )
+
+        for result in results:
+            prediction_id = result.get('prediction_id')
+            await self.usage_log_service.log_prediction_usage(
                 service_id=service_id,
-                urls=urls,
-                user_id=self.user_id
+                access_key_id=self.access_key_id,
+                prediction_id=prediction_id
             )
 
-            for result in results:
-                prediction_id = result.get('prediction_id')
-                await self.usage_log_service.log_prediction_usage(
-                    service_id=service_id,
-                    access_key_id=self.access_key_id,
-                    prediction_id=prediction_id
-                )
+            url = result.get('url')
+            flag_info = await self._check_url_flag(url)
+            result['is_flag'] = flag_info['is_flag']
+            if flag_info['is_flag']:
+                result['flag_type'] = flag_info['flag_type']
+                result['flag_id'] = flag_info['flag_id']
 
-                url = result.get('url')
-                flag_info = await self._check_url_flag(url)
-                result['is_flag'] = flag_info['is_flag']
-                if flag_info['is_flag']:
-                    result['flag_type'] = flag_info['flag_type']
-                    result['flag_id'] = flag_info['flag_id']
-
-                QueueService.add_to_retrain_queue(url, self.user)
-        else:
-            results = []
-
-            for url in urls:
-                mock_result = PredictionService.generate_mock_prediction(url)
-
-                prediction_record = await self.prediction_service.prediction_storage.create_prediction_record(
-                    user_id=self.user_id,
-                    url=url,
-                    prediction_result=mock_result,
-                    mapping_json={
-                        'is_malicious': 'is_malicious',
-                        'class': 'class',
-                        'suggested_desc': 'suggested'
-                    }
-                )
-
-                flag_info = await self._check_url_flag(url)
-
-                result = {
-                    'id': str(prediction_record.prediction_id),
-                    'url': url,
-                    'prediction_id': prediction_record.prediction_id,
-                    'result': mock_result,
-                    'is_flag': flag_info['is_flag']
-                }
-
-                if flag_info['is_flag']:
-                    result['flag_type'] = flag_info['flag_type']
-                    result['flag_id'] = flag_info['flag_id']
-
-                results.append(result)
-
-                await self.usage_log_service.log_prediction_usage(
-                    service_id=None,
-                    access_key_id=self.access_key_id,
-                    prediction_id=prediction_record.prediction_id
-                )
-
-                QueueService.add_to_retrain_queue(url, self.user)
+            QueueService.add_to_retrain_queue(url, self.user)
 
         return results
+
+    async def _get_default_ml_service(self) -> Optional[int]:
+        stmt = select(ServiceConf).where(
+            ServiceConf.is_active == True,
+            ServiceConf.service_type == ServiceType.ML_MODEL.value
+        ).order_by(ServiceConf.created_at.asc()).limit(1)
+        
+        result = await self.db.execute(stmt)
+        service = result.scalar_one_or_none()
+        
+        return service.service_conf_id if service else None
 
     async def _check_url_flag(self, url: str) -> Dict[str, Any]:
         flag = await UrlFlagService.check_url_flag_async(url, self.user_id, self.db)

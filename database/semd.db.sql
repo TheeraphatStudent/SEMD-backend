@@ -1,3 +1,8 @@
+-- Create database with UTF-8 encoding and UTC+7 timezone
+CREATE DATABASE "semd-db" WITH ENCODING 'UTF8' TEMPLATE template0;
+\c semd-db;
+SET timezone = 'UTC+7';
+
 -- ============================================================
 -- 1. สร้าง ENUM TYPES (อ้างอิงจาก Column Type ใน Design)
 -- ============================================================

@@ -8,6 +8,9 @@ from fastapi import HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Any, List
 from pydantic import Field
+import secrets
+import string
+from datetime import datetime, timedelta
 
 from control.access_key_control import AccessKeyControl
 from guard.auth_guard import AuthGuard, get_db
@@ -123,6 +126,13 @@ class AccessKeyRoute(BaseRoute):
             summary="[Admin] Get All Time Usage",
             description="Get all-time usage statistics for any key. Admin only."
         )(self.admin_get_usage_all_time)
+        
+        self.router.post(
+            "/extension/token",
+            response_model=AccessKeyResponse,
+            summary="Generate Extension Access Token",
+            description="Generate a unique 6-character extension access token valid for 30 days."
+        )(self.create_extension_token)
 
     def _check_admin(self, user: User):
         if user.role not in [RoleType.ADMIN.value, RoleType.SUPER_ADMIN.value]:
@@ -345,4 +355,35 @@ class AccessKeyRoute(BaseRoute):
         except HTTPException:
             raise
         except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    async def create_extension_token(
+        self,
+        current_user: User = Depends(AuthGuard.get_current_user),
+        db: Session = Depends(get_db)
+    ):
+        try:
+            alphabet = string.ascii_letters + string.digits
+            token = ''.join(secrets.choice(alphabet) for _ in range(6))
+            
+            expiration_date = datetime.utcnow() + timedelta(days=30)
+            
+            current_user.ex_acc_token = token
+            current_user.ex_acc_token_exp = expiration_date
+            current_user.updated_at = datetime.utcnow()
+            
+            db.commit()
+            db.refresh(current_user)
+            
+            return AccessKeyResponse(
+                status=201,
+                message="Extension access token generated successfully",
+                data={
+                    "ex_acc_token": token,
+                    "ex_acc_token_exp": expiration_date.isoformat(),
+                    "expires_in_days": 30
+                }
+            )
+        except Exception as e:
+            db.rollback()
             raise HTTPException(status_code=500, detail=str(e))

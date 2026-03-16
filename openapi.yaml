@@ -2492,6 +2492,36 @@ paths:
           description: Unauthorized
         '422':
           description: Validation error
+  /setting/access-key/extension/token:
+    post:
+      tags:
+      - access-key
+      summary: Generate Extension Access Token
+      description: Generate a unique 6-character extension access token valid for
+        30 days.
+      operationId: create_extension_token_setting_access_key_extension_token_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
   /setting/system-config:
     get:
       tags:

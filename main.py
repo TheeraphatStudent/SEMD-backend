@@ -7,6 +7,8 @@ This application demonstrates:
 
 """
 
+import sys
+import argparse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
@@ -86,3 +88,53 @@ app.include_router(UrlFlagStatRoute().get_router())
 openapi_yaml = yaml.dump(app.openapi(), sort_keys=False)
 with open("openapi.yaml", "w") as f:
     f.write(openapi_yaml)
+
+
+def main():
+    """CLI entry point for running the FastAPI application."""
+    parser = argparse.ArgumentParser(description='FastAPI Application CLI')
+    parser.add_argument(
+        'command',
+        choices=['dev', 'prod'],
+        help='Command to run: dev (development with auto-reload) or prod (production with uvicorn)'
+    )
+    parser.add_argument(
+        '--host',
+        default='0.0.0.0',
+        help='Host to bind (default: 0.0.0.0)'
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        default=8000,
+        help='Port to bind (default: 8000)'
+    )
+    
+    args = parser.parse_args()
+    
+    if args.command == 'dev':
+        import uvicorn
+        print(f"🚀 Starting FastAPI in DEVELOPMENT mode on {args.host}:{args.port}")
+        print(f"📝 Auto-reload enabled - watching for file changes")
+        uvicorn.run(
+            "main:app",
+            host=args.host,
+            port=args.port,
+            reload=True,
+            log_level="info"
+        )
+    elif args.command == 'prod':
+        import uvicorn
+        print(f"🚀 Starting FastAPI in PRODUCTION mode on {args.host}:{args.port}")
+        uvicorn.run(
+            "main:app",
+            host=args.host,
+            port=args.port,
+            reload=False,
+            workers=4,
+            log_level="warning"
+        )
+
+
+if __name__ == "__main__":
+    main()
