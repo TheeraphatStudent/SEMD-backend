@@ -7,12 +7,14 @@ import redis
 
 from config.settings import settings
 
+
 class RedisClient:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(RedisClient, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super(RedisClient, cls).__new__(
+                cls, *args, **kwargs)
         return cls._instance
 
     def __init__(self):
@@ -51,5 +53,6 @@ class RedisClient:
     def delete_cache(self, key: str) -> int:
         """Delete cached data by key."""
         return self.client.delete(key)
+
 
 redis_client = RedisClient()

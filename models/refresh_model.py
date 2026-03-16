@@ -3,9 +3,10 @@ from typing import Optional
 from datetime import datetime
 from uuid import UUID, uuid4
 
+
 class RefreshTokenModelDb(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     refresh_tokens_id: Optional[int] = None
     user_id: int
     token_hash: str = Field(..., max_length=64)

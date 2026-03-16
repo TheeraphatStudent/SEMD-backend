@@ -2,15 +2,16 @@ from pydantic import Field, BaseModel
 from typing import Optional
 from fastapi import UploadFile
 
+
 class PredictionRequest(BaseModel):
     url: Optional[str | list[str]] = Field(
         None,
-        title="url",
+        title='url',
         description="URL to predict -> 'https://example.com' or ['http://example.com', 'https://test.com']"
     )
     text_file: Optional[UploadFile] = Field(
         None,
-        description="Upload a text file with URLs, one per line"
+        description='Upload a text file with URLs, one per line'
     )
     csv_file: Optional[UploadFile] = Field(
         None,

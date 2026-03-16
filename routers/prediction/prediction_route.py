@@ -55,13 +55,13 @@ class PredictionRoute(BaseRoute):
         if not urls:
             raise HTTPException(status_code=422, detail="No URLs provided")
 
-        model_path = os.path.join(os.path.dirname(__file__), "../../../semd-ml/models/model.pkl")
+        model_path = os.path.join(os.path.dirname(__file__), "../../../SEMD-ml/models/xgboost_model_8bdc3ff795714d1a8ef57120a9a9ad1f.pkl")
         
         try:
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
         except FileNotFoundError:
-            raise HTTPException(status_code=500, detail="Model file not found")
+            raise HTTPException(status_code=500, detail=f"Model file not found: {model_path}")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error loading model: {str(e)}")
 

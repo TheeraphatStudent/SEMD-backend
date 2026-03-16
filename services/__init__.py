@@ -6,8 +6,8 @@ from .prediction_service import PredictionService
 from .user_service import UserService
 
 __all__ = [
-    "PostgresClient",
-    "RedisClient",
-    "PredictionService",
-    "UserService",
+    'PostgresClient',
+    'RedisClient',
+    'PredictionService',
+    'UserService',
 ]

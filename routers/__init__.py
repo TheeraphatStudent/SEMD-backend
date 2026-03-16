@@ -17,17 +17,17 @@ from .stat import (
 )
 
 __all__ = [
-    "BaseRoute",
-    "AuthRoute",
-    "MLRoute",
-    "PredictionRoute",
-    "ReportRoute",
-    "DashboardRoute",
-    "SettingRoute",
-    "ReportStatRoute",
-    "PredictionStatRoute",
-    "UserStatRoute",
-    "ApiKeyStatRoute",
-    "ThirdPartyStatRoute",
-    "UrlFlagStatRoute"
+    'BaseRoute',
+    'AuthRoute',
+    'MLRoute',
+    'PredictionRoute',
+    'ReportRoute',
+    'DashboardRoute',
+    'SettingRoute',
+    'ReportStatRoute',
+    'PredictionStatRoute',
+    'UserStatRoute',
+    'ApiKeyStatRoute',
+    'ThirdPartyStatRoute',
+    'UrlFlagStatRoute'
 ]
