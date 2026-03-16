@@ -24,9 +24,8 @@ class UsageLogType(str, Enum):
     ACCESS_KEY = "ACCESS_KEY"
 
 class ServiceType(str, Enum):
+    ML_MODEL = "ML_MODEL"
     REST_API = "REST_API"
-    WEB_HOOK = "WEB_HOOK"
-    SDK = "SDK"
 
 class ModelStageType(str, Enum):
     NONE = "NONE"

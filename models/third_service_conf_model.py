@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 
-class ThirdServiceConfModelDb(BaseModel):
+class ThirdServiceConfModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     third_service_conf_id: Optional[int] = None

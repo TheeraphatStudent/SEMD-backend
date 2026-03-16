@@ -4,7 +4,7 @@ from datetime import datetime
 from libs.types.enums import UsageLogType
 
 
-class UsageLogModelDb(BaseModel):
+class UsageLogModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     usage_log_id: Optional[int] = None

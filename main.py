@@ -10,9 +10,9 @@ This application demonstrates:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
-    AuthRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
-    ReportStatRoute, PredictionStatRoute, UserStatRoute, ApiKeyStatRoute,
-    ThirdPartyStatRoute, UrlFlagStatRoute
+    AuthRoute, UserRoute, MLRoute, PredictionRoute, ReportRoute, DashboardRoute, SettingRoute,
+    ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, SystemConfigRoute, QueueRoute,
+    ReportStatRoute, PredictionStatRoute, UserStatRoute, ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
 )
 from config.settings import settings
 from models import GetDefaultApiEndpoint, GetDefaultHealthCheck
@@ -24,7 +24,7 @@ app = FastAPI(
     version=settings.app_version,
     openapi_url='/openapi.json',
     docs_url='/docs',
-    root_path='/api/v1',
+    root_path='/api',
     debug=settings.debug
 )
 
@@ -32,7 +32,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
-    allow_credentials=True,
+    # allow_credentials=True,
+    allow_credentials=False,
     allow_methods=['*'],
     allow_headers=['*'],
 )
@@ -61,11 +62,18 @@ async def health_check():
 
 # ----------------- Include routers
 app.include_router(AuthRoute().get_router())
+app.include_router(UserRoute().get_router())
 app.include_router(MLRoute().get_router())
 app.include_router(PredictionRoute().get_router())
 app.include_router(ReportRoute().get_router())
 app.include_router(DashboardRoute().get_router())
 app.include_router(SettingRoute().get_router())
+app.include_router(ThirdServiceRoute().get_router())
+app.include_router(ServiceConfRoute().get_router())
+app.include_router(UrlFlagRoute().get_router())
+app.include_router(AccessKeyRoute().get_router())
+app.include_router(SystemConfigRoute().get_router())
+app.include_router(QueueRoute().get_router())
 
 app.include_router(ReportStatRoute().get_router())
 app.include_router(PredictionStatRoute().get_router())

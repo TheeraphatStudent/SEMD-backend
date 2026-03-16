@@ -4,7 +4,7 @@ services:
     restart: always
     container_name: semd-database
     volumes:
-      # - ./postgresql_data:/var/lib/postgresql/data
+      - semd_postgresql_data:/var/lib/postgresql
       - ./semd.db.sql:/docker-entrypoint-initdb.d/init.sql:Z
     ports:
       - 5433:5432
@@ -23,6 +23,8 @@ services:
     build:
       dockerfile: database/redis.dockerFile
       context: ..
+    volumes:
+      - semd_redis_data:/data
     ports:
       - 6379:6379
     networks:
@@ -32,6 +34,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+volumes:
+  semd_postgresql_data:
+  semd_redis_data:
 
 networks:
   semd-shared-network:

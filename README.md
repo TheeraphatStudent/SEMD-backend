@@ -97,6 +97,46 @@ Create a `.env` file based on `.env.example`:
 cp .env.example .env
 ```
 
+## Added third service
+
+### Cloudflare
+POST http://localhost:8000/setting/third-service/
+
+```json
+{
+  "service_name": "Cloudflare Radar - URL Scanner",
+  "base_url": "https://api.cloudflare.com/client/v4/accounts/{{account_id}}/urlscanner/v2/scan",
+  "http_method": "POST",
+  "headers_json": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer ejy.example"
+    },
+  "config_json": {
+    "body_template": [{"key": "url", "input": "url"}],
+    "url_template": {
+      "path_params": {"account_id": "5186xxxxxxxxxxxxxxxxxxx"}
+    },
+    "response_mapping": {
+      "is_malicious": "result.malicious"
+    }
+  }
+}
+```
+
+### Thai phishtank
+POST http://localhost:8000/setting/third-service/
+
+```json
+{
+  "service_name": "Thai PhishTank - Phishing URL Check",
+  "base_url": "https://thaiphishtank.org/api/phishing-url&url={{url}}&api_key={{api_key}}",
+  "http_method": "GET",
+  "secret_hash": "",
+  "headers_json": {},
+  "config_json": {}
+}
+```
+
 ## Resource
 
 - [2fa-qa](https://stefansundin.github.io/2fa-qr/)

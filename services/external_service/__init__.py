@@ -1,1 +1,0 @@
-"""To connect to external api"""

@@ -417,6 +417,373 @@ paths:
           description: Unauthorized
         '422':
           description: Validation error
+  /auth/me:
+    get:
+      tags:
+      - auth
+      summary: Get My Profile
+      description: Get current user's profile information. Requires authentication.
+      operationId: get_me_auth_me_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - auth
+      summary: Update My Profile
+      description: Update current user's profile information. Requires authentication.
+      operationId: update_me_auth_me_put
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/me/reset-password:
+    post:
+      tags:
+      - auth
+      summary: Reset My Password
+      description: Reset current user's password. Requires current password verification.
+      operationId: reset_password_auth_me_reset_password_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /auth/users:
+    get:
+      tags:
+      - admin-users
+      summary: '[Admin] Get All Users'
+      description: Get all users with pagination. Admin only.
+      operationId: get_all_users_auth_users_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number (1-indexed)
+          default: 1
+          title: Page
+        description: Page number (1-indexed)
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of items per page
+          default: 20
+          title: Page Size
+        description: Number of items per page
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Field to sort by
+          title: Sort By
+        description: Field to sort by
+      - name: sort_order
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(asc|desc)$
+          description: Sort order (asc or desc)
+          default: desc
+          title: Sort Order
+        description: Sort order (asc or desc)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - admin-users
+      summary: '[Admin] Create User'
+      description: Create a new user with password. Admin can create MEMBER users,
+        Master Admin can create ADMIN users.
+      operationId: create_user_auth_users_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateUserRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
+  /auth/users/{user_id}:
+    get:
+      tags:
+      - admin-users
+      summary: '[Admin] Get User by ID'
+      description: Get user details by ID. Admin only.
+      operationId: get_user_by_id_auth_users__user_id__get
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - admin-users
+      summary: '[Admin] Update User'
+      description: Update user details. Master Admin can change roles, Admin cannot.
+      operationId: update_user_auth_users__user_id__put
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateUserRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - admin-users
+      summary: '[Admin] Delete User'
+      description: Delete user. Admin can delete MEMBER users, Master Admin can delete
+        any user except other Master Admins.
+      operationId: delete_user_auth_users__user_id__delete
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
+  /auth/users/{user_id}/reset-password:
+    post:
+      tags:
+      - admin-users
+      summary: '[Admin] Reset User Password'
+      description: Reset user's password. Admin can reset MEMBER passwords, Master
+        Admin can reset any password.
+      operationId: reset_user_password_auth_users__user_id__reset_password_post
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPasswordResetRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
   /ml/service:
     get:
       tags:
@@ -441,14 +808,24 @@ paths:
       tags:
       - prediction
       summary: Predict URL
-      description: Predict if a URL is malicious or not using ML service
+      description: Predict if a URL is malicious or not using configured service (ML
+        model or third-party)
       operationId: predict_prediction_predict_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/PredictionRequest'
-        required: true
       responses:
         '200':
           description: Successful Response
@@ -468,8 +845,35 @@ paths:
     get:
       tags:
       - report
-      summary: Get Report Data
+      summary: Get All Reports
+      description: Get all URL reports. Requires authentication.
       operationId: get_report_data_report_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -479,15 +883,31 @@ paths:
                 $ref: '#/components/schemas/ReportListResponse'
         '404':
           description: Not found
-        '501':
-          description: Not implemented
+        '401':
+          description: Unauthorized
         '422':
           description: Validation error
     post:
       tags:
       - report
       summary: Create Report
+      description: Create a new URL report. Requires authentication.
       operationId: create_report_report_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlReportCreateRequest'
       responses:
         '200':
           description: Successful Response
@@ -497,8 +917,164 @@ paths:
                 $ref: '#/components/schemas/ReportResponse'
         '404':
           description: Not found
-        '501':
-          description: Not implemented
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /report/me:
+    get:
+      tags:
+      - report
+      summary: Get My Reports
+      description: Get URL reports created by the current user.
+      operationId: get_my_reports_report_me_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /report/{report_id}:
+    get:
+      tags:
+      - report
+      summary: Get Report by ID
+      description: Get a specific URL report by its ID.
+      operationId: get_report_by_id_report__report_id__get
+      parameters:
+      - name: report_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Report Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - report
+      summary: Update Report
+      description: Update an existing URL report. Requires authentication.
+      operationId: update_report_report__report_id__put
+      parameters:
+      - name: report_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Report Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlReportUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /report/{report_id}/history:
+    get:
+      tags:
+      - report
+      summary: Get Report History
+      description: Get the action history of a specific URL report.
+      operationId: get_report_history_report__report_id__history_get
+      parameters:
+      - name: report_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Report Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
         '422':
           description: Validation error
   /dashboard/system-stat:
@@ -653,6 +1229,1425 @@ paths:
           description: Not implemented
         '422':
           description: Validation error
+  /setting/third-service/:
+    get:
+      tags:
+      - third-service
+      summary: List Third-Party Services
+      description: List all third-party service configurations for the current user
+      operationId: list_third_services_setting_third_service__get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ThirdServiceResponse'
+                title: Response List Third Services Setting Third Service  Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - third-service
+      summary: Create Third-Party Service
+      description: Create a new third-party service configuration
+      operationId: create_third_service_setting_third_service__post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceCreateRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdServiceResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/third-service/{id}:
+    get:
+      tags:
+      - third-service
+      summary: Get Third-Party Service
+      description: Retrieve a third-party service configuration by ID
+      operationId: get_third_service_setting_third_service__id__get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdServiceResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - third-service
+      summary: Update Third-Party Service
+      description: Update a third-party service configuration
+      operationId: update_third_service_setting_third_service__id__put
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdServiceResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - third-service
+      summary: Delete Third-Party Service
+      description: Soft delete a third-party service (sets is_active=False)
+      operationId: delete_third_service_setting_third_service__id__delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/third-service/{id}/execute:
+    post:
+      tags:
+      - third-service
+      summary: Execute Third-Party Service
+      description: Execute a third-party service with runtime variables
+      operationId: execute_third_service_setting_third_service__id__execute_post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceExecuteRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Execute Third Service Setting Third Service  Id  Execute
+                  Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/third-service/{id}/rest-api/test:
+    post:
+      tags:
+      - third-service
+      summary: Test Third Service
+      description: Test a third-party service API
+      operationId: test_third_service_setting_third_service__id__rest_api_test_post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThirdServiceExecuteRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Test Third Service Setting Third Service  Id  Rest
+                  Api Test Post
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/:
+    get:
+      tags:
+      - service-configuration
+      summary: List Service Configurations
+      description: Get all service configurations for the current user
+      operationId: list_services_setting_service__get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceConfModel'
+                title: Response List Services Setting Service  Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/{service_id}:
+    get:
+      tags:
+      - service-configuration
+      summary: Get Service Configuration
+      description: Get a specific service configuration by ID
+      operationId: get_service_setting_service__service_id__get
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Service Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/{service_id}/activate:
+    post:
+      tags:
+      - service-configuration
+      summary: Activate Service
+      description: Activate a service configuration
+      operationId: activate_service_setting_service__service_id__activate_post
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Service Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/{service_id}/deactivate:
+    post:
+      tags:
+      - service-configuration
+      summary: Deactivate Service
+      description: Deactivate a service configuration
+      operationId: deactivate_service_setting_service__service_id__deactivate_post
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Service Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/service/active/list:
+    get:
+      tags:
+      - service-configuration
+      summary: List Active Services
+      description: Get all active service configurations
+      operationId: list_active_services_setting_service_active_list_get
+      parameters:
+      - name: service_type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by service type
+          title: Service Type
+        description: Filter by service type
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceConfModel'
+                title: Response List Active Services Setting Service Active List Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/url-flag:
+    get:
+      tags:
+      - url-flag
+      summary: Get All URL Flags
+      description: Get all URL flags. Requires authentication.
+      operationId: get_all_flags_setting_url_flag_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - url-flag
+      summary: Create URL Flag
+      description: Create a new URL flag. Requires authentication.
+      operationId: create_flag_setting_url_flag_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlFlagCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/url-flag/me:
+    get:
+      tags:
+      - url-flag
+      summary: Get My URL Flags
+      description: Get URL flags created by the current user.
+      operationId: get_my_flags_setting_url_flag_me_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/url-flag/{flag_id}:
+    get:
+      tags:
+      - url-flag
+      summary: Get URL Flag by ID
+      description: Get a specific URL flag by its ID.
+      operationId: get_flag_by_id_setting_url_flag__flag_id__get
+      parameters:
+      - name: flag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Flag Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - url-flag
+      summary: Update URL Flag
+      description: Update an existing URL flag. Requires authentication.
+      operationId: update_flag_setting_url_flag__flag_id__put
+      parameters:
+      - name: flag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Flag Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlFlagUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlFlagResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - url-flag
+      summary: Delete URL Flag
+      description: Delete an existing URL flag. Requires authentication.
+      operationId: delete_flag_setting_url_flag__flag_id__delete
+      parameters:
+      - name: flag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Flag Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/me:
+    get:
+      tags:
+      - access-key
+      summary: Get My Access Keys
+      description: Get all access keys for the current user with pagination.
+      operationId: get_my_keys_setting_access_key_me_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number (1-indexed)
+          default: 1
+          title: Page
+        description: Page number (1-indexed)
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of items per page
+          default: 20
+          title: Page Size
+        description: Number of items per page
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Field to sort by
+          title: Sort By
+        description: Field to sort by
+      - name: sort_order
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(asc|desc)$
+          description: Sort order (asc or desc)
+          default: desc
+          title: Sort Order
+        description: Sort order (asc or desc)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key:
+    post:
+      tags:
+      - access-key
+      summary: Create Access Key
+      description: Create a new access key. Returns the raw key only once.
+      operationId: create_key_setting_access_key_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/reset:
+    post:
+      tags:
+      - access-key
+      summary: Reset Access Key
+      description: Reset an access key. Old key becomes inactive, new key is generated.
+      operationId: reset_key_setting_access_key__key_id__reset_post
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/usage/monthly:
+    get:
+      tags:
+      - access-key
+      summary: Get Monthly Usage
+      description: Get usage statistics for a specific month.
+      operationId: get_usage_monthly_setting_access_key__key_id__usage_monthly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: integer
+          maximum: 12
+          minimum: 1
+          description: Month (1-12)
+          title: Month
+        description: Month (1-12)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/usage/yearly:
+    get:
+      tags:
+      - access-key
+      summary: Get Yearly Usage
+      description: Get usage statistics for a specific year.
+      operationId: get_usage_yearly_setting_access_key__key_id__usage_yearly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/{key_id}/usage:
+    get:
+      tags:
+      - access-key
+      summary: Get All Time Usage
+      description: Get all-time usage statistics.
+      operationId: get_usage_all_time_setting_access_key__key_id__usage_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get All Access Keys'
+      description: Get all access keys in the system. Admin only.
+      operationId: admin_get_all_keys_setting_access_key_admin_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number (1-indexed)
+          default: 1
+          title: Page
+        description: Page number (1-indexed)
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of items per page
+          default: 20
+          title: Page Size
+        description: Number of items per page
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Field to sort by
+          title: Sort By
+        description: Field to sort by
+      - name: sort_order
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(asc|desc)$
+          description: Sort order (asc or desc)
+          default: desc
+          title: Sort Order
+        description: Sort order (asc or desc)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    post:
+      tags:
+      - access-key
+      summary: '[Admin] Create Access Key for User'
+      description: Create an access key for a specific user with usage limit. Admin
+        only.
+      operationId: admin_create_key_setting_access_key_admin_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyAdminCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}:
+    put:
+      tags:
+      - access-key
+      summary: '[Admin] Update Access Key'
+      description: Update an access key (set limit, activate/deactivate). Admin only.
+      operationId: admin_update_key_setting_access_key_admin__key_id__put
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyAdminUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - access-key
+      summary: '[Admin] Delete Access Key'
+      description: Delete an access key. Admin only.
+      operationId: admin_delete_key_setting_access_key_admin__key_id__delete
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponseModel'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}/usage/monthly:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get Monthly Usage'
+      description: Get usage statistics for any key. Admin only.
+      operationId: admin_get_usage_monthly_setting_access_key_admin__key_id__usage_monthly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: integer
+          maximum: 12
+          minimum: 1
+          description: Month (1-12)
+          title: Month
+        description: Month (1-12)
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}/usage/yearly:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get Yearly Usage'
+      description: Get yearly usage statistics for any key. Admin only.
+      operationId: admin_get_usage_yearly_setting_access_key_admin__key_id__usage_yearly_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2020
+          description: Year
+          title: Year
+        description: Year
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/access-key/admin/{key_id}/usage:
+    get:
+      tags:
+      - access-key
+      summary: '[Admin] Get All Time Usage'
+      description: Get all-time usage statistics for any key. Admin only.
+      operationId: admin_get_usage_all_time_setting_access_key_admin__key_id__usage_get
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Key Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+  /setting/system-config:
+    get:
+      tags:
+      - system-config
+      summary: '[Admin] Get All System Configs'
+      description: Get all system configuration values. Admin only.
+      operationId: get_all_configs_setting_system_config_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /setting/system-config/{config_key}:
+    get:
+      tags:
+      - system-config
+      summary: '[Admin] Get System Config by Key'
+      description: Get a specific system configuration by key. Admin only.
+      operationId: get_config_by_key_setting_system_config__config_key__get
+      parameters:
+      - name: config_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Config Key
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - system-config
+      summary: '[Admin] Update System Config'
+      description: Update a system configuration value by key. Admin only.
+      operationId: update_config_setting_system_config__config_key__put
+      parameters:
+      - name: config_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Config Key
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemConfigUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /queue/url:
+    get:
+      tags:
+      - queue
+      summary: Get Retrain Queue
+      description: Get all URLs waiting for retraining. Shows prediction info with
+        user details.
+      operationId: get_retrain_queue_queue_url_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /stat/report:
     get:
       tags:
@@ -1111,6 +3106,263 @@ paths:
           description: Validation error
 components:
   schemas:
+    ACLType:
+      type: string
+      enum:
+      - GLOBAL
+      - PRIVATE
+      title: ACLType
+    AccessKeyAdminCreateRequest:
+      properties:
+        user_id:
+          type: integer
+          title: User Id
+          description: User ID to create key for
+        key_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Key Name
+          description: Name for the access key
+        usage_limit:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Usage Limit
+          description: Usage limit for the key (null = unlimited)
+        expired_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expired At
+          description: Expiration date for the key
+      type: object
+      required:
+      - user_id
+      title: AccessKeyAdminCreateRequest
+    AccessKeyAdminUpdateRequest:
+      properties:
+        key_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Key Name
+          description: Name for the access key
+        usage_limit:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Usage Limit
+          description: Usage limit for the key (null = unlimited)
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+          description: Whether the key is active
+        expired_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expired At
+          description: Expiration date for the key
+      type: object
+      title: AccessKeyAdminUpdateRequest
+    AccessKeyCreateRequest:
+      properties:
+        key_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Key Name
+          description: Name for the access key
+        expired_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expired At
+          description: Expiration date for the key
+      type: object
+      title: AccessKeyCreateRequest
+    AccessKeyListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items: {}
+          type: array
+          title: data
+          description: List of Access Keys
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+          title: pagination
+          description: Pagination metadata
+      type: object
+      required:
+      - status
+      - message
+      - data
+      - pagination
+      title: AccessKeyListResponse
+    AccessKeyResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: Access Key data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: AccessKeyResponse
+    AdminCreateUserRequest:
+      properties:
+        username:
+          type: string
+          maxLength: 32
+          minLength: 3
+          title: Username
+          description: Username
+        email:
+          type: string
+          format: email
+          title: Email
+          description: Email address
+        full_name:
+          type: string
+          maxLength: 512
+          minLength: 1
+          title: Full Name
+          description: Full name
+        password:
+          type: string
+          minLength: 8
+          title: Password
+          description: Password
+        role:
+          $ref: '#/components/schemas/RoleType'
+          description: User role
+          default: MEMBER
+        birthday:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Birthday
+          description: Birthday
+        profile_img_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Profile Img Uri
+          description: Profile image URI
+      type: object
+      required:
+      - username
+      - email
+      - full_name
+      - password
+      title: AdminCreateUserRequest
+    AdminPasswordResetRequest:
+      properties:
+        new_password:
+          type: string
+          minLength: 8
+          title: New Password
+          description: New password
+        confirm_password:
+          type: string
+          minLength: 8
+          title: Confirm Password
+          description: Confirm new password
+      type: object
+      required:
+      - new_password
+      - confirm_password
+      title: AdminPasswordResetRequest
+    AdminUpdateUserRequest:
+      properties:
+        username:
+          anyOf:
+          - type: string
+            maxLength: 32
+            minLength: 3
+          - type: 'null'
+          title: Username
+          description: Username
+        email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Email
+          description: Email address
+        full_name:
+          anyOf:
+          - type: string
+            maxLength: 512
+            minLength: 1
+          - type: 'null'
+          title: Full Name
+          description: Full name
+        birthday:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Birthday
+          description: Birthday
+        profile_img_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Profile Img Uri
+          description: Profile image URI
+        role:
+          anyOf:
+          - $ref: '#/components/schemas/RoleType'
+          - type: 'null'
+          description: User role (Master Admin only)
+      type: object
+      title: AdminUpdateUserRequest
     ApiEndpointStatItem:
       properties:
         endpoint:
@@ -1457,6 +3709,12 @@ components:
       required:
       - user_id
       title: CreateUserResponse
+    FlagType:
+      type: string
+      enum:
+      - MALICIOUS
+      - BENIGN
+      title: FlagType
     GetDefaultApiEndpoint:
       properties:
         message:
@@ -1505,6 +3763,15 @@ components:
           default: 0 / 512GB
       type: object
       title: GetDefaultHealthCheck
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     MLServiceResponse:
       properties:
         status:
@@ -1634,6 +3901,64 @@ components:
       - github
       - google
       title: OAuthProviderType
+    PaginationMeta:
+      properties:
+        page:
+          type: integer
+          title: Page
+          description: Current page number
+        page_size:
+          type: integer
+          title: Page Size
+          description: Number of items per page
+        total_items:
+          type: integer
+          title: Total Items
+          description: Total number of items
+        total_pages:
+          type: integer
+          title: Total Pages
+          description: Total number of pages
+        has_next:
+          type: boolean
+          title: Has Next
+          description: Whether there is a next page
+        has_prev:
+          type: boolean
+          title: Has Prev
+          description: Whether there is a previous page
+      type: object
+      required:
+      - page
+      - page_size
+      - total_items
+      - total_pages
+      - has_next
+      - has_prev
+      title: PaginationMeta
+    PasswordResetRequest:
+      properties:
+        current_password:
+          type: string
+          minLength: 8
+          title: Current Password
+          description: Current password
+        new_password:
+          type: string
+          minLength: 8
+          title: New Password
+          description: New password
+        confirm_password:
+          type: string
+          minLength: 8
+          title: Confirm Password
+          description: Confirm new password
+      type: object
+      required:
+      - current_password
+      - new_password
+      - confirm_password
+      title: PasswordResetRequest
     PreAuthResponse:
       properties:
         status:
@@ -1816,7 +4141,7 @@ components:
           - type: integer
           - type: 'null'
           title: Service Id
-          description: Service ID to use for prediction
+          description: Service ID to use for predictor
           example: 1
       type: object
       title: PredictionRequest
@@ -1969,6 +4294,35 @@ components:
       - message
       - data
       title: PredictionTrendResponse
+    QueueListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          additionalProperties: true
+          type: object
+          title: data
+          description: Queue data with total and items
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: QueueListResponse
     RefreshTokenRequest:
       properties:
         refresh_token:
@@ -2330,6 +4684,13 @@ components:
       - message
       - data
       title: ReportStatTrendResponse
+    ReportStatusType:
+      type: string
+      enum:
+      - PENDING
+      - ACCEPTED
+      - REJECTED
+      title: ReportStatusType
     RoleType:
       type: string
       enum:
@@ -2338,6 +4699,166 @@ components:
       - ADMIN
       - SUPER_ADMIN
       title: RoleType
+    ServiceConfModel:
+      properties:
+        service_conf_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Conf Id
+        user_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: User Id
+        service_name:
+          type: string
+          maxLength: 32
+          title: Service Name
+        service_type:
+          $ref: '#/components/schemas/ServiceType'
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+        version_no:
+          type: string
+          maxLength: 12
+          title: Version No
+        config_uri:
+          type: string
+          title: Config Uri
+        config_json:
+          additionalProperties: true
+          type: object
+          title: Config Json
+          default: {}
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - service_name
+      - service_type
+      - version_no
+      - config_uri
+      title: ServiceConfModel
+    ServiceType:
+      type: string
+      enum:
+      - ML_MODEL
+      - REST_API
+      title: ServiceType
+    SystemConfigListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/SystemConfigModel'
+          type: array
+          title: data
+          description: List of system configs
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemConfigListResponse
+    SystemConfigModel:
+      properties:
+        system_config_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: System Config Id
+        config_key:
+          type: string
+          title: Config Key
+        config_value:
+          type: string
+          title: Config Value
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - config_key
+      - config_value
+      title: SystemConfigModel
+    SystemConfigResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/SystemConfigModel'
+          title: data
+          description: System config data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: SystemConfigResponse
+    SystemConfigUpdateRequest:
+      properties:
+        config_value:
+          type: string
+          title: Config Value
+          description: New value for the config
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Optional description update
+      type: object
+      required:
+      - config_value
+      title: SystemConfigUpdateRequest
     SystemHealthItem:
       properties:
         status:
@@ -2775,6 +5296,169 @@ components:
       - message
       - data
       title: ThirdPartyTrendResponse
+    ThirdServiceCreateRequest:
+      properties:
+        service_name:
+          type: string
+          maxLength: 64
+          title: Service Name
+          example: Cloudflare URL Scanner
+        base_url:
+          type: string
+          title: Base Url
+          description: Base URL with optional {{variable}} placeholders
+          example: https://api.cloudflare.com/client/v4/accounts/{{account_id}}/urlscanner/v2/scan
+        http_method:
+          type: string
+          maxLength: 8
+          title: Http Method
+          default: POST
+        headers_json:
+          additionalProperties:
+            type: string
+          type: object
+          title: Headers Json
+          description: HTTP headers including authentication (e.g., Authorization,
+            API keys)
+          example:
+            Authorization: Bearer your_token_here
+            Content-Type: application/json
+        config_json:
+          additionalProperties: true
+          type: object
+          title: Config Json
+          description: Configuration for body template and URL template
+          example:
+            body_template:
+            - input: url
+              key: url
+            response_mapping:
+              is_malicious: result.malicious
+            url_template:
+              path_params:
+                account_id: your_account_id
+              query_params:
+                url: url
+        mapping_json:
+          additionalProperties: true
+          type: object
+          title: Mapping Json
+          description: Response mapping configuration for extracting prediction data
+          example:
+            class: data.category
+            is_malicious: data.is_malicious
+            suggested_desc: data.description
+      type: object
+      required:
+      - service_name
+      - base_url
+      title: ThirdServiceCreateRequest
+    ThirdServiceExecuteRequest:
+      properties:
+        vars:
+          additionalProperties: true
+          type: object
+          title: Vars
+          description: Runtime variables to resolve body template
+      type: object
+      required:
+      - vars
+      title: ThirdServiceExecuteRequest
+    ThirdServiceResponse:
+      properties:
+        third_service_conf_id:
+          type: integer
+          title: Third Service Conf Id
+        service_conf_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Conf Id
+        service_name:
+          type: string
+          title: Service Name
+        base_url:
+          type: string
+          title: Base Url
+        http_method:
+          type: string
+          title: Http Method
+        headers_json:
+          additionalProperties: true
+          type: object
+          title: Headers Json
+        config_json:
+          additionalProperties: true
+          type: object
+          title: Config Json
+        is_active:
+          type: boolean
+          title: Is Active
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - third_service_conf_id
+      - service_name
+      - base_url
+      - http_method
+      - headers_json
+      - config_json
+      - is_active
+      - created_at
+      - updated_at
+      title: ThirdServiceResponse
+    ThirdServiceUpdateRequest:
+      properties:
+        service_name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Service Name
+        base_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Base Url
+        http_method:
+          anyOf:
+          - type: string
+            maxLength: 8
+          - type: 'null'
+          title: Http Method
+        headers_json:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Headers Json
+        config_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Config Json
+        mapping_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Mapping Json
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+      type: object
+      title: ThirdServiceUpdateRequest
     TokenPairResponse:
       properties:
         status:
@@ -2969,6 +5653,24 @@ components:
       - message
       - data
       title: UrlFlagCategoryResponse
+    UrlFlagCreateRequest:
+      properties:
+        url:
+          type: string
+          title: Url
+          description: URL to flag
+        type:
+          $ref: '#/components/schemas/FlagType'
+          description: Flag type (MALICIOUS or BENIGN)
+          default: BENIGN
+        access_level:
+          $ref: '#/components/schemas/ACLType'
+          description: Access level (GLOBAL or PRIVATE)
+          default: PRIVATE
+      type: object
+      required:
+      - url
+      title: UrlFlagCreateRequest
     UrlFlagDetailItem:
       properties:
         id:
@@ -3050,6 +5752,62 @@ components:
       - message
       - data
       title: UrlFlagDetailResponse
+    UrlFlagListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items: {}
+          type: array
+          title: data
+          description: List of URL Flags
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagListResponse
+    UrlFlagResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          title: data
+          description: URL Flag data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UrlFlagResponse
     UrlFlagStatItem:
       properties:
         total_flagged:
@@ -3172,6 +5930,78 @@ components:
       - message
       - data
       title: UrlFlagTrendResponse
+    UrlFlagUpdateRequest:
+      properties:
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: URL to flag
+        type:
+          anyOf:
+          - $ref: '#/components/schemas/FlagType'
+          - type: 'null'
+          description: Flag type (MALICIOUS or BENIGN)
+        access_level:
+          anyOf:
+          - $ref: '#/components/schemas/ACLType'
+          - type: 'null'
+          description: Access level (GLOBAL or PRIVATE)
+      type: object
+      title: UrlFlagUpdateRequest
+    UrlReportCreateRequest:
+      properties:
+        url:
+          type: string
+          title: Url
+          description: URL to report
+        categories:
+          $ref: '#/components/schemas/FlagType'
+          description: Category of the URL (MALICIOUS or BENIGN)
+          default: BENIGN
+        status:
+          $ref: '#/components/schemas/ReportStatusType'
+          description: Status of the report
+          default: PENDING
+        remark:
+          anyOf:
+          - type: string
+            maxLength: 256
+          - type: 'null'
+          title: Remark
+          description: Additional remark
+      type: object
+      required:
+      - url
+      title: UrlReportCreateRequest
+    UrlReportUpdateRequest:
+      properties:
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: URL to report
+        categories:
+          anyOf:
+          - $ref: '#/components/schemas/FlagType'
+          - type: 'null'
+          description: Category of the URL (MALICIOUS or BENIGN)
+        status:
+          anyOf:
+          - $ref: '#/components/schemas/ReportStatusType'
+          - type: 'null'
+          description: Status of the report
+        remark:
+          anyOf:
+          - type: string
+            maxLength: 256
+          - type: 'null'
+          title: Remark
+          description: Additional remark
+      type: object
+      title: UrlReportUpdateRequest
     UserActivityItem:
       properties:
         date:
@@ -3228,6 +6058,171 @@ components:
       - message
       - data
       title: UserActivityResponse
+    UserListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          items:
+            $ref: '#/components/schemas/UserModel'
+          type: array
+          title: data
+          description: List of users
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+          title: pagination
+          description: Pagination metadata
+      type: object
+      required:
+      - status
+      - message
+      - data
+      - pagination
+      title: UserListResponse
+    UserModel:
+      properties:
+        user_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: User Id
+        username:
+          type: string
+          maxLength: 32
+          title: Username
+        email:
+          type: string
+          maxLength: 64
+          title: Email
+        full_name:
+          type: string
+          maxLength: 512
+          title: Full Name
+        birthday:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Birthday
+        password_hash:
+          type: string
+          maxLength: 1024
+          title: Password Hash
+        role:
+          $ref: '#/components/schemas/RoleType'
+          default: MEMBER
+        gg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gg Id
+        gg_acc_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gg Acc Token
+        gg_re_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gg Re Token
+        gh_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gh Id
+        gh_acc_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gh Acc Token
+        gh_re_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gh Re Token
+        twofa_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Twofa Secret
+        is_2fa_enabled:
+          type: boolean
+          title: Is 2Fa Enabled
+          default: false
+        ex_acc_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ex Acc Token
+        ex_acc_token_exp:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Ex Acc Token Exp
+        profile_img_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Profile Img Uri
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - username
+      - email
+      - full_name
+      - password_hash
+      title: UserModel
+    UserResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          $ref: '#/components/schemas/UserModel'
+          title: data
+          description: User data
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: UserResponse
     UserRoleStatItem:
       properties:
         role:
@@ -3333,3 +6328,69 @@ components:
       - message
       - data
       title: UserStatResponse
+    UserUpdateRequest:
+      properties:
+        username:
+          anyOf:
+          - type: string
+            maxLength: 32
+            minLength: 3
+          - type: 'null'
+          title: Username
+          description: Username
+        email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Email
+          description: Email address
+        full_name:
+          anyOf:
+          - type: string
+            maxLength: 512
+            minLength: 1
+          - type: 'null'
+          title: Full Name
+          description: Full name
+        birthday:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Birthday
+          description: Birthday
+        profile_img_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Profile Img Uri
+          description: Profile image URI
+      type: object
+      title: UserUpdateRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

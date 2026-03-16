@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 
-class ActivityLogModelDb(BaseModel):
+class ActivityLogModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     activity_log_id: Optional[int] = None

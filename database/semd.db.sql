@@ -31,7 +31,7 @@ BEGIN
 
     -- สำหรับตาราง service_conf
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'service_type') THEN
-        CREATE TYPE service_type AS ENUM ('REST_API', 'WEB_HOOK', 'SDK');
+        CREATE TYPE service_type AS ENUM ('REST_API');
     END IF;
 END $$;
 
@@ -129,9 +129,13 @@ CREATE TABLE IF NOT EXISTS model_registry (
 CREATE TABLE IF NOT EXISTS access_key (
     access_key_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id         BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    key_name        VARCHAR(64) NULL,
     access_key_hash TEXT NOT NULL,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    usage_limit     BIGINT NULL,
     expired_at      TIMESTAMPTZ NOT NULL,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ตารางผลการทำนาย (Prediction)
@@ -145,6 +149,10 @@ CREATE TABLE IF NOT EXISTS prediction (
     recall_score    NUMERIC(10, 2) NULL,
     precision_score NUMERIC(10, 2) NULL,
     f1_score        NUMERIC(10, 2) NULL,
+
+    -- Result
+    is_malicious    BOOLEAN NOT NULL,
+    predict_class   VARCHAR(64) NOT NULL,
 
     -- Suggested Description
     suggested_desc  VARCHAR(512) NULL,
@@ -206,10 +214,37 @@ CREATE TABLE IF NOT EXISTS third_service_conf (
     service_name          VARCHAR(64) NOT NULL,
     base_url              TEXT NOT NULL,
     http_method           VARCHAR(8) NOT NULL DEFAULT 'GET',
-    secret_hash           TEXT NOT NULL,                  -- Format: key1:value1;key2:value2;
     headers_json          JSONB NOT NULL DEFAULT '{}',
     config_json           JSONB NOT NULL DEFAULT '{}',
+    mapping_json          JSONB NOT NULL DEFAULT '{}',
     is_active             BOOLEAN NOT NULL DEFAULT TRUE,
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ตารางบันทึกการเปลี่ยนแปลง URL Report (URL Reported Action Log)
+CREATE TABLE IF NOT EXISTS url_reported (
+    url_reported_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    url_report_id       BIGINT REFERENCES url_report(url_report_id) ON DELETE CASCADE NOT NULL,
+    user_id             BIGINT REFERENCES users(user_id) ON DELETE SET NULL NOT NULL,
+    action              VARCHAR(32) NOT NULL,
+    old_status          rp_status_type NULL,
+    new_status          rp_status_type NULL,
+    remark              VARCHAR(256) NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ตารางบันทึกการ Config ของระบบ
+CREATE TABLE IF NOT EXISTS system_config (
+    system_config_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    config_key          VARCHAR(64) NOT NULL UNIQUE,
+    config_value        TEXT NOT NULL,
+    description         VARCHAR(256) NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO system_config (config_key, config_value, description) VALUES
+('global_max_requests_per_access_key', '10000', 'จำนวนสูงสุดที่ Access Key สามารถร้องขอได้'),
+('system_retrained_model_count', '2000', 'จำนวน URL ที่ถูก Predict ที่โมเดลสามารถรีเทรนได้'),
+('system_retrained_model_is_active', 'false', 'สถานะการรีเทรนโมเดล');

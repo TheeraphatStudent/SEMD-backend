@@ -4,7 +4,7 @@ from datetime import datetime
 from libs.types.enums import FlagType, ACLType
 
 
-class UrlFlagModelDb(BaseModel):
+class UrlFlagModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     url_flag_id: Optional[int] = None
