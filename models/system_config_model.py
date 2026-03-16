@@ -5,7 +5,7 @@ from datetime import datetime
 
 class SystemConfigModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     system_config_id: Optional[int] = None
     config_key: str
     config_value: str
@@ -15,5 +15,6 @@ class SystemConfigModel(BaseModel):
 
 
 class SystemConfigUpdateRequest(BaseModel):
-    config_value: str = Field(..., description="New value for the config")
-    description: Optional[str] = Field(None, description="Optional description update")
+    config_value: str = Field(..., description='New value for the config')
+    description: Optional[str] = Field(
+        None, description='Optional description update')

@@ -6,10 +6,11 @@ from datetime import datetime
 from database import UsageLog
 from libs.types.enums import UsageLogType
 
+
 class UsageLogService:
     def __init__(self, db: AsyncSession):
         self.db = db
-    
+
     async def log_prediction_usage(
         self,
         service_id: Optional[int] = None,
@@ -22,13 +23,13 @@ class UsageLogService:
             prediction_id=prediction_id,
             type=UsageLogType.PREDICT
         )
-        
+
         self.db.add(usage_log)
         await self.db.commit()
         await self.db.refresh(usage_log)
-        
+
         return usage_log
-    
+
     async def log_access_key_usage(
         self,
         access_key_id: int,
@@ -40,13 +41,13 @@ class UsageLogService:
             prediction_id=None,
             type=UsageLogType.ACCESS_KEY
         )
-        
+
         self.db.add(usage_log)
         await self.db.commit()
         await self.db.refresh(usage_log)
-        
+
         return usage_log
-    
+
     async def get_usage_logs_by_user(
         self,
         user_id: int,
@@ -60,10 +61,10 @@ class UsageLogService:
             .limit(limit)
             .offset(offset)
         )
-        
+
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
-    
+
     async def get_usage_logs_by_access_key(
         self,
         access_key_id: int,
@@ -77,6 +78,6 @@ class UsageLogService:
             .limit(limit)
             .offset(offset)
         )
-        
+
         result = await self.db.execute(stmt)
         return list(result.scalars().all())

@@ -2,9 +2,10 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
+
 class ActivityLogModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     activity_log_id: Optional[int] = None
     user_id: Optional[int] = None
     method: str = Field(..., max_length=16)

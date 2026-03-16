@@ -2614,6 +2614,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /queue/url:
+    get:
+      tags:
+      - queue
+      summary: Get Retrain Queue
+      description: Get all URLs waiting for retraining. Shows prediction info with
+        user details.
+      operationId: get_retrain_queue_queue_url_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueListResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /stat/report:
     get:
       tags:
@@ -4260,6 +4294,35 @@ components:
       - message
       - data
       title: PredictionTrendResponse
+    QueueListResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        data:
+          additionalProperties: true
+          type: object
+          title: data
+          description: Queue data with total and items
+      type: object
+      required:
+      - status
+      - message
+      - data
+      title: QueueListResponse
     RefreshTokenRequest:
       properties:
         refresh_token:

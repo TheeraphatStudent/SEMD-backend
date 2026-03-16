@@ -3,9 +3,10 @@ from typing import Optional
 from datetime import datetime
 from libs.types.enums import ServiceType
 
+
 class ServiceConfModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     service_conf_id: Optional[int] = None
     user_id: Optional[int] = None
     service_name: str = Field(..., max_length=32)
