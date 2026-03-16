@@ -6,16 +6,16 @@ from .system_config_control import SystemConfigControl, system_config_control
 from .queue_control import QueueControl, queue_control
 
 __all__ = [
-    "AuthControl",
-    "auth_control",
-    "UrlReportControl",
-    "url_report_control",
-    "UrlFlagControl",
-    "url_flag_control",
-    "AccessKeyControl",
-    "access_key_control",
-    "SystemConfigControl",
-    "system_config_control",
-    "QueueControl",
-    "queue_control"
+    'AuthControl',
+    'auth_control',
+    'UrlReportControl',
+    'url_report_control',
+    'UrlFlagControl',
+    'url_flag_control',
+    'AccessKeyControl',
+    'access_key_control',
+    'SystemConfigControl',
+    'system_config_control',
+    'QueueControl',
+    'queue_control'
 ]

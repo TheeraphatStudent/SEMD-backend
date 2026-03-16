@@ -9,7 +9,7 @@ from libs.types.enums import FlagType, ReportStatusType
 
 
 class UrlReportService:
-    
+
     @classmethod
     def create_report(cls, user: User, request: UrlReportCreateRequest, db: Session) -> UrlReport:
         new_report = UrlReport(
@@ -19,35 +19,36 @@ class UrlReportService:
             status=request.status.value,
             remark=request.remark
         )
-        
+
         db.add(new_report)
         db.commit()
         db.refresh(new_report)
-        
+
         cls._log_action(
             db=db,
             url_report_id=new_report.url_report_id,
             user_id=user.user_id,
-            action="CREATE",
+            action='CREATE',
             old_status=None,
             new_status=request.status.value,
             remark=f"Report created for URL: {request.url}"
         )
-        
+
         return new_report
-    
+
     @classmethod
     def update_report(cls, user: User, report_id: int, request: UrlReportUpdateRequest, db: Session) -> UrlReport:
-        report = db.query(UrlReport).filter(UrlReport.url_report_id == report_id).first()
-        
+        report = db.query(UrlReport).filter(
+            UrlReport.url_report_id == report_id).first()
+
         if not report:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Report with id {report_id} not found"
             )
-        
+
         old_status = report.status
-        
+
         if request.url is not None:
             report.url = request.url
         if request.categories is not None:
@@ -56,17 +57,17 @@ class UrlReportService:
             report.status = request.status.value
         if request.remark is not None:
             report.remark = request.remark
-        
+
         report.updated_at = datetime.utcnow()
-        
+
         db.commit()
         db.refresh(report)
-        
+
         new_status = report.status
-        action = "UPDATE"
+        action = 'UPDATE'
         if old_status != new_status:
-            action = "STATUS_CHANGE"
-        
+            action = 'STATUS_CHANGE'
+
         cls._log_action(
             db=db,
             url_report_id=report.url_report_id,
@@ -76,33 +77,34 @@ class UrlReportService:
             new_status=new_status,
             remark=request.remark or f"Report updated by user {user.user_id}"
         )
-        
+
         return report
-    
+
     @classmethod
     def get_report_by_id(cls, report_id: int, db: Session) -> UrlReport:
-        report = db.query(UrlReport).filter(UrlReport.url_report_id == report_id).first()
-        
+        report = db.query(UrlReport).filter(
+            UrlReport.url_report_id == report_id).first()
+
         if not report:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Report with id {report_id} not found"
             )
-        
+
         return report
-    
+
     @classmethod
     def get_all_reports(cls, db: Session, skip: int = 0, limit: int = 100) -> List[UrlReport]:
         return db.query(UrlReport).offset(skip).limit(limit).all()
-    
+
     @classmethod
     def get_reports_by_user(cls, user_id: int, db: Session, skip: int = 0, limit: int = 100) -> List[UrlReport]:
         return db.query(UrlReport).filter(UrlReport.user_id == user_id).offset(skip).limit(limit).all()
-    
+
     @classmethod
     def get_report_history(cls, report_id: int, db: Session) -> List[UrlReported]:
         return db.query(UrlReported).filter(UrlReported.url_report_id == report_id).order_by(UrlReported.created_at.desc()).all()
-    
+
     @classmethod
     def _log_action(
         cls,
@@ -122,11 +124,11 @@ class UrlReportService:
             new_status=new_status,
             remark=remark
         )
-        
+
         db.add(log_entry)
         db.commit()
         db.refresh(log_entry)
-        
+
         return log_entry
 
 

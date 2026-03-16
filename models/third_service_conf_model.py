@@ -2,14 +2,15 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
+
 class ThirdServiceConfModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     third_service_conf_id: Optional[int] = None
     service_conf_id: Optional[int] = None
     service_name: str = Field(..., max_length=64)
     base_url: str
-    http_method: str = Field(default="GET", max_length=8)
+    http_method: str = Field(default='GET', max_length=8)
     secret_hash: str
     headers_json: dict = {}
     config_json: dict = {}

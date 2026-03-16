@@ -5,16 +5,16 @@ from enum import Enum
 
 
 class JobType(str, Enum):
-    PREDICTION = "prediction"
-    BATCH_PREDICTION = "batch_prediction"
-    TRAINING = "training"
+    PREDICTION = 'prediction'
+    BATCH_PREDICTION = 'batch_prediction'
+    TRAINING = 'training'
 
 
 class JobStatus(str, Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    PENDING = 'pending'
+    PROCESSING = 'processing'
+    COMPLETED = 'completed'
+    FAILED = 'failed'
 
 
 class PredictionJobRequest(BaseModel):

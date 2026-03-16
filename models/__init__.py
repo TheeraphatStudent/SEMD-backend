@@ -58,137 +58,137 @@ from .stats import (
 
 __all__ = [
     # Auth
-    "AuthLoginRequest",
-    "AuthLoginProviderRequest",
-    "AuthTwoFactorRequest",
-    "AuthLoginResponse",
-    "TokenPairResponse",
-    "PreAuthResponse",
-    "TwoFAVerifyRequest",
-    "RefreshTokenRequest",
-    "TwoFASetupResponse",
-    "TwoFAEnableRequest",
-    "OAuthDeviceCodeRequest",
-    "OAuthDeviceCodeResponse",
-    "OAuthDevicePollRequest",
-    "OAuthAuthorizationRequest",
-    "OAuthAuthorizationResponse",
-    "OAuthCallbackRequest",
-    "RegisterRequest",
-    "RegisterResponse",
-    "CreateUserRequest",
-    "CreateUserResponse",
+    'AuthLoginRequest',
+    'AuthLoginProviderRequest',
+    'AuthTwoFactorRequest',
+    'AuthLoginResponse',
+    'TokenPairResponse',
+    'PreAuthResponse',
+    'TwoFAVerifyRequest',
+    'RefreshTokenRequest',
+    'TwoFASetupResponse',
+    'TwoFAEnableRequest',
+    'OAuthDeviceCodeRequest',
+    'OAuthDeviceCodeResponse',
+    'OAuthDevicePollRequest',
+    'OAuthAuthorizationRequest',
+    'OAuthAuthorizationResponse',
+    'OAuthCallbackRequest',
+    'RegisterRequest',
+    'RegisterResponse',
+    'CreateUserRequest',
+    'CreateUserResponse',
 
     # Base
-    "BaseResponseModel",
+    'BaseResponseModel',
 
     # Default
-    "GetDefaultApiEndpoint",
-    "GetDefaultHealthCheck",
+    'GetDefaultApiEndpoint',
+    'GetDefaultHealthCheck',
 
     # Prediction
-    "PredictionModelDb",
-    "PredictionRequest",
-    "PredictionResponse",
-    "PredictionDetailResponse",
-    
+    'PredictionModelDb',
+    'PredictionRequest',
+    'PredictionResponse',
+    'PredictionDetailResponse',
+
     # ML Message Protocol
-    "JobType",
-    "JobStatus",
-    "PredictionJobRequest",
-    "PredictionDetail",
-    "SinglePredictionResult",
-    "PredictionJobResult",
+    'JobType',
+    'JobStatus',
+    'PredictionJobRequest',
+    'PredictionDetail',
+    'SinglePredictionResult',
+    'PredictionJobResult',
 
     # Report
-    "ReportModelItem",
-    "ReportModelResponse",
-    "ReportModelRequest",
-    
-    "MLServiceResponse",
-    "ReportResponse",
-    "ReportListResponse",
+    'ReportModelItem',
+    'ReportModelResponse',
+    'ReportModelRequest',
+
+    'MLServiceResponse',
+    'ReportResponse',
+    'ReportListResponse',
 
     # Stats - Report
-    "ReportStatResponse",
-    "ReportStatListResponse",
-    "ReportStatTrendResponse",
-    "ReportDetailResponse",
-    
+    'ReportStatResponse',
+    'ReportStatListResponse',
+    'ReportStatTrendResponse',
+    'ReportDetailResponse',
+
     # Stats - System
-    "SystemStatResponse",
-    "SystemHealthResponse",
-    "SystemPerformanceResponse",
-    
+    'SystemStatResponse',
+    'SystemHealthResponse',
+    'SystemPerformanceResponse',
+
     # Stats - Prediction
-    "PredictionStatResponse",
-    "PredictionTrendResponse",
-    "PredictionByModelResponse",
-    "PredictionDetailResponse",
-    
+    'PredictionStatResponse',
+    'PredictionTrendResponse',
+    'PredictionByModelResponse',
+    'PredictionDetailResponse',
+
     # Stats - User
-    "UserStatResponse",
-    "UserActivityResponse",
-    "UserRoleStatResponse",
-    "TopUserResponse",
-    
+    'UserStatResponse',
+    'UserActivityResponse',
+    'UserRoleStatResponse',
+    'TopUserResponse',
+
     # Stats - API Key
-    "ApiKeyStatResponse",
-    "ApiKeyUsageResponse",
-    "ApiKeyTrendResponse",
-    "ApiEndpointStatResponse",
-    
+    'ApiKeyStatResponse',
+    'ApiKeyUsageResponse',
+    'ApiKeyTrendResponse',
+    'ApiEndpointStatResponse',
+
     # Stats - Third Party
-    "ThirdPartyStatResponse",
-    "ThirdPartyServiceResponse",
-    "ThirdPartyTrendResponse",
-    "ThirdPartyErrorResponse",
-    
+    'ThirdPartyStatResponse',
+    'ThirdPartyServiceResponse',
+    'ThirdPartyTrendResponse',
+    'ThirdPartyErrorResponse',
+
     # Stats - URL Flag
-    "UrlFlagStatResponse",
-    "UrlFlagTrendResponse",
-    "UrlFlagDetailResponse",
-    "UrlFlagCategoryResponse",
-    
+    'UrlFlagStatResponse',
+    'UrlFlagTrendResponse',
+    'UrlFlagDetailResponse',
+    'UrlFlagCategoryResponse',
+
     # Database Models
-    "UserModelDb",
-    "RefreshTokenModelDb",
-    "ServiceConfModelDb",
-    "ModelRegistryModelDb",
-    "AccessKeyModelDb",
-    "UrlFlagModelDb",
-    "UrlReportModelDb",
-    "UrlReportedModelDb",
-    "ActivityLogModelDb",
-    "UsageLogModelDb",
-    "ThirdServiceConfModelDb",
-    
+    'UserModelDb',
+    'RefreshTokenModelDb',
+    'ServiceConfModelDb',
+    'ModelRegistryModelDb',
+    'AccessKeyModelDb',
+    'UrlFlagModelDb',
+    'UrlReportModelDb',
+    'UrlReportedModelDb',
+    'ActivityLogModelDb',
+    'UsageLogModelDb',
+    'ThirdServiceConfModelDb',
+
     # URL Report Request Models
-    "UrlReportCreateRequest",
-    "UrlReportUpdateRequest",
-    
+    'UrlReportCreateRequest',
+    'UrlReportUpdateRequest',
+
     # URL Flag Request Models
-    "UrlFlagCreateRequest",
-    "UrlFlagUpdateRequest",
-    
+    'UrlFlagCreateRequest',
+    'UrlFlagUpdateRequest',
+
     # Access Key Request Models
-    "AccessKeyCreateRequest",
-    "AccessKeyAdminCreateRequest",
-    "AccessKeyAdminUpdateRequest",
-    
+    'AccessKeyCreateRequest',
+    'AccessKeyAdminCreateRequest',
+    'AccessKeyAdminUpdateRequest',
+
     # User Request Models
-    "UserUpdateRequest",
-    "PasswordResetRequest",
-    "AdminCreateUserRequest",
-    "AdminUpdateUserRequest",
-    "AdminPasswordResetRequest",
-    
+    'UserUpdateRequest',
+    'PasswordResetRequest',
+    'AdminCreateUserRequest',
+    'AdminUpdateUserRequest',
+    'AdminPasswordResetRequest',
+
     # Third Service Models
-    "BodyTemplateItem",
-    "UrlTemplateConfig", 
-    "ThirdServiceConfigJson",
-    "ThirdServiceCreateRequest",
-    "ThirdServiceUpdateRequest",
-    "ThirdServiceExecuteRequest",
-    "ThirdServiceResponse"
+    'BodyTemplateItem',
+    'UrlTemplateConfig',
+    'ThirdServiceConfigJson',
+    'ThirdServiceCreateRequest',
+    'ThirdServiceUpdateRequest',
+    'ThirdServiceExecuteRequest',
+    'ThirdServiceResponse'
 ]
