@@ -16,6 +16,7 @@ from routers import (
     ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, SystemConfigRoute, QueueRoute,
     ReportStatRoute, PredictionStatRoute, UserStatRoute, ApiKeyStatRoute, ThirdPartyStatRoute, UrlFlagStatRoute
 )
+from routers.report import UsageRoute
 from config.settings import settings
 from models import GetDefaultApiEndpoint, GetDefaultHealthCheck
 import yaml
@@ -83,6 +84,7 @@ app.include_router(UserStatRoute().get_router())
 app.include_router(ApiKeyStatRoute().get_router())
 app.include_router(ThirdPartyStatRoute().get_router())
 app.include_router(UrlFlagStatRoute().get_router())
+app.include_router(UsageRoute().get_router())
 
 # ----------------- Write document
 openapi_yaml = yaml.dump(app.openapi(), sort_keys=False)

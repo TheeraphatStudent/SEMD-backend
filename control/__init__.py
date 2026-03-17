@@ -4,6 +4,7 @@ from .url_flag_control import UrlFlagControl, url_flag_control
 from .access_key_control import AccessKeyControl, access_key_control
 from .system_config_control import SystemConfigControl, system_config_control
 from .queue_control import QueueControl, queue_control
+from .model_registry_control import ModelRegistryControl
 
 __all__ = [
     'AuthControl',
@@ -17,5 +18,6 @@ __all__ = [
     'SystemConfigControl',
     'system_config_control',
     'QueueControl',
-    'queue_control'
+    'queue_control',
+    'ModelRegistryControl'
 ]

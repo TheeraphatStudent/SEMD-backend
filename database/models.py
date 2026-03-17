@@ -59,7 +59,7 @@ class ServiceConf(Base):
     user_id = Column(BigInteger, nullable=True)
     service_name = Column(String(32), nullable=False)
     service_type = Column(
-        Enum('REST_API', name='service_type'), nullable=False)
+        Enum('REST_API', 'ML_MODEL', name='service_type'), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     version_no = Column(String(12), nullable=False)
     config_uri = Column(Text, nullable=False)

@@ -116,18 +116,20 @@ class UrlFlagService:
 
     @classmethod
     async def check_url_flag_async(cls, url: str, user_id: Optional[int], db: AsyncSession) -> Optional[UrlFlag]:
+        from sqlalchemy import text
+        
         if user_id:
             stmt = select(UrlFlag).where(
                 UrlFlag.url == url,
                 or_(
-                    UrlFlag.access_level == ACLType.GLOBAL.value,
+                    UrlFlag.access_level.cast(db.bind.dialect.name == 'postgresql' and 'text' or None) == ACLType.GLOBAL.value if False else text("access_level::text = 'GLOBAL'"),
                     UrlFlag.user_id == user_id
                 )
             )
         else:
             stmt = select(UrlFlag).where(
                 UrlFlag.url == url,
-                UrlFlag.access_level == ACLType.GLOBAL.value
+                text("access_level::text = 'GLOBAL'")
             )
 
         result = await db.execute(stmt)

@@ -5,6 +5,8 @@ from .redis_client import RedisClient, redis_client
 from .prediction_service import PredictionService
 from .user_service import UserService
 from .ml_service_client import MLServiceClient, ml_service_client
+from .model_registry_service import ModelRegistryService
+from .ml_prediction_service import MLPredictionService
 
 __all__ = [
     'PostgresClient',
@@ -14,4 +16,6 @@ __all__ = [
     'UserService',
     'MLServiceClient',
     'ml_service_client',
+    'ModelRegistryService',
+    'MLPredictionService',
 ]

@@ -28,6 +28,9 @@ class PredictionService:
         urls: List[str],
         user_id: Optional[int] = None
     ) -> List[Dict[str, Any]]:
+        from database import User
+        from libs.types.enums import RoleType
+        
         stmt = select(ServiceConf).where(
             ServiceConf.service_conf_id == service_id,
             ServiceConf.is_active == True
@@ -42,17 +45,22 @@ class PredictionService:
             )
 
         if user_id and service_conf.user_id and service_conf.user_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='Access denied to this service configuration'
-            )
+            owner_stmt = select(User).where(User.user_id == service_conf.user_id)
+            owner_result = await self.db.execute(owner_stmt)
+            owner = owner_result.scalar_one_or_none()
+            
+            if not owner or owner.role not in [RoleType.ADMIN.value, RoleType.SUPER_ADMIN.value]:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail='Access denied to this service configuration'
+                )
 
         conf_id = service_conf.service_conf_id
         conf_name = service_conf.service_name
         conf_type = service_conf.service_type
 
         if conf_type == ServiceType.ML_MODEL.value:
-            return await self._predict_with_ml_model(conf_id, conf_name, conf_type, urls)
+            return await self._predict_with_ml_model(conf_id, conf_name, conf_type, urls, user_id)
         elif conf_type == ServiceType.REST_API.value:
             return await self._predict_with_third_party(conf_id, conf_name, conf_type, urls, user_id)
         else:
@@ -66,7 +74,8 @@ class PredictionService:
         service_conf_id: int,
         service_name: str,
         service_type: str,
-        urls: List[str]
+        urls: List[str],
+        user_id: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         from services.ml_service_client import ml_service_client
 
@@ -86,11 +95,30 @@ class PredictionService:
                     detail=ml_result.get('error', 'Prediction failed')
                 )
 
+            prediction_data = ml_result.get('prediction', {})
+            prediction_record = await self.prediction_storage.create_prediction_record(
+                user_id=user_id,
+                url=url,
+                prediction_result={
+                    'class': prediction_data.get('class', 'unknown'),
+                    'is_malicious': prediction_data.get('is_malicious', False),
+                    'accuracy_score': prediction_data.get('confidence', 0),
+                    'suggested_desc': ml_result.get('suggested_desc', '')
+                },
+                mapping_json={
+                    'class': 'class',
+                    'is_malicious': 'is_malicious',
+                    'accuracy_score': 'accuracy_score',
+                    'suggested_desc': 'suggested_desc'
+                }
+            )
+
             results.append({
                 'url': url,
                 'service_id': service_conf_id,
                 'service_name': service_name,
                 'service_type': service_type,
+                'prediction_id': prediction_record.prediction_id,
                 **ml_result
             })
 

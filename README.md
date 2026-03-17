@@ -137,6 +137,20 @@ POST http://localhost:8000/setting/third-service/
 }
 ```
 
+## Ml Service
+
+```flow
+SEMD-backend (FastAPI) 
+    → ml_prediction_service.py 
+    → ml_service_client.py (submits job to Redis queue)
+    → Redis (ml_prediction_queue)
+    → SEMD-ml Docker container (queue_worker)
+    → prediction_service.py (uses ml_pipeline)
+    → Redis cache (ml_result:{job_id})
+    → ml_service_client.py (polls for result)
+    → Response to client
+```
+
 ## Resource
 
 - [2fa-qa](https://stefansundin.github.io/2fa-qr/)

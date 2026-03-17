@@ -43,6 +43,14 @@ from .ml_message import (
     JobType, JobStatus, PredictionJobRequest, PredictionDetail,
     SinglePredictionResult, PredictionJobResult
 )
+from .model_registry_request import (
+    ModelRegistryCreateRequest, ModelRegistryUpdateRequest,
+    ModelStageUpdateRequest, MLPredictRequest, MLBatchPredictRequest
+)
+from .model_registry_response import (
+    ModelRegistryResponse, ModelRegistryListResponse,
+    MLPredictResponse, MLBatchPredictResponse
+)
 from .report_response import ReportResponse, ReportListResponse
 from .stats import (
     ReportStatResponse, ReportStatListResponse, ReportStatTrendResponse,
@@ -190,5 +198,16 @@ __all__ = [
     'ThirdServiceCreateRequest',
     'ThirdServiceUpdateRequest',
     'ThirdServiceExecuteRequest',
-    'ThirdServiceResponse'
+    'ThirdServiceResponse',
+
+    # Model Registry Models
+    'ModelRegistryCreateRequest',
+    'ModelRegistryUpdateRequest',
+    'ModelStageUpdateRequest',
+    'MLPredictRequest',
+    'MLBatchPredictRequest',
+    'ModelRegistryResponse',
+    'ModelRegistryListResponse',
+    'MLPredictResponse',
+    'MLBatchPredictResponse'
 ]

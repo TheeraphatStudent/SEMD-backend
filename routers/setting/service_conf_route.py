@@ -21,7 +21,7 @@ class ServiceConfRoute(BaseRoute):
             "/",
             response_model=List[ServiceConfModel],
             summary="List Service Configurations",
-            description="Get all service configurations for the current user"
+            description="Get all service configurations"
         )(self.list_services)
 
         self.router.get(

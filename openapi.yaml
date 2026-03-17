@@ -803,6 +803,449 @@ paths:
           description: Not implemented
         '422':
           description: Validation error
+  /ml/models:
+    post:
+      tags:
+      - ml
+      summary: Register Model
+      description: Register a new ML model in the registry
+      operationId: create_model_ml_models_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRegistryCreateRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+    get:
+      tags:
+      - ml
+      summary: List Models
+      description: List all registered ML models
+      operationId: list_models_ml_models_get
+      parameters:
+      - name: algorithm
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by algorithm
+          title: Algorithm
+        description: Filter by algorithm
+      - name: stage
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by stage
+          title: Stage
+        description: Filter by stage
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryListResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/models/production:
+    get:
+      tags:
+      - ml
+      summary: Get Production Model
+      description: Get the current production model
+      operationId: get_production_model_ml_models_production_get
+      parameters:
+      - name: algorithm
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by algorithm
+          title: Algorithm
+        description: Filter by algorithm
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/models/{model_id}:
+    get:
+      tags:
+      - ml
+      summary: Get Model
+      description: Get a specific model by ID
+      operationId: get_model_ml_models__model_id__get
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+    put:
+      tags:
+      - ml
+      summary: Update Model
+      description: Update a model registry entry
+      operationId: update_model_ml_models__model_id__put
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRegistryUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+    delete:
+      tags:
+      - ml
+      summary: Delete Model
+      description: Delete a model from the registry
+      operationId: delete_model_ml_models__model_id__delete
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/models/{model_id}/stage:
+    patch:
+      tags:
+      - ml
+      summary: Update Model Stage
+      description: Update the stage of a model
+      operationId: update_model_stage_ml_models__model_id__stage_patch
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelStageUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/models/{model_id}/promote:
+    post:
+      tags:
+      - ml
+      summary: Promote to Production
+      description: Promote a model to production stage
+      operationId: promote_to_production_ml_models__model_id__promote_post
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/models/{model_id}/activate:
+    post:
+      tags:
+      - ml
+      summary: Activate Model
+      description: Activate a model
+      operationId: activate_model_ml_models__model_id__activate_post
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/models/{model_id}/deactivate:
+    post:
+      tags:
+      - ml
+      summary: Deactivate Model
+      description: Deactivate a model
+      operationId: deactivate_model_ml_models__model_id__deactivate_post
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Model Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegistryResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/predict:
+    post:
+      tags:
+      - ml
+      summary: Predict URL
+      description: Predict if a URL is malicious
+      operationId: predict_url_ml_predict_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MLPredictRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MLPredictResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
+  /ml/predict/batch:
+    post:
+      tags:
+      - ml
+      summary: Batch Predict URLs
+      description: Predict multiple URLs
+      operationId: predict_batch_ml_predict_batch_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MLBatchPredictRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MLBatchPredictResponse'
+        '404':
+          description: Not found
+        '501':
+          description: Not implemented
+        '422':
+          description: Validation error
   /prediction/predict:
     post:
       tags:
@@ -1497,7 +1940,7 @@ paths:
       tags:
       - service-configuration
       summary: List Service Configurations
-      description: Get all service configurations for the current user
+      description: Get all service configurations
       operationId: list_services_setting_service__get
       parameters:
       - name: authorization
@@ -3134,6 +3577,135 @@ paths:
           description: Not implemented
         '422':
           description: Validation error
+  /report/usage/logs:
+    get:
+      tags:
+      - usage-log
+      summary: Get Usage Logs
+      description: Get usage logs for the current user
+      operationId: get_usage_logs_report_usage_logs_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsageLogResponse'
+                title: Response Get Usage Logs Report Usage Logs Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /report/usage/recent:
+    get:
+      tags:
+      - usage-log
+      summary: Get Recent Activity
+      description: Get recent prediction activity for the current user
+      operationId: get_recent_activity_report_usage_recent_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          default: 10
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecentActivityResponse'
+                title: Response Get Recent Activity Report Usage Recent Get
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /report/usage/stats:
+    get:
+      tags:
+      - usage-log
+      summary: Get Usage Stats
+      description: Get usage statistics for the current user
+      operationId: get_usage_stats_report_usage_stats_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStatsResponse'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
     ACLType:
@@ -3802,6 +4374,103 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    MLBatchPredictRequest:
+      properties:
+        urls:
+          items:
+            type: string
+          type: array
+          maxItems: 100
+          minItems: 1
+          title: Urls
+          description: URLs to predict
+        model_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Model Id
+          description: Specific model registry ID to use
+      type: object
+      required:
+      - urls
+      title: MLBatchPredictRequest
+      description: Request model for batch ML prediction.
+    MLBatchPredictResponse:
+      properties:
+        predictions:
+          items:
+            $ref: '#/components/schemas/MLPredictResponse'
+          type: array
+          title: Predictions
+        total:
+          type: integer
+          title: Total
+        success_count:
+          type: integer
+          title: Success Count
+        error_count:
+          type: integer
+          title: Error Count
+      type: object
+      required:
+      - predictions
+      - total
+      - success_count
+      - error_count
+      title: MLBatchPredictResponse
+    MLPredictRequest:
+      properties:
+        url:
+          type: string
+          title: Url
+          description: URL to predict
+        model_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Model Id
+          description: Specific model registry ID to use
+      type: object
+      required:
+      - url
+      title: MLPredictRequest
+      description: Request model for ML prediction.
+    MLPredictResponse:
+      properties:
+        url:
+          type: string
+          title: Url
+        prediction:
+          type: string
+          title: Prediction
+        confidence:
+          type: number
+          title: Confidence
+        probabilities:
+          anyOf:
+          - additionalProperties:
+              type: number
+            type: object
+          - type: 'null'
+          title: Probabilities
+        model_id:
+          type: integer
+          title: Model Id
+        model_name:
+          type: string
+          title: Model Name
+        algorithm:
+          type: string
+          title: Algorithm
+      type: object
+      required:
+      - url
+      - prediction
+      - confidence
+      - model_id
+      - model_name
+      - algorithm
+      title: MLPredictResponse
     MLServiceResponse:
       properties:
         status:
@@ -3829,6 +4498,357 @@ components:
       - message
       - data
       title: MLServiceResponse
+    ModelRegistryCreateRequest:
+      properties:
+        name:
+          type: string
+          maxLength: 64
+          title: Name
+          description: Model name
+        algorithm:
+          type: string
+          maxLength: 64
+          title: Algorithm
+          description: Algorithm used (e.g., xgboost, random_forest)
+        mlflow_run_id:
+          type: string
+          maxLength: 64
+          title: Mlflow Run Id
+          description: MLflow run ID
+        model_uri:
+          type: string
+          title: Model Uri
+          description: Path to model file
+        scaler_uri:
+          type: string
+          title: Scaler Uri
+          description: Path to scaler file
+        label_uri:
+          type: string
+          title: Label Uri
+          description: Path to label encoder file
+        selecter_uri:
+          type: string
+          title: Selecter Uri
+          description: Path to feature selector file
+          default: ''
+        mlflow_model_version:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Mlflow Model Version
+          description: MLflow model version
+        experiment_id:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Experiment Id
+          description: MLflow experiment ID
+        stage:
+          $ref: '#/components/schemas/ModelStageType'
+          description: Model stage
+          default: NONE
+        accuracy_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Accuracy Score
+          description: Accuracy score
+        recall_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Recall Score
+          description: Recall score
+        precision_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Precision Score
+          description: Precision score
+        f1_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: F1 Score
+          description: F1 score
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Model description
+        tags:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Tags
+          description: Model tags
+      type: object
+      required:
+      - name
+      - algorithm
+      - mlflow_run_id
+      - model_uri
+      - scaler_uri
+      - label_uri
+      title: ModelRegistryCreateRequest
+    ModelRegistryListResponse:
+      properties:
+        models:
+          items:
+            $ref: '#/components/schemas/ModelRegistryResponse'
+          type: array
+          title: Models
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - models
+      - total
+      title: ModelRegistryListResponse
+    ModelRegistryResponse:
+      properties:
+        model_registry_id:
+          type: integer
+          title: Model Registry Id
+        service_conf_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Conf Id
+        name:
+          type: string
+          title: Name
+        algorithm:
+          type: string
+          title: Algorithm
+        mlflow_run_id:
+          type: string
+          title: Mlflow Run Id
+        mlflow_model_version:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Mlflow Model Version
+        experiment_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Experiment Id
+        stage:
+          type: string
+          title: Stage
+        model_uri:
+          type: string
+          title: Model Uri
+        scaler_uri:
+          type: string
+          title: Scaler Uri
+        label_uri:
+          type: string
+          title: Label Uri
+        selecter_uri:
+          type: string
+          title: Selecter Uri
+        accuracy_score:
+          anyOf:
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Accuracy Score
+        recall_score:
+          anyOf:
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Recall Score
+        precision_score:
+          anyOf:
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Precision Score
+        f1_score:
+          anyOf:
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: F1 Score
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        tags:
+          additionalProperties: true
+          type: object
+          title: Tags
+          default: {}
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - model_registry_id
+      - name
+      - algorithm
+      - mlflow_run_id
+      - stage
+      - model_uri
+      - scaler_uri
+      - label_uri
+      - selecter_uri
+      - created_at
+      - updated_at
+      title: ModelRegistryResponse
+      description: Response model for model registry entry.
+    ModelRegistryUpdateRequest:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Name
+        algorithm:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Algorithm
+        mlflow_run_id:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Mlflow Run Id
+        mlflow_model_version:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Mlflow Model Version
+        experiment_id:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Experiment Id
+        stage:
+          anyOf:
+          - $ref: '#/components/schemas/ModelStageType'
+          - type: 'null'
+        model_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Uri
+        scaler_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Scaler Uri
+        label_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Label Uri
+        selecter_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Selecter Uri
+        accuracy_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Accuracy Score
+        recall_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Recall Score
+        precision_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Precision Score
+        f1_score:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: F1 Score
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        tags:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Tags
+      type: object
+      title: ModelRegistryUpdateRequest
+    ModelStageType:
+      type: string
+      enum:
+      - NONE
+      - STAGING
+      - PRODUCTION
+      - ARCHIVED
+      title: ModelStageType
+    ModelStageUpdateRequest:
+      properties:
+        stage:
+          $ref: '#/components/schemas/ModelStageType'
+          description: New model stage
+      type: object
+      required:
+      - stage
+      title: ModelStageUpdateRequest
+      description: Request model for updating model stage.
     OAuthAuthorizationRequest:
       properties:
         provider:
@@ -4353,6 +5373,29 @@ components:
       - message
       - data
       title: QueueListResponse
+    RecentActivityResponse:
+      properties:
+        url:
+          type: string
+          title: Url
+        verdict:
+          type: string
+          title: Verdict
+        time:
+          type: string
+          title: Time
+        prediction_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prediction Id
+      type: object
+      required:
+      - url
+      - verdict
+      - time
+      - prediction_id
+      title: RecentActivityResponse
     RefreshTokenRequest:
       properties:
         refresh_token:
@@ -6032,6 +7075,83 @@ components:
           description: Additional remark
       type: object
       title: UrlReportUpdateRequest
+    UsageLogResponse:
+      properties:
+        usage_log_id:
+          type: integer
+          title: Usage Log Id
+        service_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Service Id
+        service_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Service Name
+        prediction_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prediction Id
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        is_malicious:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Malicious
+        type:
+          type: string
+          title: Type
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - usage_log_id
+      - service_id
+      - service_name
+      - prediction_id
+      - url
+      - is_malicious
+      - type
+      - created_at
+      title: UsageLogResponse
+    UsageStatsResponse:
+      properties:
+        total_predictions:
+          type: integer
+          title: Total Predictions
+        safe_count:
+          type: integer
+          title: Safe Count
+        danger_count:
+          type: integer
+          title: Danger Count
+        today_count:
+          type: integer
+          title: Today Count
+        this_week_count:
+          type: integer
+          title: This Week Count
+        this_month_count:
+          type: integer
+          title: This Month Count
+      type: object
+      required:
+      - total_predictions
+      - safe_count
+      - danger_count
+      - today_count
+      - this_week_count
+      - this_month_count
+      title: UsageStatsResponse
     UserActivityItem:
       properties:
         date:
