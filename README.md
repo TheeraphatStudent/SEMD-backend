@@ -27,37 +27,30 @@ backend/
 │
 ├── workers/                # Ai & Redis worker
 ├── requirements.txt        # Python dependencies
-├── .env.example            # Environment variables template
-├── backend-working.sh      # Virtual environment activation script
+├── makefile                # setup/start/prod/worker helper commands (uv-based)
 └── README.md
 ```
 
 ## Setup Project
 
+Requires [`uv`](https://docs.astral.sh/uv/) and `make`.
+
 ```bash
-source ./backend-working.sh
+make setup
 ```
 
 This will:
 
-1. Deactivate any existing virtual environment
-2. Fix permissions for the `.venv` directory
-3. Activate the backend virtual environment
-4. Install/update requirements
-5. Display installed packages
-
-### To deactivate
-
-```bash
-deactivate
-```
+1. Copy `config/backend.example.ini` → `config/backend.ini` and `config/redis.example.conf` → `config/redis.conf` (won't overwrite existing files)
+2. Extract Postgres/Redis credentials from `backend.ini` and patch `config/redis.conf`, generate `database/.env`, and patch `database/docker-compose.database.yaml`
+3. Install Python dependencies via `uv add -r requirements.txt` + `uv sync`
 
 ## Running the Application
 
 After setup:
 
 ```bash
-fastapi dev main.py
+make start
 ```
 
 The API will be available at:
@@ -68,34 +61,19 @@ The API will be available at:
 
 ---
 
-Running with uvicorn 
+Production mode:
 
 ```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+make prod
 ```
 
-## Working with wsl or linux
-
-**Fix ascii problem**
-
-Problem:
-```bash
--bash: $'\r': command not found
--bash: ./model-working.sh: line 25: syntax error: unexpected end of file
-```
-
-Fixed:
-```bash
-sed -i 's/\r$//' ./backend-working.sh
-```
-
-## Configuration
-
-Create a `.env` file based on `.env.example`:
+Run the ML result Redis worker:
 
 ```bash
-cp .env.example .env
+make worker
 ```
+
+See `make help` for the full list of targets.
 
 ## Added third service
 
