@@ -1,15 +1,15 @@
 services:
   postgreSQL:
-    image: docker.io/library/postgres:latest
+    image: docker.io/library/postgres:17
     restart: always
     container_name: semd-database
+    env_file:
+      - ./postgres.env
     volumes:
       - semd_postgresql_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5433:5432"
-    env_file:
-      - ./postgres.env
     networks:
       - semd-shared-network
 

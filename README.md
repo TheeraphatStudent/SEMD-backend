@@ -97,7 +97,7 @@ See `make help` for the full list of targets.
 ## Added third service
 
 ### Cloudflare
-POST http://localhost:8000/setting/third-service/
+POST http://server:8000/setting/third-service/
 
 ```json
 {
@@ -121,7 +121,7 @@ POST http://localhost:8000/setting/third-service/
 ```
 
 ### Thai phishtank
-POST http://localhost:8000/setting/third-service/
+POST http://server:8000/setting/third-service/
 
 ```json
 {

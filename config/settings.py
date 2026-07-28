@@ -66,16 +66,16 @@ class Settings(BaseSettings):
     github_client_secret: str = config.get(
         'GITHUB', 'CLIENT_SECRET', fallback='')
     github_redirect_uri: str = config.get(
-        'GITHUB', 'REDIRECT_URI', fallback='http://localhost:8000/auth/callback/github')
+        'GITHUB', 'REDIRECT_URI', fallback='http://server:8000/auth/callback/github')
     github_homepage_url: str = config.get(
-        'GITHUB', 'HOMEPAGE_URL', fallback='http://localhost:8000')
+        'GITHUB', 'HOMEPAGE_URL', fallback='http://server:8000')
 
     # Google OAuth settings
     google_client_id: str = config.get('GOOGLE', 'CLIENT_ID', fallback='')
     google_client_secret: str = config.get(
         'GOOGLE', 'CLIENT_SECRET', fallback='')
     google_redirect_uri: str = config.get(
-        'GOOGLE', 'REDIRECT_URI', fallback='http://localhost:8000/auth/callback/google')
+        'GOOGLE', 'REDIRECT_URI', fallback='http://server:8000/auth/callback/google')
 
     @property
     def database_url(self) -> str:
