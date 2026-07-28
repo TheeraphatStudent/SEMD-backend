@@ -20,3 +20,9 @@ graphify-out/cost.json
 graphify-out/cache/
 
 openapi.yaml
+
+# Runner Cache
+
+_actions
+
+_PipelineMapping
