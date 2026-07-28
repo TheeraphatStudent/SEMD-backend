@@ -33,8 +33,6 @@ class User(Base):
 
     gg_id = Column(Text, nullable=True)
     gg_acc_token = Column(Text, nullable=True)
-    gg_re_token = Column(Text, nullable=True)
-    gh_id = Column(Text, nullable=True)
     gh_acc_token = Column(Text, nullable=True)
     gh_re_token = Column(Text, nullable=True)
     twofa_secret = Column(Text, nullable=True)
@@ -176,6 +174,8 @@ class UrlReport(Base):
     categories = Column(String(20), nullable=False, default='BENIGN')
     status = Column(String(20), nullable=False, default='PENDING')
     remark = Column(String(256), nullable=True)
+    reviewed_by = Column(BigInteger, ForeignKey('users.user_id', ondelete='SET NULL'), nullable=True)
+    reviewed_at = Column(TIMESTAMP(timezone=True), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False,

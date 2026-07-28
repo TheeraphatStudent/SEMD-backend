@@ -27,27 +27,30 @@ class PredictionRoute(BaseRoute):
         )
 
         self.router.post(
-            "/predict", 
+            "/predict",
             response_model=PredictionResponse,
             summary="Predict URL",
-            description="Predict if a URL is malicious or not using configured service (ML model or third-party)"
+            description="Predict if a URL is malicious or not using configured service (ML model or third-party). "
+                        "No login required -- an expired, missing, or invalid token degrades to an anonymous call "
+                        "instead of a 401, so the browser extension can call this without a session."
         )(self.predict)
 
     async def predict(
         self,
         request: PredictionRequest,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: Optional[User] = Depends(AuthGuard.get_current_user_optional),
         db: AsyncSession = Depends(get_async_db)
     ):
         urls = await self._extract_urls(request)
-        
+
         if not urls:
             raise HTTPException(status_code=422, detail="No URLs provided")
 
         access_key_id = None
-        
-        control = PredictionControl(db, current_user.user_id, access_key_id, user=current_user)
-        
+        user_id = current_user.user_id if current_user else None
+
+        control = PredictionControl(db, user_id, access_key_id, user=current_user)
+
         results = await control.predict(urls, request.service_id)
         return PredictionResponse(
             status=200,

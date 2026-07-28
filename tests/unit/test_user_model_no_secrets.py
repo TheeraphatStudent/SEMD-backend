@@ -15,7 +15,7 @@ from datetime import datetime
 from models.auth.user_model import UserModel
 
 _SECRET_FIELDS = (
-    'password_hash', 'gg_acc_token', 'gg_re_token',
+    'password_hash', 'gg_acc_token',
     'gh_acc_token', 'gh_re_token', 'twofa_secret', 'ex_acc_token',
 )
 
@@ -28,7 +28,7 @@ class UserModelSecretExposureTests(unittest.TestCase):
 
     def test_non_secret_connected_account_fields_still_present(self):
         field_names = set(UserModel.model_fields.keys())
-        for keep_field in ('gg_id', 'gh_id', 'is_2fa_enabled', 'ex_acc_token_exp'):
+        for keep_field in ('gg_id', 'is_2fa_enabled', 'ex_acc_token_exp'):
             self.assertIn(keep_field, field_names)
 
     def test_model_validate_from_orm_like_object_does_not_error(self):
@@ -40,7 +40,6 @@ class UserModelSecretExposureTests(unittest.TestCase):
             birthday = None
             role = 'MEMBER'
             gg_id = None
-            gh_id = None
             is_2fa_enabled = False
             ex_acc_token_exp = None
             profile_img_uri = None

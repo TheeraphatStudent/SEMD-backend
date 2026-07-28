@@ -54,10 +54,11 @@ CREATE TABLE IF NOT EXISTS users (
     role            role_type NOT NULL DEFAULT 'MEMBER',
     
     -- Social Auth & 2FA
+    -- gg_re_token and gh_id removed: gg_re_token was never read/written by
+    -- the Google OAuth flow (only gg_id is used); gh_id was GitHub OAuth's
+    -- lookup key, and GitHub is no longer a supported login provider.
     gg_id           TEXT NULL,
     gg_acc_token    TEXT NULL,
-    gg_re_token     TEXT NULL,
-    gh_id           TEXT NULL,
     gh_acc_token    TEXT NULL,
     gh_re_token     TEXT NULL,
     twofa_secret    TEXT NULL,
@@ -183,6 +184,9 @@ CREATE TABLE IF NOT EXISTS url_report (
     categories      flag_type NOT NULL DEFAULT 'BENIGN',
     status          rp_status_type NOT NULL DEFAULT 'PENDING',
     remark          VARCHAR(256) NULL,
+    -- Human-over-AI review: who approved/rejected the report, and when.
+    reviewed_by     BIGINT REFERENCES users(user_id) ON DELETE SET NULL,
+    reviewed_at     TIMESTAMPTZ NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

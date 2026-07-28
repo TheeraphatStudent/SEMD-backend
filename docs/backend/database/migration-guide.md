@@ -24,3 +24,7 @@ Adopt Alembic (the standard SQLAlchemy migration tool) before the next schema ch
 ## Rollback notes for this refactor's changes
 
 No migration exists to roll back — see above, no schema was changed. Code-level rollback for any domain's changes is `git checkout -- <files>`, documented per-domain in each `docs/backend/features/<domain>/README.md`.
+
+## First real schema change: `docker/postgres/migrations/`
+
+The advisor-feedback pass (dropping `users.gg_re_token`/`users.gh_id`, adding `url_report.reviewed_by`/`reviewed_at`) is the first schema change since this guide was written that isn't purely additive-and-optional on the ORM side alone — it required an actual `ALTER TABLE`. Since Alembic still hasn't been adopted (see "Recommendation" above — still not decided), a `docker/postgres/migrations/NNNN_description.sql` file was added instead, applied by hand with `psql "$DATABASE_URL" -f docker/postgres/migrations/0001_oauth_cleanup_and_report_review.sql` against any already-running database. `init.sql` was updated in lockstep so a fresh install matches. Follow this same pattern (numbered file in `docker/postgres/migrations/`, plus the matching `init.sql` edit) until Alembic is adopted.

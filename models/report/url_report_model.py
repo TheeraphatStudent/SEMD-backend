@@ -13,5 +13,7 @@ class UrlReportModel(BaseModel):
     categories: FlagType = FlagType.BENIGN
     status: ReportStatusType = ReportStatusType.PENDING
     remark: Optional[str] = Field(None, max_length=256)
+    reviewed_by: Optional[int] = None
+    reviewed_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

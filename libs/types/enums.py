@@ -34,5 +34,7 @@ class ModelStageType(str, Enum):
     ARCHIVED = "ARCHIVED"
 
 class OAuthProviderType(str, Enum):
-    GITHUB = "github"
+    # GITHUB removed: gh_id (the users.gh_id column used to look up/link a
+    # GitHub-authenticated account) was dropped from the schema; Google is
+    # the only supported login provider going forward.
     GOOGLE = "google"

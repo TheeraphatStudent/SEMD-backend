@@ -1,6 +1,6 @@
 # Table Dictionary
 
-All 13 tables in `database/models.py`, as of the Phase 3 `ForeignKey()` additions. `Enum(...)` = real Postgres native enum column; plain `String` = app-level-only validation against `libs/types/enums.py`.
+All 13 tables in `models/db/entities.py` (the root `CLAUDE.md`'s `database/models.py` path is stale). `Enum(...)` = real Postgres native enum column; plain `String` = app-level-only validation against `libs/types/enums.py`.
 
 ## `users`
 
@@ -13,8 +13,8 @@ All 13 tables in `database/models.py`, as of the Phase 3 `ForeignKey()` addition
 | birthday | TIMESTAMP(tz) | Yes | — | | |
 | password_hash | String(1024) | No | — | | bcrypt hash |
 | role | String(20) | No | `MEMBER` | | app-level only — `RoleType`; not a DB enum |
-| gg_id, gg_acc_token, gg_re_token | Text | Yes | — | | Google OAuth linkage + live tokens |
-| gh_id, gh_acc_token, gh_re_token | Text | Yes | — | | GitHub OAuth linkage + live tokens |
+| gg_id, gg_acc_token | Text | Yes | — | | Google OAuth linkage + live token. `gg_re_token` dropped (advisor pass) — confirmed dead, never read/written outside the column declaration |
+| gh_acc_token, gh_re_token | Text | Yes | — | | Orphaned: `gh_id` (the GitHub OAuth lookup/link key) was dropped (advisor pass) since GitHub is no longer a supported login provider (`OAuthProviderType` now Google-only). These two columns are unreachable leftovers — not dropped in this pass since only `gg_re_token`/`gh_id` were in scope; flagged for a follow-up cleanup |
 | twofa_secret | Text | Yes | — | | **plaintext at rest** — open finding, see `standards/SECURITY.md` |
 | is_2fa_enabled | Boolean | No | `false` | | |
 | ex_acc_token | Text | Yes | — | | extension access token, **hashed (sha256) as of Domain 4** |
@@ -112,6 +112,8 @@ All 13 tables in `database/models.py`, as of the Phase 3 `ForeignKey()` addition
 | categories | String(20) | No, default `BENIGN` | app-level only — `FlagType` |
 | status | String(20) | No, default `PENDING` | app-level only — `ReportStatusType` (3 states: PENDING/ACCEPTED/REJECTED). **Domain 2 finding**: previously editable by any authenticated user regardless of ownership; now ownership + admin-status-change enforced |
 | remark | String(256) | Yes | |
+| reviewed_by | BigInteger | Yes | FK → users.user_id, `ON DELETE SET NULL` — set when an admin changes `status` (advisor pass, human-over-AI review). Also recorded per-transition in `url_reported.user_id` |
+| reviewed_at | TIMESTAMP(tz) | Yes | set alongside `reviewed_by` |
 | created_at, updated_at | TIMESTAMP(tz) | No | |
 
 ## `activity_log`

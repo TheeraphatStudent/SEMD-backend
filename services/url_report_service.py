@@ -65,6 +65,7 @@ class UrlReportService:
             raise PermissionDeniedError('Only an admin can change a report\'s review status')
 
         old_status = report.status
+        status_changed = request.status is not None and request.status.value != old_status
 
         if request.url is not None:
             report.url = request.url
@@ -74,6 +75,13 @@ class UrlReportService:
             report.status = request.status.value
         if request.remark is not None:
             report.remark = request.remark
+
+        # Human-over-AI: recording who approved/rejected the report and when,
+        # directly on the row (in addition to the url_reported audit trail),
+        # so "who reviewed this" doesn't require a join to see.
+        if status_changed and is_admin:
+            report.reviewed_by = user.user_id
+            report.reviewed_at = datetime.utcnow()
 
         report.updated_at = datetime.utcnow()
 
