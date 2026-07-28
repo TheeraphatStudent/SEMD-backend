@@ -63,6 +63,38 @@ def _get_current_user(
     return user
 
 
+def _get_current_user_optional(
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+):
+    """Best-effort caller identity for endpoints that must not require login
+    (e.g. the browser extension). Never raises: a missing header, a
+    malformed header, an expired/invalid token, or an unknown user id all
+    resolve to `None` (anonymous) instead of a 401 -- the caller proceeds
+    unauthenticated rather than being hard-blocked. `PredictionControl`,
+    `UrlFlagService.check_url_flag(_async)`, and `QueueService.add_to_retrain_queue`
+    already accept `user`/`user_id=None` end to end, so callers of this
+    dependency don't need extra None-handling beyond what they'd do anyway.
+    """
+    from models.db import User
+    from services.auth_service import AuthService
+
+    if not authorization:
+        return None
+
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        return None
+
+    try:
+        payload = AuthService.verify_token(parts[1], 'access')
+        user_id = int(payload.get('sub'))
+    except (HTTPException, ValueError, TypeError):
+        return None
+
+    return db.query(User).filter(User.user_id == user_id).first()
+
+
 def _require_admin(current_user=Depends(_get_current_user)):
     from libs.types.enums import RoleType
 
@@ -89,6 +121,7 @@ class AuthGuard:
     # Domain 10's ML training router, the first caller of `require_admin`.
     verify_bearer_token = staticmethod(_verify_bearer_token)
     get_current_user = staticmethod(_get_current_user)
+    get_current_user_optional = staticmethod(_get_current_user_optional)
     require_admin = staticmethod(_require_admin)
 
     @staticmethod

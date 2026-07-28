@@ -277,11 +277,11 @@ class OAuthService:
     ) -> User:
         print(user_info)
 
-        if provider == 'github':
-            user = db.query(User).filter(User.gh_id == user_info['id']).first()
-        elif provider == 'google':
+        if provider == 'google':
             user = db.query(User).filter(User.gg_id == user_info['id']).first()
         else:
+            # GitHub OAuth removed along with users.gh_id -- Google is the
+            # only supported login provider (see libs/types/enums.py::OAuthProviderType).
             user = None
 
         if user:
@@ -292,10 +292,7 @@ class OAuthService:
         existing_user = db.query(User).filter(
             User.email == user_info['email']).first()
         if existing_user:
-            if provider == 'github':
-                existing_user.gh_id = user_info['id']
-                existing_user.profile_img_uri = user_info['avatar_url']
-            elif provider == 'google':
+            if provider == 'google':
                 existing_user.gg_id = user_info['id']
                 existing_user.profile_img_uri = user_info['avatar_url']
             db.commit()
@@ -317,10 +314,7 @@ class OAuthService:
             role='MEMBER'
         )
 
-        if provider == 'github':
-            new_user.gh_id = user_info['id']
-            new_user.profile_img_uri = user_info['avatar_url']
-        elif provider == 'google':
+        if provider == 'google':
             new_user.gg_id = user_info['id']
             new_user.profile_img_uri = user_info['avatar_url']
 
