@@ -41,11 +41,16 @@ class ModelRegistryListResponse(BaseModel):
 class MLPredictResponse(BaseModel):
     url: str
     prediction: str
+    is_malicious: bool = False
     confidence: float
     probabilities: Optional[Dict[str, float]] = None
     model_id: int
     model_name: str
-    algorithm: str
+    model_version: str
+    model_alias: str
+    feature_schema_version: str
+    prediction_time_ms: float
+    algorithm: str = "unknown"
 
 
 class MLBatchPredictResponse(BaseModel):
