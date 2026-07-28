@@ -1,0 +1,15 @@
+flowchart TD
+    A[Request with Bearer token] --> B[AuthGuard.get_current_user]
+    B -->|invalid/expired/missing| C[401 Unauthorized]
+    B -->|valid| D{Endpoint requires admin?}
+    D -- No, own-resource endpoint --> E{Resource belongs to caller?}
+    D -- Yes --> F{role in ADMIN, SUPER_ADMIN?}
+    F -- No --> G[403 Forbidden]
+    F -- Yes --> H[Allowed]
+    E -- No --> I{caller is admin?}
+    E -- Yes --> H
+    I -- No --> G
+    I -- Yes --> H
+    H --> J{role-restricted field in payload? e.g. report.status, user.role}
+    J -- Yes, caller not SUPER_ADMIN/ADMIN as required --> G
+    J -- No / caller authorized --> K[Operation executed]

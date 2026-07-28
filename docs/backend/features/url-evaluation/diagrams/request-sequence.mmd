@@ -1,0 +1,17 @@
+flowchart TD
+    A[POST /prediction/predict or /ml/predict] --> B[AuthGuard.get_current_user]
+    B --> C[Extract URL list from body/text_file/csv_file]
+    C --> D[reject_unsafe_urls: lexical + DNS-resolved-IP check, all URLs concurrently]
+    D -- any URL unsafe --> E[422 ValidationError, code=UNSAFE_URL, per-URL reasons]
+    D -- all safe --> F{service_id provided?}
+    F -- No --> G[Resolve default active ML ServiceConf]
+    F -- Yes --> H[Use given service_id]
+    G --> I[PredictionService.predict_with_service]
+    H --> I
+    I --> J{ServiceConf.service_type}
+    J -- ML_MODEL --> K[Push job to ml_prediction_queue, poll ml_result:job_id]
+    J -- REST_API --> L[ThirdServiceExecutor.execute: admin-configured base_url, follow_redirects=False, size-capped]
+    K --> M[Check user URL flag]
+    L --> M
+    M --> N[Log usage, enqueue retrain candidate]
+    N --> O[Return typed response]
