@@ -1,6 +1,5 @@
--- Create database with UTF-8 encoding and UTC+7 timezone
-CREATE DATABASE "semd-db" WITH ENCODING 'UTF8' TEMPLATE template0;
-\c semd-db;
+-- The PostgreSQL container creates POSTGRES_DB before executing init scripts.
+-- This script therefore defines the schema in that selected database.
 SET timezone = 'UTC+7';
 
 -- ============================================================
