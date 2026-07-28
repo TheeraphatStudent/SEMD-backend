@@ -1,0 +1,214 @@
+name: OpenCodeReview
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+concurrency:
+  group: open-code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# `issues: write` is sufficient for a pull request's conversation comments.
+# `contents: read` is required to check out and fetch the reviewed commits.
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  fork-notice:
+    name: Fork pull request notice
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain fork safeguard
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '## OpenCodeReview skipped'
+            echo
+            echo 'This pull request originates from a fork, so OpenCodeReview was not run.'
+            echo 'The workflow uses the `pull_request` event and never exposes `OPENROUTER_API_KEY` to forked code.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  review:
+    name: Review pull request
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Check out the trusted base commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+
+      - name: Fetch and verify immutable pull-request commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA"
+          git cat-file -e "$BASE_SHA^{commit}"
+          git cat-file -e "$HEAD_SHA^{commit}"
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/open-code-review-changed-files.txt"
+          echo "Base commit: $BASE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Head commit: $HEAD_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install and verify OpenCodeReview
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install -g @alibaba-group/open-code-review
+          ocr --help >/dev/null
+          review_help="$(ocr review --help)"
+          grep -Fq -- '--from string' <<<"$review_help"
+          grep -Fq -- '--to string' <<<"$review_help"
+          grep -Fq -- '--format string' <<<"$review_help"
+          grep -Fq -- '--audience string' <<<"$review_help"
+
+      - name: Run OpenCodeReview
+        shell: bash
+        env:
+          OCR_LLM_TOKEN: ${{ secrets.OPENROUTER_API_KEY }}
+          OCR_LLM_URL: https://openrouter.ai/api/v1/chat/completions
+          OCR_LLM_MODEL: openrouter/free
+          OCR_USE_ANTHROPIC: "false"
+        run: |
+          set -euo pipefail
+          if [[ -z "${OCR_LLM_TOKEN:-}" ]]; then
+            echo '::error::OPENROUTER_API_KEY is unavailable; OpenCodeReview cannot authenticate to OpenRouter.'
+            exit 1
+          fi
+
+          result_file="$RUNNER_TEMP/open-code-review-result.json"
+          error_file="$RUNNER_TEMP/open-code-review-error.log"
+          if ! ocr review \
+            --from "$BASE_SHA" \
+            --to "$HEAD_SHA" \
+            --format json \
+            --audience agent >"$result_file" 2>"$error_file"; then
+            if grep -Eqi '(unauthori[sz]ed|authentication|invalid.*(api.?key|token)|401)' "$error_file"; then
+              echo '::error::OpenRouter authentication failed during OpenCodeReview.'
+            elif grep -Eqi '(rate.?limit|quota|too many requests|429)' "$error_file"; then
+              echo '::error::The configured OpenRouter free model is rate-limited or quota-limited.'
+            elif grep -Eqi '(model.*(unavailable|not found)|unavailable.*model|404)' "$error_file"; then
+              echo '::error::The configured OpenRouter free model is unavailable.'
+            else
+              echo '::error::OpenCodeReview failed. Check the command, LLM configuration, and provider availability.'
+            fi
+            exit 1
+          fi
+
+          if [[ ! -s "$result_file" ]]; then
+            echo '::error::OpenCodeReview completed without review output.'
+            exit 1
+          fi
+
+      - name: Validate and render review result
+        shell: bash
+        env:
+          OCR_LLM_MODEL: openrouter/free
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+
+          const resultPath = `${process.env.RUNNER_TEMP}/open-code-review-result.json`;
+          const commentPath = `${process.env.RUNNER_TEMP}/open-code-review-comment.md`;
+          let result;
+          try {
+            result = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+          } catch (error) {
+            throw new Error(`OpenCodeReview returned invalid JSON: ${error.message}`);
+          }
+
+          if (!result || !Array.isArray(result.comments)) {
+            throw new Error('OpenCodeReview JSON does not contain a comments array.');
+          }
+          if (!['success', 'skipped'].includes(result.status)) {
+            throw new Error(`OpenCodeReview finished with status ${JSON.stringify(result.status)}; refusing to post an incomplete review.`);
+          }
+
+          const truncate = (value, limit) => {
+            const text = String(value ?? '').trim();
+            return text.length <= limit ? text : `${text.slice(0, limit - 1)}…`;
+          };
+          const lines = [
+            '<!-- open-code-review-result -->',
+            '## OpenCodeReview',
+            '',
+            `- Status: \`${result.status}\``,
+            `- Model: \`${process.env.OCR_LLM_MODEL}\``,
+            `- Base commit: \`${process.env.BASE_SHA}\``,
+            `- Head commit: \`${process.env.HEAD_SHA}\``,
+            '',
+            '## Review findings',
+            '',
+          ];
+
+          if (result.comments.length === 0) {
+            lines.push('No actionable issues were found.');
+            if (result.message) lines.push('', `OpenCodeReview: ${truncate(result.message, 1000)}`);
+          } else {
+            for (const [index, finding] of result.comments.entries()) {
+              const location = finding.start_line
+                ? `${finding.path}:${finding.start_line}${finding.end_line && finding.end_line !== finding.start_line ? `-${finding.end_line}` : ''}`
+                : finding.path || 'file-level finding';
+              lines.push(`### ${index + 1}. \`${location}\``, '', truncate(finding.content, 6000), '');
+            }
+          }
+
+          let body = `${lines.join('\n').trim()}\n`;
+          if (body.length > 60000) {
+            body = `${body.slice(0, 59600)}\n\n_Additional findings were omitted to stay within GitHub's comment size limit._\n`;
+          }
+          fs.writeFileSync(commentPath, body, 'utf8');
+          NODE
+          test -s "$RUNNER_TEMP/open-code-review-comment.md"
+
+      - name: Create or update the OpenCodeReview comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- open-code-review-result -->';
+            const body = fs.readFileSync(`${process.env.RUNNER_TEMP}/open-code-review-comment.md`, 'utf8');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+              core.info(`Updated OpenCodeReview comment ${existing.id}.`);
+            } else {
+              const created = await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              core.info(`Created OpenCodeReview comment ${created.data.id}.`);
+            }
