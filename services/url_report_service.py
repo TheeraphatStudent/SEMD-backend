@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import HTTPException, status
@@ -79,9 +79,16 @@ class UrlReportService:
         # Human-over-AI: recording who approved/rejected the report and when,
         # directly on the row (in addition to the url_reported audit trail),
         # so "who reviewed this" doesn't require a join to see.
+        # `is_admin` is redundant here -- the guard above already raises for any
+        # non-admin attempting a status change, so status_changed implies
+        # is_admin. Kept deliberately as defense in depth: if that guard is ever
+        # loosened, this must not start attributing reviews to non-admins.
+        # `datetime.now(timezone.utc)` (not `utcnow()`): reviewed_at is a
+        # TIMESTAMPTZ column, and a naive datetime would be reinterpreted in the
+        # server's local timezone on insert.
         if status_changed and is_admin:
             report.reviewed_by = user.user_id
-            report.reviewed_at = datetime.utcnow()
+            report.reviewed_at = datetime.now(timezone.utc)
 
         report.updated_at = datetime.utcnow()
 

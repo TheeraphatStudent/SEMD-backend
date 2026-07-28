@@ -6,6 +6,16 @@
 --   psql "$DATABASE_URL" -f docker/postgres/migrations/0001_oauth_cleanup_and_report_review.sql
 --
 -- Corresponding init.sql DDL was also updated so a fresh install matches.
+--
+-- IRREVERSIBLE: dropping users.gh_id below destroys the only link back to a
+-- GitHub-provisioned account. Those users were created with password_hash=''
+-- (services/oauth_service.py), so unless their email also matches a Google
+-- account they lose their only way to log in. Run this pre-check by hand
+-- first -- it is deliberately NOT part of the transaction below:
+--
+--   -- Before applying: check how many users would lose their only login method.
+--   -- SELECT count(*) FROM users WHERE gh_id IS NOT NULL AND gg_id IS NULL;
+--   -- Back up the `users` table (e.g. `pg_dump -t users`) before proceeding if that count is non-zero.
 
 BEGIN;
 

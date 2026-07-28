@@ -43,7 +43,18 @@ class PredictionService:
                 detail=f"Service configuration {service_id} not found or inactive"
             )
 
-        if user_id and service_conf.user_id and service_conf.user_id != user_id:
+        # Ownership check. The leading `user_id and ...` that used to be here
+        # short-circuited the WHOLE check to False for anonymous callers, so
+        # once /prediction/predict started accepting `user_id=None` an
+        # unauthenticated caller could pass any `service_id` and use another
+        # user's private ServiceConf -- including a REST_API one, whose linked
+        # ThirdServiceConf.headers_json holds that owner's real third-party
+        # API credentials. Anonymous (`user_id is None`) must be treated as
+        # "not the owner", exactly like an authenticated non-owner.
+        # An owner-less config (`service_conf.user_id IS NULL`) stays open, as
+        # does an admin-owned one (the branch below) -- that is how a shared,
+        # system-level service is expressed in this schema.
+        if service_conf.user_id and service_conf.user_id != user_id:
             owner_stmt = select(User).where(User.user_id == service_conf.user_id)
             owner_result = await self.db.execute(owner_stmt)
             owner = owner_result.scalar_one_or_none()

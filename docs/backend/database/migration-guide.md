@@ -23,7 +23,7 @@ Adopt Alembic (the standard SQLAlchemy migration tool) before the next schema ch
 
 ## Rollback notes for this refactor's changes
 
-No migration exists to roll back — see above, no schema was changed. Code-level rollback for any domain's changes is `git checkout -- <files>`, documented per-domain in each `docs/backend/features/<domain>/README.md`.
+As of that point in the refactor (Domains 1–13, before the advisor-feedback pass described in the next section), no migration existed to roll back — see above, no schema was changed. Code-level rollback for any domain's changes is `git checkout -- <files>`, documented per-domain in each `docs/backend/features/<domain>/README.md`. This is no longer true repo-wide: a real migration was added afterwards, and its rollback notes are in the section below.
 
 ## First real schema change: `docker/postgres/migrations/`
 
