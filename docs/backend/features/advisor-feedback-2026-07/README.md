@@ -370,3 +370,68 @@ If the advisor's comment is about the **thesis's own** data-dictionary table (a
 document outside this repo), the same rule — drop textual nullable notes, keep only
 the Nullable column value — should be applied there directly; that document isn't
 in this repo and wasn't found by grep, so it can't be edited from here.
+
+## 6. Post-review fixes and open operational items
+
+An independent review of the diff above (commit `7707eae`) found a Critical
+authorization bypass, fixed in a follow-up commit (`f001b21`) on the same branch:
+switching `/prediction/predict` to `user_id=None` for anonymous callers also
+silently disabled the ownership check in `services/prediction_service.py` (the
+leading `user_id and` made the whole guard short-circuit False whenever there was
+no caller identity) — meaning an anonymous caller, or one with an expired token,
+could use *any* `service_id`, including another user's private `ServiceConf` and
+the third-party API credentials linked to it via `ThirdServiceConf.headers_json`.
+Fixed by removing that leading conjunct so the ownership check applies to
+anonymous callers exactly as it does to non-owning authenticated ones; covered by
+a new test (`tests/unit/test_prediction_service_ownership.py`). Full suite is now
+112 tests (86 original + 26 added across this fix and its own test coverage), all
+passing.
+
+Three items surfaced by that same review still need action, listed here rather
+than fixed silently:
+
+**Pre-deploy check — default ML service ownership.** `init.sql` seeds no
+`service_conf` row, so "the default ML service" is whichever active `ML_MODEL`
+config was created first, by whoever. If that row is owned by a non-admin
+MEMBER, every anonymous `/prediction/predict` call (the exact flow this pass
+exists to enable) will now correctly 403 under the fixed ownership check —
+which is *correct* per-request behavior, but means the anonymous flow won't
+actually work in an environment where the seed data wasn't set up with this in
+mind. Before deploying this change, run:
+```sql
+SELECT service_conf_id, user_id FROM service_conf
+WHERE is_active AND service_type='ML_MODEL' ORDER BY created_at ASC LIMIT 1;
+```
+and if `user_id` is a non-admin, set it to `NULL` (unowned/system config) or to
+an admin/super-admin-owned row.
+
+**`semd-frontend`'s generated API client is stale beyond this pass's scope, and
+regenerating it in full currently breaks the frontend build.** Attempting
+`npm run generate:api` end-to-end (to drop the now-removed `gh_id`/`gg_re_token`
+fields and the retired `github` enum value from the generated TypeScript client)
+surfaced an unrelated, pre-existing backend bug: `PredictionDetailResponse` is
+defined **twice** — `models/prediction/prediction_response.py` (generic,
+`data: Any`-shaped) and `models/stats/prediction.py` (`data: list[PredictionDetailItem]`)
+— and `routers/stat/prediction_stat_route.py` imports the generic one via
+`models/__init__.py`'s re-export, not the properly-typed one. Orval faithfully
+generates `data: unknown` for it, which breaks
+`semd-frontend/src/services/scan.service.ts`'s `response.data.data.find(...)`
+(fails `tsc --noEmit`). Since this is a real, unrelated backend contract bug —
+not something to guess a fix for under this pass — the full client regeneration
+was reverted rather than committed broken. **Confirmed harmless in the
+meantime**: both this review and the prior one grepped `semd-frontend/src`
+outside `generated/` for reads of `gh_id`/`gg_re_token`/the `github` enum value
+and found none, so the stale generated types are a documentation/hygiene issue
+only, not a runtime risk. Recommended order: fix the `PredictionDetailResponse`
+naming collision first (decide which of the two class definitions the route
+should actually use), then run a full `npm run generate:api` once, rather than
+patching the generated file by hand.
+
+**Companion commits, for completeness:** `semd-extension@bb32e6b` fixes a second,
+separate client-side gate (`src/popup/index.tsx`) that also blocked the popup UI
+entirely when no Access Code was configured — `9827da2` alone (removing the
+`x-api-key` pre-flight block in `api.ts`) wasn't sufficient on its own to make the
+extension actually usable without one. `semd-frontend@be986da` removes the
+GitHub login button and its NextAuth provider wiring, since GitHub OAuth login no
+longer exists on the backend (`libs/types/enums.py::OAuthProviderType`) as of
+this pass — left broken otherwise (silent 422 on click).
