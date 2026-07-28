@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from models.system_config_model import SystemConfigModel, SystemConfigUpdateRequest
+from models.service.system_config_model import SystemConfigModel, SystemConfigUpdateRequest
 from services.system_config_service import SystemConfigService
 
 

@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 from decimal import Decimal
 
 from services.model_registry_service import ModelRegistryService
-from database import ModelRegistry
+from models.db import ModelRegistry
 from libs.types.enums import ModelStageType
 
 

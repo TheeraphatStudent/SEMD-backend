@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 
-from database import User, AccessKey
-from models.access_key_request import (
+from models.db import User, AccessKey
+from models.access.access_key_request import (
     AccessKeyCreateRequest,
     AccessKeyAdminCreateRequest, AccessKeyAdminUpdateRequest
 )
-from models.access_key_model import AccessKeyModel
+from models.access.access_key_model import AccessKeyModel
 from services.access_key_service import AccessKeyService
 from libs.pagination import PaginationParams, PaginationMeta, create_pagination_meta
 

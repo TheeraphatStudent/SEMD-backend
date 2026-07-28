@@ -3,12 +3,12 @@ from typing import Dict, Any, List
 
 from services.third_service_service import ThirdServiceService
 from services.client.third_service_executor import ThirdServiceExecutor
-from models.third_service_model import (
+from models.service.third_service_model import (
     ThirdServiceCreateRequest,
     ThirdServiceUpdateRequest,
     ThirdServiceResponse
 )
-from database import ThirdServiceConf
+from models.db import ThirdServiceConf
 
 
 class ThirdServiceControl:

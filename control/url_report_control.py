@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import User, UrlReport, UrlReported
-from models.url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
-from models.url_report_model import UrlReportModel
-from models.url_reported_model import UrlReportedModel
+from models.db import User, UrlReport, UrlReported
+from models.report.url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
+from models.report.url_report_model import UrlReportModel
+from models.report.url_reported_model import UrlReportedModel
 from services.url_report_service import UrlReportService
 
 
