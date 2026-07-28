@@ -1,14 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from typing import Dict, Any, List, Optional
-from fastapi import HTTPException
+from typing import Any, Dict, List, Optional
 
-from services.prediction_service import PredictionService
-from services.usage_log_service import UsageLogService
-from services.url_flag_service import UrlFlagService
-from services.queue_service import QueueService
-from database import User, ServiceConf
+from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.security import reject_unsafe_urls
+from models.db import ServiceConf, User
 from libs.types.enums import ServiceType
+from services.prediction_service import PredictionService
+from services.queue_service import QueueService
+from services.url_flag_service import UrlFlagService
+from services.usage_log_service import UsageLogService
 
 
 class PredictionControl:
@@ -21,6 +23,8 @@ class PredictionControl:
         self.usage_log_service = UsageLogService(db)
 
     async def predict(self, urls: List[str], service_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        await reject_unsafe_urls(urls)
+
         if not service_id:
             service_id = await self._get_default_ml_service()
             if not service_id:

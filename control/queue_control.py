@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from models.queue_model import QueueItemResponse
+from models.access.queue_model import QueueItemResponse
 from services.queue_service import QueueService
 
 

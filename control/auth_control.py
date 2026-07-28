@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from typing import Union
 import secrets
 
-from models.auth_model import (
+from models.auth.auth_model import (
     AuthLoginRequest, AuthLoginProviderRequest, TwoFAVerifyRequest,
     RefreshTokenRequest, TwoFAEnableRequest, TokenPairResponse,
     PreAuthResponse, TwoFASetupResponse, OAuthDeviceCodeRequest,
@@ -11,15 +11,15 @@ from models.auth_model import (
     OAuthAuthorizationResponse, OAuthCallbackRequest, RegisterRequest,
     RegisterResponse, CreateUserRequest, CreateUserResponse
 )
-from models.user_request import (
+from models.auth.user_request import (
     UserUpdateRequest, PasswordResetRequest,
     AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
 )
-from models.user_model import UserModel
+from models.auth.user_model import UserModel
 from services.auth_service import AuthService
 from services.oauth_service import OAuthService
 from services.two_factor_service import TwoFactorService
-from database import User
+from models.db import User
 from libs.types.enums import RoleType
 
 

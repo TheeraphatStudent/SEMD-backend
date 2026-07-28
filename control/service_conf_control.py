@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
 from services.service_conf_service import ServiceConfService
-from database import ServiceConf
+from models.db import ServiceConf
 
 
 class ServiceConfControl:

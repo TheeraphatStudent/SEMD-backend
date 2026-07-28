@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import User, UrlFlag
-from models.url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
-from models.url_flag_model import UrlFlagModel
+from models.db import User, UrlFlag
+from models.report.url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
+from models.report.url_flag_model import UrlFlagModel
 from services.url_flag_service import UrlFlagService
 
 
