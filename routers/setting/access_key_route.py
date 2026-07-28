@@ -1,22 +1,21 @@
-from routers import BaseRoute
-from models import BaseResponseModel
-from models.access_key_request import (
-    AccessKeyCreateRequest,
-    AccessKeyAdminCreateRequest, AccessKeyAdminUpdateRequest
-)
-from fastapi import HTTPException, Depends, Query
-from sqlalchemy.orm import Session
-from typing import Any, List
-from pydantic import Field
+import hashlib
 import secrets
 import string
 from datetime import datetime, timedelta
+from typing import Any, List
+
+from fastapi import Depends, HTTPException, Query
+from pydantic import Field
+from sqlalchemy.orm import Session
 
 from control.access_key_control import AccessKeyControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_db
-from database import User
-from libs.pagination import PaginationParams, PaginationMeta
+from libs.pagination import PaginationMeta, PaginationParams
 from libs.types.enums import RoleType
+from models import BaseResponseModel
+from models.access.access_key_request import AccessKeyAdminCreateRequest, AccessKeyAdminUpdateRequest, AccessKeyCreateRequest
+from routers import BaseRoute
 
 
 class AccessKeyResponse(BaseResponseModel):
@@ -147,17 +146,12 @@ class AccessKeyRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            result = AccessKeyControl.create_key(current_user, request, db)
-            return AccessKeyResponse(
-                status=201,
-                message="Access key created successfully. Save the access_key, it won't be shown again.",
-                data=result
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.create_key(current_user, request, db)
+        return AccessKeyResponse(
+            status=201,
+            message="Access key created successfully. Save the access_key, it won't be shown again.",
+            data=result
+        )
 
     async def reset_key(
         self,
@@ -165,17 +159,12 @@ class AccessKeyRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            result = AccessKeyControl.reset_key(current_user, key_id, db)
-            return AccessKeyResponse(
-                status=200,
-                message="Access key reset successfully. Save the new access_key, it won't be shown again.",
-                data=result
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.reset_key(current_user, key_id, db)
+        return AccessKeyResponse(
+            status=200,
+            message="Access key reset successfully. Save the new access_key, it won't be shown again.",
+            data=result
+        )
 
     async def get_my_keys(
         self,
@@ -183,16 +172,13 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db),
         pagination: PaginationParams = Depends()
     ):
-        try:
-            keys, meta = AccessKeyControl.get_user_keys(current_user, pagination, db)
-            return AccessKeyListResponse(
-                status=200,
-                message="Access keys retrieved successfully",
-                data=keys,
-                pagination=meta
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        keys, meta = AccessKeyControl.get_user_keys(current_user, pagination, db)
+        return AccessKeyListResponse(
+            status=200,
+            message="Access keys retrieved successfully",
+            data=keys,
+            pagination=meta
+        )
 
     async def get_usage_monthly(
         self,
@@ -202,13 +188,8 @@ class AccessKeyRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            result = AccessKeyControl.get_key_usage_monthly(current_user, key_id, year, month, db)
-            return AccessKeyResponse(status=200, message="Monthly usage retrieved", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.get_key_usage_monthly(current_user, key_id, year, month, db)
+        return AccessKeyResponse(status=200, message="Monthly usage retrieved", data=result)
 
     async def get_usage_yearly(
         self,
@@ -217,13 +198,8 @@ class AccessKeyRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            result = AccessKeyControl.get_key_usage_yearly(current_user, key_id, year, db)
-            return AccessKeyResponse(status=200, message="Yearly usage retrieved", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.get_key_usage_yearly(current_user, key_id, year, db)
+        return AccessKeyResponse(status=200, message="Yearly usage retrieved", data=result)
 
     async def get_usage_all_time(
         self,
@@ -231,13 +207,8 @@ class AccessKeyRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            result = AccessKeyControl.get_key_usage_all_time(current_user, key_id, db)
-            return AccessKeyResponse(status=200, message="All-time usage retrieved", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.get_key_usage_all_time(current_user, key_id, db)
+        return AccessKeyResponse(status=200, message="All-time usage retrieved", data=result)
 
     async def admin_get_all_keys(
         self,
@@ -246,18 +217,13 @@ class AccessKeyRoute(BaseRoute):
         pagination: PaginationParams = Depends()
     ):
         self._check_admin(current_user)
-        try:
-            keys, meta = AccessKeyControl.admin_get_all_keys(pagination, db)
-            return AccessKeyListResponse(
-                status=200,
-                message="All access keys retrieved",
-                data=keys,
-                pagination=meta
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        keys, meta = AccessKeyControl.admin_get_all_keys(pagination, db)
+        return AccessKeyListResponse(
+            status=200,
+            message="All access keys retrieved",
+            data=keys,
+            pagination=meta
+        )
 
     async def admin_create_key(
         self,
@@ -266,17 +232,12 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin(current_user)
-        try:
-            result = AccessKeyControl.admin_create_key(request, db)
-            return AccessKeyResponse(
-                status=201,
-                message="Access key created for user. Save the access_key, it won't be shown again.",
-                data=result
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.admin_create_key(request, db)
+        return AccessKeyResponse(
+            status=201,
+            message="Access key created for user. Save the access_key, it won't be shown again.",
+            data=result
+        )
 
     async def admin_update_key(
         self,
@@ -286,13 +247,8 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin(current_user)
-        try:
-            result = AccessKeyControl.admin_update_key(key_id, request, db)
-            return AccessKeyResponse(status=200, message="Access key updated", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.admin_update_key(key_id, request, db)
+        return AccessKeyResponse(status=200, message="Access key updated", data=result)
 
     async def admin_delete_key(
         self,
@@ -301,13 +257,8 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin(current_user)
-        try:
-            AccessKeyControl.admin_delete_key(key_id, db)
-            return BaseResponseModel(status=200, message="Access key deleted")
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        AccessKeyControl.admin_delete_key(key_id, db)
+        return BaseResponseModel(status=200, message="Access key deleted")
 
     async def admin_get_usage_monthly(
         self,
@@ -318,13 +269,8 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin(current_user)
-        try:
-            result = AccessKeyControl.admin_get_key_usage_monthly(key_id, year, month, db)
-            return AccessKeyResponse(status=200, message="Monthly usage retrieved", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.admin_get_key_usage_monthly(key_id, year, month, db)
+        return AccessKeyResponse(status=200, message="Monthly usage retrieved", data=result)
 
     async def admin_get_usage_yearly(
         self,
@@ -334,13 +280,8 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin(current_user)
-        try:
-            result = AccessKeyControl.admin_get_key_usage_yearly(key_id, year, db)
-            return AccessKeyResponse(status=200, message="Yearly usage retrieved", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.admin_get_key_usage_yearly(key_id, year, db)
+        return AccessKeyResponse(status=200, message="Yearly usage retrieved", data=result)
 
     async def admin_get_usage_all_time(
         self,
@@ -349,13 +290,8 @@ class AccessKeyRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin(current_user)
-        try:
-            result = AccessKeyControl.admin_get_key_usage_all_time(key_id, db)
-            return AccessKeyResponse(status=200, message="All-time usage retrieved", data=result)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = AccessKeyControl.admin_get_key_usage_all_time(key_id, db)
+        return AccessKeyResponse(status=200, message="All-time usage retrieved", data=result)
 
     async def create_extension_token(
         self,
@@ -365,10 +301,13 @@ class AccessKeyRoute(BaseRoute):
         try:
             alphabet = string.ascii_letters + string.digits
             token = ''.join(secrets.choice(alphabet) for _ in range(6))
-            
+
             expiration_date = datetime.utcnow() + timedelta(days=30)
-            
-            current_user.ex_acc_token = token
+
+            # Hashed at rest, matching the API-access-key pattern (Domain 3) --
+            # previously stored in plaintext, see
+            # docs/backend/features/extension-access-codes/README.md.
+            current_user.ex_acc_token = hashlib.sha256(token.encode()).hexdigest()
             current_user.ex_acc_token_exp = expiration_date
             current_user.updated_at = datetime.utcnow()
             
@@ -384,6 +323,10 @@ class AccessKeyRoute(BaseRoute):
                     "expires_in_days": 30
                 }
             )
-        except Exception as e:
+        except Exception:
+            # Explicit rollback preserved here (unlike the pure-passthrough
+            # sites above) because this method mutates `current_user` and
+            # commits directly in the router rather than delegating to a
+            # service/control layer -- the only site in this file that does.
             db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise

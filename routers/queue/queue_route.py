@@ -1,15 +1,13 @@
-from routers import BaseRoute
-from models import BaseResponseModel
-from models.queue_model import QueueItemResponse
-from fastapi import HTTPException, Depends
-from sqlalchemy.orm import Session
-from typing import List, Any
+
+from fastapi import Depends
 from pydantic import Field
+from sqlalchemy.orm import Session
 
 from control.queue_control import QueueControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_db
-from database import User
-from libs.types.enums import RoleType
+from models import BaseResponseModel
+from routers import BaseRoute
 
 
 class QueueListResponse(BaseResponseModel):
@@ -33,15 +31,19 @@ class QueueRoute(BaseRoute):
 
     async def get_retrain_queue(
         self,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        # Was any-authenticated-user. This endpoint exposes OTHER users'
+        # username/user_id/profile_img_url tied to specific URLs they
+        # predicted (see models/queue_model.py::PredictByInfo) -- an
+        # internal ML-pipeline monitoring view, not a user-facing feature
+        # (no owner-scoped "my queue items" variant exists, unlike
+        # /report/me). Gated to admin: see
+        # docs/backend/features/dataset-retraining/README.md.
+        current_user: User = Depends(AuthGuard.require_admin),
         db: Session = Depends(get_db)
     ):
-        try:
-            queue_data = QueueControl.get_retrain_queue()
-            return QueueListResponse(
-                status=200,
-                message="Retrain queue retrieved successfully",
-                data=queue_data
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        queue_data = QueueControl.get_retrain_queue()
+        return QueueListResponse(
+            status=200,
+            message="Retrain queue retrieved successfully",
+            data=queue_data
+        )

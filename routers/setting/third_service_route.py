@@ -1,18 +1,20 @@
-from routers import BaseRoute
+from typing import Any, Dict, List
+
 from fastapi import Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Dict, Any, List
 
 from control.third_service_control import ThirdServiceControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_async_db
-from database import User
-from models.third_service_model import (
+from models.common.base_response_model import BaseResponseModel
+from models.service.third_service_model import (
     ThirdServiceCreateRequest,
-    ThirdServiceUpdateRequest,
     ThirdServiceExecuteRequest,
-    ThirdServiceResponse
+    ThirdServiceResponse,
+    ThirdServiceUpdateRequest,
 )
-from models.base_response_model import BaseResponseModel
+from routers import BaseRoute
+
 
 class ThirdServiceRoute(BaseRoute):
     def __init__(self):
@@ -117,7 +119,7 @@ class ThirdServiceRoute(BaseRoute):
         control = ThirdServiceControl(db, current_user.user_id)
         await control.delete(id)
         return BaseResponseModel(
-            status="success",
+            status=200,
             message="Third-party service deleted successfully"
         )
 

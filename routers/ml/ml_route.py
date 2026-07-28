@@ -1,27 +1,29 @@
-from routers import BaseRoute
-from fastapi import Depends, status, Query, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import Optional
 
-from guard.auth_guard import AuthGuard, get_async_db
-from database import User
+from fastapi import Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from control.model_registry_control import ModelRegistryControl
-from services.ml_prediction_service import MLPredictionService
+from core.exceptions import NotImplementedFeatureError
+from models.db import User
+from guard.auth_guard import AuthGuard, get_async_db
+from libs.types.enums import ModelStageType
 from models import MLServiceResponse
-from models.model_registry_request import (
+from models.service.model_registry_request import (
+    MLBatchPredictRequest,
+    MLPredictRequest,
     ModelRegistryCreateRequest,
     ModelRegistryUpdateRequest,
     ModelStageUpdateRequest,
-    MLPredictRequest,
-    MLBatchPredictRequest
 )
-from models.model_registry_response import (
-    ModelRegistryResponse,
-    ModelRegistryListResponse,
+from models.service.model_registry_response import (
+    MLBatchPredictResponse,
     MLPredictResponse,
-    MLBatchPredictResponse
+    ModelRegistryListResponse,
+    ModelRegistryResponse,
 )
-from libs.types.enums import ModelStageType
+from routers import BaseRoute
+from services.ml_prediction_service import MLPredictionService
 
 
 class MLRoute(BaseRoute):
@@ -121,13 +123,17 @@ class MLRoute(BaseRoute):
             description="Predict multiple URLs"
         )(self.predict_batch)
 
-    def get_service(self):
-        return None
+    async def get_service(self, current_user: User = Depends(AuthGuard.get_current_user)):
+        # Was `return None` against a declared response_model=MLServiceResponse
+        # -- same response-validation-crash-on-every-call bug fixed for the
+        # 32 Dashboard/Stat stubs in Domain 9. Same fix: authenticated,
+        # honest 501 instead of a silent 500.
+        raise NotImplementedFeatureError('ML service status endpoint is not implemented yet')
 
     async def create_model(
         self,
         request: ModelRegistryCreateRequest,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)
@@ -195,7 +201,7 @@ class MLRoute(BaseRoute):
         self,
         model_id: int,
         request: ModelRegistryUpdateRequest,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)
@@ -207,7 +213,7 @@ class MLRoute(BaseRoute):
         self,
         model_id: int,
         request: ModelStageUpdateRequest,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)
@@ -217,7 +223,7 @@ class MLRoute(BaseRoute):
     async def promote_to_production(
         self,
         model_id: int,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)
@@ -227,7 +233,7 @@ class MLRoute(BaseRoute):
     async def activate_model(
         self,
         model_id: int,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)
@@ -237,7 +243,7 @@ class MLRoute(BaseRoute):
     async def deactivate_model(
         self,
         model_id: int,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)
@@ -247,7 +253,7 @@ class MLRoute(BaseRoute):
     async def delete_model(
         self,
         model_id: int,
-        current_user: User = Depends(AuthGuard.get_current_user),
+        current_user: User = Depends(AuthGuard.require_admin),
         db: AsyncSession = Depends(get_async_db)
     ):
         control = ModelRegistryControl(db, current_user.user_id)

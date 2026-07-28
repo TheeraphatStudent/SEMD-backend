@@ -1,19 +1,18 @@
-from routers import BaseRoute
-from models import BaseResponseModel
-from models.user_request import (
-    AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
-)
-from models.user_model import UserModel
-from fastapi import HTTPException, Depends, Query
-from sqlalchemy.orm import Session
 from typing import List
+
+from fastapi import Depends, HTTPException
 from pydantic import Field
+from sqlalchemy.orm import Session
 
 from control.auth_control import AuthControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_db
-from database import User
-from libs.pagination import PaginationParams, PaginationMeta, create_pagination_meta
+from libs.pagination import PaginationMeta, PaginationParams, create_pagination_meta
 from libs.types.enums import RoleType
+from models import BaseResponseModel
+from models.auth.user_model import UserModel
+from models.auth.user_request import AdminCreateUserRequest, AdminPasswordResetRequest, AdminUpdateUserRequest
+from routers import BaseRoute
 
 
 class UserListResponse(BaseResponseModel):
@@ -90,17 +89,14 @@ class UserRoute(BaseRoute):
         pagination: PaginationParams = Depends()
     ):
         self._check_admin_permission(current_user)
-        try:
-            users, total = AuthControl.admin_get_all_users(db, pagination.offset, pagination.limit)
-            meta = create_pagination_meta(pagination.page, pagination.page_size, total)
-            return UserListResponse(
-                status=200,
-                message="Users retrieved successfully",
-                data=users,
-                pagination=meta
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        users, total = AuthControl.admin_get_all_users(db, pagination.offset, pagination.limit)
+        meta = create_pagination_meta(pagination.page, pagination.page_size, total)
+        return UserListResponse(
+            status=200,
+            message="Users retrieved successfully",
+            data=users,
+            pagination=meta
+        )
 
     async def create_user(
         self,
@@ -109,17 +105,12 @@ class UserRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin_permission(current_user)
-        try:
-            new_user = AuthControl.admin_create_user(request, current_user, db)
-            return UserResponse(
-                status=201,
-                message="User created successfully",
-                data=new_user
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        new_user = AuthControl.admin_create_user(request, current_user, db)
+        return UserResponse(
+            status=201,
+            message="User created successfully",
+            data=new_user
+        )
 
     async def get_user_by_id(
         self,
@@ -128,17 +119,12 @@ class UserRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin_permission(current_user)
-        try:
-            user = AuthControl.admin_get_user_by_id(user_id, db)
-            return UserResponse(
-                status=200,
-                message="User retrieved successfully",
-                data=user
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        user = AuthControl.admin_get_user_by_id(user_id, db)
+        return UserResponse(
+            status=200,
+            message="User retrieved successfully",
+            data=user
+        )
 
     async def update_user(
         self,
@@ -148,17 +134,12 @@ class UserRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin_permission(current_user)
-        try:
-            updated_user = AuthControl.admin_update_user(user_id, request, current_user, db)
-            return UserResponse(
-                status=200,
-                message="User updated successfully",
-                data=updated_user
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        updated_user = AuthControl.admin_update_user(user_id, request, current_user, db)
+        return UserResponse(
+            status=200,
+            message="User updated successfully",
+            data=updated_user
+        )
 
     async def reset_user_password(
         self,
@@ -168,16 +149,11 @@ class UserRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin_permission(current_user)
-        try:
-            AuthControl.admin_reset_user_password(user_id, request, current_user, db)
-            return BaseResponseModel(
-                status=200,
-                message="User password reset successfully"
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        AuthControl.admin_reset_user_password(user_id, request, current_user, db)
+        return BaseResponseModel(
+            status=200,
+            message="User password reset successfully"
+        )
 
     async def delete_user(
         self,
@@ -186,13 +162,8 @@ class UserRoute(BaseRoute):
         db: Session = Depends(get_db)
     ):
         self._check_admin_permission(current_user)
-        try:
-            AuthControl.admin_delete_user(user_id, current_user, db)
-            return BaseResponseModel(
-                status=200,
-                message="User deleted successfully"
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        AuthControl.admin_delete_user(user_id, current_user, db)
+        return BaseResponseModel(
+            status=200,
+            message="User deleted successfully"
+        )

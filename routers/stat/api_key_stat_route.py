@@ -1,8 +1,18 @@
-from models import ApiKeyStatResponse, ApiKeyUsageResponse, ApiKeyTrendResponse, ApiEndpointStatResponse
+from fastapi import Depends
+
+from core.exceptions import NotImplementedFeatureError
+from models.db import User
+from guard.auth_guard import AuthGuard
+from models import ApiEndpointStatResponse, ApiKeyStatResponse, ApiKeyTrendResponse, ApiKeyUsageResponse
 from routers import BaseRoute
 
+
 class ApiKeyStatRoute(BaseRoute):
-  def __init__(self):
+    """See routers/dashboard/dashboard_route.py's docstring -- same finding
+    (unauthenticated `pass` stubs failing response validation on every call),
+    same fix (authenticated, honest 501 via NotImplementedFeatureError)."""
+
+    def __init__(self):
         super().__init__(
             prefix="/stat/api-key",
             tags=["stat-api-key"],
@@ -14,14 +24,14 @@ class ApiKeyStatRoute(BaseRoute):
         self.router.get('/trend', response_model=ApiKeyTrendResponse)(self.get_api_key_trend)
         self.router.get('/endpoint', response_model=ApiEndpointStatResponse)(self.get_api_endpoint_stat)
 
-  async def get_api_key_stat(self):
-      pass
-  
-  async def get_api_key_usage(self):
-      pass
-  
-  async def get_api_key_trend(self):
-      pass
-  
-  async def get_api_endpoint_stat(self):
-      pass
+    async def get_api_key_stat(self, current_user: User = Depends(AuthGuard.get_current_user)):
+        raise NotImplementedFeatureError('API key statistics are not implemented yet')
+
+    async def get_api_key_usage(self, current_user: User = Depends(AuthGuard.get_current_user)):
+        raise NotImplementedFeatureError('API key usage statistics are not implemented yet')
+
+    async def get_api_key_trend(self, current_user: User = Depends(AuthGuard.get_current_user)):
+        raise NotImplementedFeatureError('API key trend statistics are not implemented yet')
+
+    async def get_api_endpoint_stat(self, current_user: User = Depends(AuthGuard.get_current_user)):
+        raise NotImplementedFeatureError('API endpoint statistics are not implemented yet')
