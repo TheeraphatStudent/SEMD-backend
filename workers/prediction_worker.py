@@ -9,7 +9,6 @@ Flow:
 
 """
 
-from services.redis_client import redis_client
 import sys
 import os
 import time
@@ -18,6 +17,8 @@ import signal
 import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from services.client.redis_client import redis_client
 
 
 logging.basicConfig(

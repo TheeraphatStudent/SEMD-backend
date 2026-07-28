@@ -11,19 +11,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Python `3.12.x` (pinned via `.python-version`). Everything is driven through the `makefile` and `uv` — there is no venv-activation script anymore (the old `backend-working.sh`/`setup-config.sh` were consolidated into it):
 
 ```bash
-make setup   # bootstrap config/backend.ini, config/redis.conf, database/.env + `uv add -r requirements.txt` && `uv sync`
-make start   # uv run fastapi dev main.py
+make setup   # bootstrap config/backend.ini, config/redis.conf, docker/postgres.env + `uv add -r requirements.txt` && `uv sync`
+make start   # podman compose -f docker/compose.yaml up -d --build --remove-orphans
 make prod    # uv run python main.py prod
 make worker  # uv run python -m workers.prediction_worker
 make clean   # remove .venv and __pycache__
 ```
 Run `make help` for the current target list. Since no `pyproject.toml`/`uv.lock` existed originally, `make setup`'s `install` step uses `uv add -r requirements.txt` (which creates `pyproject.toml` if missing) followed by `uv sync` rather than a bare `uv sync`.
 
-Config is **not** `.env`-based despite the module having historically documented that — `config/settings.py` reads `config/backend.ini` via `configparser` (with hardcoded fallbacks), and `Settings` (a `pydantic-settings` `BaseSettings`) just wraps those values. `make config` (part of `make setup`) copies `config/backend.example.ini` → `config/backend.ini` and `config/redis.example.conf` → `config/redis.conf` (non-destructively — won't clobber an existing file), then extracts the Postgres/Redis credentials out of `backend.ini` to patch `config/redis.conf` and `database/docker-compose.database.yaml` in place and generate `database/.env`. Read the `config`/`install` targets in `makefile` before editing those generated files by hand.
+Config is **not** `.env`-based despite the module having historically documented that — `config/settings.py` reads `config/backend.ini` via `configparser` (with hardcoded fallbacks), and `Settings` (a `pydantic-settings` `BaseSettings`) just wraps those values. `make config` (part of `make setup`) copies `config/backend.example.ini` → `config/backend.ini` and `config/redis.example.conf` → `config/redis.conf` (non-destructively — won't clobber an existing file), then extracts the Postgres/Redis credentials out of `backend.ini` to patch `config/redis.conf` and generate `docker/postgres.env`. Read the `config`/`install` targets in `makefile` before editing those generated files by hand.
 
-Docker/Podman: `docker/backend.dockerFile` + `docker/compose.yaml` build the API image; `database/docker-compose.database.yaml` runs Postgres + Redis. Both expect the external `semd-shared-network` bridge network (create once: `podman network create semd-shared-network`) — see root `CLAUDE.md`. Note `docker/compose.yaml`'s `include: - path: './db/compose.yaml'` points at a directory that doesn't exist (actual dir is `database/`) — treat that include as currently broken, not as a second compose file to look for.
+Docker/Podman: `docker/compose.yaml` is the single stack entrypoint for backend + PostgreSQL + Redis. Docker assets are centralized under `docker/` (`backend.Dockerfile`, `redis.Dockerfile`, `postgres/init.sql`, `postgres.env`). The stack uses the local `semd-shared-network` bridge declared inside the compose file.
 
-There is no test suite (no `test_*.py`, no pytest config) and no lint config — don't assume either exists.
+There is a `tests/unit/` suite using `unittest`. Lint/typecheck targets are wired through `make lint` and `make typecheck`.
 
 `main.py` regenerates `openapi.yaml` from the live FastAPI app on every import (`app.openapi()` dumped to YAML at module scope). This means starting the app in *any* mode rewrites `openapi.yaml` — expect it to show as modified after a dev server run, and treat it as generated output rather than hand-editable.
 
@@ -32,7 +32,7 @@ There is no test suite (no `test_*.py`, no pytest config) and no lint config —
 Strict one-directional dependency chain, one subpackage/module per domain (`auth`, `ml`, `prediction`, `report`, `setting`, `stat`, `dashboard`, `queue`):
 
 ```
-routers/  →  control/  →  services/  →  database/ (SQLAlchemy models)
+routers/  →  control/  →  services/  →  models/db/ (SQLAlchemy models)
 (FastAPI       (business    (DB / Redis /   models/ (Pydantic schemas) sit
  route defs)    logic)       third-party      alongside, used by all layers)
                              HTTP calls)
@@ -42,7 +42,7 @@ routers/  →  control/  →  services/  →  database/ (SQLAlchemy models)
 - `control/*_control.py` — one `*Control` class per domain, instantiated per-request with a `db: AsyncSession` (plus usually `user_id`/`user`). This is where cross-cutting logic lives (e.g. `PredictionControl.predict()` resolves a default ML service if none given, logs usage, checks URL flags, and enqueues retraining — see `control/prediction_control.py`).
 - `services/` — DB queries and external I/O. Some services are also directly instantiated as a module-level singleton (e.g. `prediction_service = PredictionService()` at the bottom of `services/prediction_service.py`) — don't assume every service is purely request-scoped.
 - `models/*_model.py` — Pydantic request/response schemas. Every response model inherits `models/base_response_model.py::BaseResponseModel` (`status`/`message` fields); high fan-in on it is expected, not coupling debt.
-- `database/models.py` — all SQLAlchemy ORM models in one file, re-exported via `database/__init__.py`. `libs/types/enums.py` holds the shared string enums referenced across layers (`RoleType`, `FlagType`, `ServiceType`, `ReportStatusType`, `UsageLogType`, `ModelStageType`, `OAuthProviderType`) — check here before adding a new status/type string.
+- `models/db/entities.py` — all SQLAlchemy ORM models in one file, re-exported via `models/db/__init__.py`. `libs/types/enums.py` holds the shared string enums referenced across layers (`RoleType`, `FlagType`, `ServiceType`, `ReportStatusType`, `UsageLogType`, `ModelStageType`, `OAuthProviderType`) — check here before adding a new status/type string.
 
 ## Prediction dispatch: ML model vs third-party REST
 

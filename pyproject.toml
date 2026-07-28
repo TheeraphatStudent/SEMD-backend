@@ -22,3 +22,28 @@ dependencies = [
     "sqlalchemy>=2.0.47",
     "uvicorn>=0.30.0",
 ]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "ruff>=0.8.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# Baseline only: catch real errors and unused imports, don't impose a style
+# rewrite on ~150 pre-existing files in one pass. Widen selection incrementally
+# per-feature during Phase 4, per SEMD_BACKEND_REFACTOR_ROADMAP.md.
+select = ["E", "F", "I"]
+ignore = ["E501"]  # line length not enforced yet; formatter not adopted
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+# Lenient baseline: enforcement tightens per-feature during Phase 4, not globally
+# up front, per SEMD_BACKEND_REFACTOR_ROADMAP.md Phase 3 typing item.
+disable_error_code = ["import-untyped"]
