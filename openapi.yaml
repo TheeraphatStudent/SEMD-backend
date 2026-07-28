@@ -790,6 +790,15 @@ paths:
       - ml
       summary: Get Service
       operationId: get_service_ml_service_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1246,6 +1255,107 @@ paths:
           description: Not implemented
         '422':
           description: Validation error
+  /ml/training/submit:
+    post:
+      tags:
+      - ML Training
+      summary: Submit Training Job
+      operationId: submit_training_job_ml_training_submit_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainingJobRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingJobResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /ml/training/result:
+    post:
+      tags:
+      - ML Training
+      summary: Get Training Result
+      operationId: get_training_result_ml_training_result_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobResultRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /ml/training/retrain:
+    post:
+      tags:
+      - ML Training
+      summary: Trigger Retraining
+      operationId: trigger_retraining_ml_training_retrain_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainingJobRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingJobResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /prediction/predict:
     post:
       tags:
@@ -1526,6 +1636,15 @@ paths:
       - Dashboard
       summary: Getsystemstat
       operationId: getSystemStat_dashboard_system_stat_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1545,6 +1664,15 @@ paths:
       - Dashboard
       summary: Getsystemhealth
       operationId: getSystemHealth_dashboard_system_health_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1564,6 +1692,15 @@ paths:
       - Dashboard
       summary: Getsystemperformance
       operationId: getSystemPerformance_dashboard_system_performance_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1583,6 +1720,15 @@ paths:
       - Dashboard
       summary: Getthirdpartystat
       operationId: getThirdPartyStat_dashboard_third_party_stat_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1602,6 +1748,15 @@ paths:
       - Dashboard
       summary: Geturlflagstat
       operationId: getUrlFlagStat_dashboard_url_flag_stat_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1621,6 +1776,15 @@ paths:
       - Dashboard
       summary: Geturlreportstat
       operationId: getUrlReportStat_dashboard_url_report_stat_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1640,6 +1804,15 @@ paths:
       - Dashboard
       summary: Getapiaccesskeystat
       operationId: getApiAccessKeyStat_dashboard_api_access_key_stat_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -1659,6 +1832,15 @@ paths:
       - Dashboard
       summary: Getuserstat
       operationId: getUserStat_dashboard_user_stat_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3127,6 +3309,15 @@ paths:
       - stat-report
       summary: Get Report Stat
       operationId: get_report_stat_stat_report_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3146,6 +3337,15 @@ paths:
       - stat-report
       summary: Get Urls List
       operationId: get_urls_list_stat_report_list_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3165,6 +3365,15 @@ paths:
       - stat-report
       summary: Get Urls Trend
       operationId: get_urls_trend_stat_report_trend_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3184,6 +3393,15 @@ paths:
       - stat-report
       summary: Get Report Detail
       operationId: get_report_detail_stat_report_detail_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3203,6 +3421,15 @@ paths:
       - stat-prediction
       summary: Get Prediction Stat
       operationId: get_prediction_stat_stat_prediction_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3222,6 +3449,15 @@ paths:
       - stat-prediction
       summary: Get Prediction Trend
       operationId: get_prediction_trend_stat_prediction_trend_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3241,6 +3477,15 @@ paths:
       - stat-prediction
       summary: Get Prediction By Model
       operationId: get_prediction_by_model_stat_prediction_by_model_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3260,6 +3505,15 @@ paths:
       - stat-prediction
       summary: Get Prediction Detail
       operationId: get_prediction_detail_stat_prediction_detail_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3279,6 +3533,15 @@ paths:
       - stat-user
       summary: Get User Stat
       operationId: get_user_stat_stat_user_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3298,6 +3561,15 @@ paths:
       - stat-user
       summary: Get User Activity
       operationId: get_user_activity_stat_user_activity_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3317,6 +3589,15 @@ paths:
       - stat-user
       summary: Get User Role
       operationId: get_user_role_stat_user_role_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3336,6 +3617,15 @@ paths:
       - stat-user
       summary: Get Top Users
       operationId: get_top_users_stat_user_top_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3355,6 +3645,15 @@ paths:
       - stat-api-key
       summary: Get Api Key Stat
       operationId: get_api_key_stat_stat_api_key_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3374,6 +3673,15 @@ paths:
       - stat-api-key
       summary: Get Api Key Usage
       operationId: get_api_key_usage_stat_api_key_usage_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3393,6 +3701,15 @@ paths:
       - stat-api-key
       summary: Get Api Key Trend
       operationId: get_api_key_trend_stat_api_key_trend_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3412,6 +3729,15 @@ paths:
       - stat-api-key
       summary: Get Api Endpoint Stat
       operationId: get_api_endpoint_stat_stat_api_key_endpoint_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3431,6 +3757,15 @@ paths:
       - stat-third-party
       summary: Get Third Party Stat
       operationId: get_third_party_stat_stat_third_party_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3450,6 +3785,15 @@ paths:
       - stat-third-party
       summary: Get Third Party Services
       operationId: get_third_party_services_stat_third_party_services_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3469,6 +3813,15 @@ paths:
       - stat-third-party
       summary: Get Third Party Trend
       operationId: get_third_party_trend_stat_third_party_trend_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3488,6 +3841,15 @@ paths:
       - stat-third-party
       summary: Get Third Party Errors
       operationId: get_third_party_errors_stat_third_party_errors_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3507,6 +3869,15 @@ paths:
       - stat-url-flag
       summary: Get Url Flag Stat
       operationId: get_url_flag_stat_stat_url_flag_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3526,6 +3897,15 @@ paths:
       - stat-url-flag
       summary: Get Url Flag Trend
       operationId: get_url_flag_trend_stat_url_flag_trend_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3545,6 +3925,15 @@ paths:
       - stat-url-flag
       summary: Get Url Flag Detail
       operationId: get_url_flag_detail_stat_url_flag_detail_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3564,6 +3953,15 @@ paths:
       - stat-url-flag
       summary: Get Url Flag Category
       operationId: get_url_flag_category_stat_url_flag_category_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
       responses:
         '200':
           description: Successful Response
@@ -3706,6 +4104,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /health/live:
+    get:
+      tags:
+      - health
+      summary: Liveness
+      operationId: liveness_health_live_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /health/ready:
+    get:
+      tags:
+      - health
+      summary: Readiness
+      operationId: readiness_health_ready_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
 components:
   schemas:
     ACLType:
@@ -4374,6 +4796,21 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    JobResultRequest:
+      properties:
+        job_id:
+          type: string
+          title: Job Id
+          description: Job ID to retrieve results
+        timeout:
+          type: integer
+          title: Timeout
+          description: Timeout in seconds
+          default: 60
+      type: object
+      required:
+      - job_id
+      title: JobResultRequest
     MLBatchPredictRequest:
       properties:
         urls:
@@ -4443,6 +4880,10 @@ components:
         prediction:
           type: string
           title: Prediction
+        is_malicious:
+          type: boolean
+          title: Is Malicious
+          default: false
         confidence:
           type: number
           title: Confidence
@@ -4459,9 +4900,22 @@ components:
         model_name:
           type: string
           title: Model Name
+        model_version:
+          type: string
+          title: Model Version
+        model_alias:
+          type: string
+          title: Model Alias
+        feature_schema_version:
+          type: string
+          title: Feature Schema Version
+        prediction_time_ms:
+          type: number
+          title: Prediction Time Ms
         algorithm:
           type: string
           title: Algorithm
+          default: unknown
       type: object
       required:
       - url
@@ -4469,7 +4923,10 @@ components:
       - confidence
       - model_id
       - model_name
-      - algorithm
+      - model_version
+      - model_alias
+      - feature_schema_version
+      - prediction_time_ms
       title: MLPredictResponse
     MLServiceResponse:
       properties:
@@ -6624,6 +7081,64 @@ components:
       - message
       - data
       title: TopUserResponse
+    TrainingJobRequest:
+      properties:
+        service_conf_id:
+          type: integer
+          title: Service Conf Id
+          description: Service configuration ID
+        dataset_files:
+          items:
+            type: string
+          type: array
+          title: Dataset Files
+          description: List of dataset file names
+        algorithms:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Algorithms
+          description: Algorithms to train
+        run_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Run Name
+          description: Custom run name
+      type: object
+      required:
+      - service_conf_id
+      - dataset_files
+      title: TrainingJobRequest
+    TrainingJobResponse:
+      properties:
+        status:
+          type: integer
+          title: status
+          description: Response status code
+          examples:
+          - 200
+          - 404
+          - 500
+        message:
+          type: string
+          title: message
+          description: Response message
+          examples:
+          - Success
+          - Not found
+          - Internal server error
+        job_id:
+          type: string
+          title: Job Id
+      type: object
+      required:
+      - status
+      - message
+      - job_id
+      title: TrainingJobResponse
     TwoFAEnableRequest:
       properties:
         secret:
@@ -7268,10 +7783,6 @@ components:
             format: date-time
           - type: 'null'
           title: Birthday
-        password_hash:
-          type: string
-          maxLength: 1024
-          title: Password Hash
         role:
           $ref: '#/components/schemas/RoleType'
           default: MEMBER
@@ -7280,45 +7791,15 @@ components:
           - type: string
           - type: 'null'
           title: Gg Id
-        gg_acc_token:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Gg Acc Token
-        gg_re_token:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Gg Re Token
         gh_id:
           anyOf:
           - type: string
           - type: 'null'
           title: Gh Id
-        gh_acc_token:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Gh Acc Token
-        gh_re_token:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Gh Re Token
-        twofa_secret:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Twofa Secret
         is_2fa_enabled:
           type: boolean
           title: Is 2Fa Enabled
           default: false
-        ex_acc_token:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Ex Acc Token
         ex_acc_token_exp:
           anyOf:
           - type: string
@@ -7343,8 +7824,31 @@ components:
       - username
       - email
       - full_name
-      - password_hash
       title: UserModel
+      description: 'Public-facing user profile shape.
+
+
+        Deliberately excludes password_hash, gg_acc_token/gg_re_token,
+
+        gh_acc_token/gh_re_token, twofa_secret, and ex_acc_token -- these are
+
+        ORM columns on `database.User`, not API-response fields. They were
+
+        previously included here and returned verbatim by GET /auth/me,
+
+        GET /auth/users, and GET /auth/users/{id} (self profile view, and any
+
+        ADMIN viewing any other user), i.e. every OAuth refresh token, the TOTP
+
+        seed, the password hash, and the live extension token were exposed over
+
+        the API. See docs/backend/features/extension-access-codes/README.md.
+
+        `gg_id`/`gh_id` (provider account identifiers, not credentials) and
+
+        `ex_acc_token_exp` (an expiry timestamp, not a secret) are kept since
+
+        they''re legitimately useful for a "connected accounts" UI.'
     UserResponse:
       properties:
         status:

@@ -5,18 +5,23 @@ from typing import List, Union
 from pathlib import Path
 
 from pydantic import field_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import configparser
 
 config = configparser.ConfigParser()
 config.read(Path(__file__).parent / 'backend.ini')
 config.sections()
 
-print(config)
-
 
 class Settings(BaseSettings):
-    """Configuration values loaded from environment variables."""
+    """Configuration values, resolved as env var -> backend.ini -> built-in default.
+
+    `env_ignore_empty` makes a *blank* env var (present but empty string, e.g. an
+    unset `${VAR}` interpolation in compose) fall through to the ini/default instead
+    of silently wiping out a valid `backend.ini` value such as REDIS_PASSWORD.
+    """
+
+    model_config = SettingsConfigDict(env_ignore_empty=True)
 
     # App settings
     app_name: str = config.get('API', 'APP_NAME', fallback='SEMD API')

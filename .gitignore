@@ -6,10 +6,17 @@
 .env.local
 .env.production
 .env.development
+docker/postgres.env
 
 !**/*.example.ini
 !**/*.example.conf
 
 **__pycache__
 
+# Graphify
 *.log
+.graphify/*.txt
+graphify-out/cost.json 
+graphify-out/cache/
+
+openapi.yaml
