@@ -1,10 +1,22 @@
-import httpx
+import logging
 import re
-from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
-from fastapi import HTTPException, status
-from typing import Dict, Any, Optional
+from typing import Any, Dict
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-from database import ThirdServiceConf
+import httpx
+from fastapi import HTTPException, status
+
+from core.exceptions import ExternalServiceError, ServiceUnavailableError
+from models.db import ThirdServiceConf
+
+logger = logging.getLogger(__name__)
+
+# Defense-in-depth for the one path in this backend that actually makes an
+# outbound fetch against a URL not fully controlled by this codebase (the
+# destination host is admin-configured via ThirdServiceConf.base_url, but the
+# response is fully attacker/vendor-controlled). See
+# docs/backend/features/url-evaluation/README.md Domain 5/6 notes.
+_MAX_RESPONSE_BYTES = 5 * 1024 * 1024  # 5 MiB
 
 
 class ThirdServiceExecutor:
@@ -127,7 +139,11 @@ class ThirdServiceExecutor:
         method = self.conf.http_method.upper()
         
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            # follow_redirects=False made explicit rather than relying on
+            # httpx's default -- a redirect from an admin-configured detector
+            # endpoint into a private/internal address is exactly the SSRF
+            # shape this backend must not walk into automatically.
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
                 if method == "GET":
                     params = body if body and len(body) > 0 else None
                     response = await client.request(
@@ -150,26 +166,57 @@ class ThirdServiceExecutor:
                             url=resolved_url,
                             headers=headers
                         )
-                
+
+                if response.is_redirect:
+                    raise ExternalServiceError(
+                        'Third-party service returned a redirect; redirects are not followed',
+                        code='THIRD_PARTY_REDIRECT',
+                    )
+
+                content_length = response.headers.get('content-length')
+                if content_length is not None and int(content_length) > _MAX_RESPONSE_BYTES:
+                    raise ExternalServiceError(
+                        'Third-party service response exceeded the maximum allowed size',
+                        code='THIRD_PARTY_RESPONSE_TOO_LARGE',
+                    )
+                if len(response.content) > _MAX_RESPONSE_BYTES:
+                    raise ExternalServiceError(
+                        'Third-party service response exceeded the maximum allowed size',
+                        code='THIRD_PARTY_RESPONSE_TOO_LARGE',
+                    )
+
                 response.raise_for_status()
                 response_data = response.json()
-                
-                return self.map_response(response_data)
-                
-        except httpx.HTTPStatusError as e:
-            print(e)
 
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=f"Third-party service error: {e.response.text}"
+                return self.map_response(response_data)
+
+        except ExternalServiceError:
+            raise
+        except httpx.HTTPStatusError as e:
+            # This executor is called both from the admin-owned "test
+            # connection" flow AND from /prediction/predict for any
+            # authenticated MEMBER (services/prediction_service.py
+            # ::_predict_with_third_party) -- the vendor's raw response body
+            # and connection-error text previously landed in `detail` and
+            # propagated straight through to whichever caller triggered it,
+            # not just the admin who configured the service. Real detail is
+            # logged server-side only; the client gets a generic message.
+            logger.warning(
+                'third-party service returned an error status: %s', e.response.status_code, exc_info=e
+            )
+            raise ExternalServiceError(
+                f"Third-party service returned an error (status {e.response.status_code})",
+                code='THIRD_PARTY_ERROR',
             )
         except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Failed to connect to third-party service: {str(e)}"
+            logger.warning('failed to connect to third-party service', exc_info=e)
+            raise ServiceUnavailableError(
+                'Failed to connect to the configured third-party service',
+                code='THIRD_PARTY_UNAVAILABLE',
             )
         except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error during third-party service execution: {str(e)}"
+            logger.error('unexpected error during third-party service execution', exc_info=e)
+            raise ExternalServiceError(
+                'Unexpected error while executing the third-party service call',
+                code='THIRD_PARTY_ERROR',
             )

@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Any, Optional
 from decimal import Decimal
 
-from database import Prediction
+from models.db import Prediction
 from libs.shared import is_class_malicious, normalize_class_name, map_prediction_class
 
 

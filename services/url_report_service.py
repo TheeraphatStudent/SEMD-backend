@@ -1,11 +1,15 @@
-from typing import List, Optional
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from datetime import datetime
+from typing import List, Optional
 
-from database import UrlReport, UrlReported, User
-from models.url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
-from libs.types.enums import FlagType, ReportStatusType
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+
+from core.exceptions import PermissionDeniedError
+from models.db import UrlReport, UrlReported, User
+from libs.types.enums import RoleType
+from models.report.url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
+
+_ADMIN_ROLES = (RoleType.ADMIN.value, RoleType.SUPER_ADMIN.value)
 
 
 class UrlReportService:
@@ -46,6 +50,19 @@ class UrlReportService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Report with id {report_id} not found"
             )
+
+        is_owner = report.user_id == user.user_id
+        is_admin = user.role in _ADMIN_ROLES
+
+        # Object-level authorization: previously any authenticated user could
+        # edit -- including status-transition -- any other user's report,
+        # bypassing the review workflow entirely. See
+        # docs/backend/features/users-roles-permissions/README.md.
+        if not is_owner and not is_admin:
+            raise PermissionDeniedError('You do not have permission to update this report')
+
+        if request.status is not None and request.status.value != report.status and not is_admin:
+            raise PermissionDeniedError('Only an admin can change a report\'s review status')
 
         old_status = report.status
 

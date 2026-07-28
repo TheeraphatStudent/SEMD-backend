@@ -3,7 +3,7 @@ from sqlalchemy import select
 from typing import Optional
 from datetime import datetime
 
-from database import UsageLog
+from models.db import UsageLog
 from libs.types.enums import UsageLogType
 
 

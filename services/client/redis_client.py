@@ -23,6 +23,8 @@ class RedisClient:
                 password=settings.redis_password,
                 db=settings.redis_db,
                 decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
             )
 
     def push_to_queue(self, queue_name: str, data: dict) -> int:

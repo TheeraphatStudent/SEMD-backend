@@ -1,11 +1,11 @@
-import uuid
-import time
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+import asyncio
 import logging
+import time
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from services.client import redis_client
-from config.settings import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -98,7 +98,19 @@ class MLServiceClient:
 
         return job_id
 
-    def get_job_result(self, job_id: str, timeout: int = 30) -> Optional[Dict[str, Any]]:
+    async def get_job_result(self, job_id: str, timeout: int = 30) -> Optional[Dict[str, Any]]:
+        """Poll the Redis result cache for `job_id`.
+
+        Uses `asyncio.sleep`, not `time.sleep` -- this coroutine is awaited
+        directly from `async def` FastAPI route handlers (via predict_url_sync/
+        predict_urls_sync below, and routers/ml/ml_training_route.py's
+        get_training_result). Before this fix it used a blocking `time.sleep`
+        poll loop with no `asyncio.to_thread`/`run_in_executor` wrapper,
+        meaning every prediction request blocked the ASGI event loop for up
+        to `timeout` seconds (30-60s), serializing all concurrent request
+        handling in that worker process -- flagged in
+        SEMD_BACKEND_CURRENT_STATE.md section 8 and fixed here (Domain 12).
+        """
         cache_key = f"{self.result_cache_prefix}{job_id}"
 
         result = redis_client.get_cache(cache_key)
@@ -114,21 +126,25 @@ class MLServiceClient:
             if result:
                 logger.info(f"Found result for job: {job_id}")
                 return result
-            time.sleep(poll_interval)
+            await asyncio.sleep(poll_interval)
 
         logger.warning(f"Timeout waiting for job result: {job_id}")
         return None
 
-    def predict_url_sync(
+    async def predict_url_sync(
         self,
         url: str,
         user_id: Optional[int] = None,
         model_id: Optional[str] = None,
         timeout: int = 30
     ) -> Dict[str, Any]:
+        # Name kept (not renamed to predict_url_async) to avoid an
+        # unnecessary rename across every call site and test mock -- "sync"
+        # here describes the request/response contract (caller gets a
+        # completed result, not a job handle), not the execution model.
         job_id = self.submit_prediction_job(url, user_id, model_id)
 
-        result = self.get_job_result(job_id, timeout)
+        result = await self.get_job_result(job_id, timeout)
 
         if result is None:
             return {
@@ -140,7 +156,7 @@ class MLServiceClient:
 
         return result
 
-    def predict_urls_sync(
+    async def predict_urls_sync(
         self,
         urls: List[str],
         user_id: Optional[int] = None,
@@ -149,7 +165,7 @@ class MLServiceClient:
     ) -> Dict[str, Any]:
         job_id = self.submit_batch_prediction_job(urls, user_id, model_id)
 
-        result = self.get_job_result(job_id, timeout)
+        result = await self.get_job_result(job_id, timeout)
 
         if result is None:
             return {

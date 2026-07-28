@@ -1,19 +1,32 @@
-from typing import List, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
-from fastapi import HTTPException, status
 from datetime import datetime
+from typing import List, Optional
 
-from database import UrlFlag, User
-from models.url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
-from libs.types.enums import FlagType, ACLType
+from fastapi import HTTPException, status
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
+from core.exceptions import PermissionDeniedError
+from models.db import UrlFlag, User
+from libs.types.enums import ACLType, RoleType
+from models.report.url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
+
+_ADMIN_ROLES = (RoleType.ADMIN.value, RoleType.SUPER_ADMIN.value)
 
 
 class UrlFlagService:
 
     @classmethod
     def create_flag(cls, user: User, request: UrlFlagCreateRequest, db: Session) -> UrlFlag:
+        # GLOBAL flags are applied to every user's prediction result (see
+        # check_url_flag/check_url_flag_async below) -- previously any
+        # authenticated MEMBER could create one, meaning any account could
+        # unilaterally whitelist a malicious URL or blacklist a legitimate
+        # one for the entire user base. See
+        # docs/backend/features/url-flags-whitelist/README.md.
+        if request.access_level == ACLType.GLOBAL and user.role not in _ADMIN_ROLES:
+            raise PermissionDeniedError('Only an admin can create a GLOBAL-access-level flag')
+
         new_flag = UrlFlag(
             user_id=user.user_id,
             url=request.url,
@@ -37,11 +50,18 @@ class UrlFlagService:
                 detail=f"URL Flag with id {flag_id} not found"
             )
 
-        if flag.user_id != user.user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have permission to update this flag"
-            )
+        is_owner = flag.user_id == user.user_id
+        is_admin = user.role in _ADMIN_ROLES
+
+        if not is_owner and not is_admin:
+            raise PermissionDeniedError("You don't have permission to update this flag")
+
+        # Admin-only if the flag is (or is being made) GLOBAL -- same
+        # reasoning as create_flag above. Covers both "promote my private
+        # flag to global" and "edit an existing global flag".
+        resulting_access_level = request.access_level.value if request.access_level is not None else flag.access_level
+        if resulting_access_level == ACLType.GLOBAL.value and not is_admin:
+            raise PermissionDeniedError('Only an admin can set or modify a GLOBAL-access-level flag')
 
         if request.url is not None:
             flag.url = request.url
@@ -67,11 +87,15 @@ class UrlFlagService:
                 detail=f"URL Flag with id {flag_id} not found"
             )
 
-        if flag.user_id != user.user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have permission to delete this flag"
-            )
+        is_owner = flag.user_id == user.user_id
+        is_admin = user.role in _ADMIN_ROLES
+
+        # Admin override added: previously an admin could not remove a rogue
+        # GLOBAL flag created by another user -- only the original creator
+        # could delete it, which is exactly backwards for a flag type that's
+        # meant to be admin-governed.
+        if not is_owner and not is_admin:
+            raise PermissionDeniedError("You don't have permission to delete this flag")
 
         db.delete(flag)
         db.commit()

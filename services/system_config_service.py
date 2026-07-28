@@ -2,8 +2,8 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from database import SystemConfig
-from models.system_config_model import SystemConfigUpdateRequest
+from models.db import SystemConfig
+from models.service.system_config_model import SystemConfigUpdateRequest
 
 
 class SystemConfigService:

@@ -3,17 +3,16 @@ Prediction service - Business logic for URL prediction.
 Supports both ML model and third-party service predictions.
 """
 
-import uuid
-from datetime import datetime
-from typing import Dict, Any, List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from fastapi import HTTPException, status
+from typing import Any, Dict, List, Optional
 
-from database import ServiceConf, ThirdServiceConf
+from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from models.db import ServiceConf, ThirdServiceConf
+from libs.types.enums import ServiceType
 from services.client.third_service_executor import ThirdServiceExecutor
 from services.prediction_storage_service import PredictionStorageService
-from libs.types.enums import ServiceType
 
 
 class PredictionService:
@@ -28,7 +27,7 @@ class PredictionService:
         urls: List[str],
         user_id: Optional[int] = None
     ) -> List[Dict[str, Any]]:
-        from database import User
+        from models.db import User
         from libs.types.enums import RoleType
         
         stmt = select(ServiceConf).where(
@@ -81,7 +80,7 @@ class PredictionService:
 
         results = []
         for url in urls:
-            ml_result = ml_service_client.predict_url_sync(url, timeout=30)
+            ml_result = await ml_service_client.predict_url_sync(url, timeout=30)
 
             if ml_result.get('status') == 'timeout':
                 raise HTTPException(
@@ -100,7 +99,7 @@ class PredictionService:
                 user_id=user_id,
                 url=url,
                 prediction_result={
-                    'class': prediction_data.get('class', 'unknown'),
+                    'class': prediction_data.get('prediction', prediction_data.get('class', 'unknown')),
                     'is_malicious': prediction_data.get('is_malicious', False),
                     'accuracy_score': prediction_data.get('confidence', 0),
                     'suggested_desc': ml_result.get('suggested_desc', '')

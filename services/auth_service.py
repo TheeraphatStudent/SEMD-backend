@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from config.settings import settings
-from database import User, RefreshToken
-from models.auth_model import TokenPairResponse
-from models.user_request import (
+from models.db import User, RefreshToken
+from models.auth.auth_model import TokenPairResponse
+from models.auth.user_request import (
     UserUpdateRequest, PasswordResetRequest,
     AdminCreateUserRequest, AdminUpdateUserRequest, AdminPasswordResetRequest
 )
