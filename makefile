@@ -43,6 +43,9 @@ start: stop
 stop:
 	podman compose -f docker/docker-compose.yaml down --remove-orphans
 
+dev:
+	uv run python main.py dev
+
 prod:
 	uv run python main.py prod
 
