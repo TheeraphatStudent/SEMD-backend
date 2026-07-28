@@ -3,8 +3,8 @@ from sqlalchemy import select, update
 from fastapi import HTTPException, status
 from datetime import datetime
 
-from database import ServiceConf, ThirdServiceConf
-from models.third_service_model import ThirdServiceCreateRequest, ThirdServiceUpdateRequest
+from models.db import ServiceConf, ThirdServiceConf
+from models.service.third_service_model import ThirdServiceCreateRequest, ThirdServiceUpdateRequest
 
 
 class ThirdServiceService:

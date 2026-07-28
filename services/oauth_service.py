@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from config.settings import settings
-from database import User
+from models.db import User
 
 
 class OAuthService:

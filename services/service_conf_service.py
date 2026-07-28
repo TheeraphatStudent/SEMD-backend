@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from datetime import datetime
 from typing import List, Optional
 
-from database import ServiceConf, ThirdServiceConf, ModelRegistry
+from models.db import ServiceConf, ThirdServiceConf, ModelRegistry
 from libs.types.enums import ServiceType
 
 

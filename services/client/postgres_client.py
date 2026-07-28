@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import sessionmaker, Session
 
 from config.settings import settings
-from database import Base
+from models.db import Base
 
 class PostgresClient:
     _instance = None

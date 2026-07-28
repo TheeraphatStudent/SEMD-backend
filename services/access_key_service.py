@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 import secrets
 import hashlib
 
-from database import AccessKey, UsageLog, User
-from models.access_key_request import (
+from models.db import AccessKey, UsageLog, User
+from models.access.access_key_request import (
     AccessKeyCreateRequest,
     AccessKeyAdminCreateRequest, AccessKeyAdminUpdateRequest
 )

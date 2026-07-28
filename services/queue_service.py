@@ -3,8 +3,8 @@ from typing import List, Optional
 import json
 
 from services.client.redis_client import redis_client
-from models.queue_model import QueueItem, PredictByInfo, QueueItemResponse
-from database import User
+from models.access.queue_model import QueueItem, PredictByInfo, QueueItemResponse
+from models.db import User
 
 
 RETRAIN_QUEUE_KEY = 'retrain_url_queue'

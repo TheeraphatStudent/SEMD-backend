@@ -2,7 +2,7 @@ import pyotp
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from database import User
+from models.db import User
 
 
 class TwoFactorService:

@@ -11,7 +11,7 @@ from typing import List, Optional, Dict, Any
 from decimal import Decimal
 import logging
 
-from database import ModelRegistry, ServiceConf
+from models.db import ModelRegistry, ServiceConf
 from libs.types.enums import ServiceType, ModelStageType
 
 logging.basicConfig(level=logging.INFO)
