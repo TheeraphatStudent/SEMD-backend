@@ -140,9 +140,12 @@ on this route.
 **Domain modeling.** Two candidate field-10/11 numberings existed in this repo
 (declaration order in `entities.py` vs. `table-dictionary.md`'s row order); neither
 matched an in-repo thesis table (grep for "3.24"/"3.25" across the whole project
-found nothing outside `.agents/skills/` reference docs). Confirmed with the project
-owner: declaration order (`gg_re_token`, `gh_id`), and that Google remains the only
-login provider — GitHub OAuth is being retired.
+found nothing outside `.agents/skills/` reference docs). The project owner selected
+declaration order (`gg_re_token`, `gh_id`) when asked directly during this
+implementation pass, and confirmed that Google remains the only login provider —
+GitHub OAuth is being retired. (Unlike the file citations elsewhere in this
+document, that is an interactive session decision, not something verifiable from
+repo history — re-confirm it before treating it as settled.)
 
 **Schema.**
 - `models/db/entities.py::User` — `gg_re_token` and `gh_id` columns removed.
@@ -197,8 +200,10 @@ implemented: `ReportStatusType` (`PENDING`/`ACCEPTED`/`REJECTED`,
 logged to `url_reported` (who: `user_id`, when: `created_at`, what:
 `old_status`/`new_status`) per `docs/backend/features/url-reports/README.md`. The
 open gap was that "who reviewed this, and when" required a join to the audit table
-instead of being a direct column on the report itself — confirmed as worth adding
-(vs. "audit table is enough") with the project owner.
+instead of being a direct column on the report itself. The project owner chose to
+add the direct columns (vs. "the audit table is enough") when asked directly during
+this implementation pass — an interactive session decision, not a claim verifiable
+from repo history like the file citations elsewhere in this document.
 
 **Schema.**
 - `models/db/entities.py::UrlReport` — `reviewed_by` (`BigInteger`, FK →
@@ -248,8 +253,13 @@ client (web / extension, no login required)
   -> response: is_malicious, predict_class, is_flag/flag_type (if any), scores
 ```
 
-Separately, a user (or now-anonymous caller) may also `POST /report/` a URL
-(`UrlReportControl.create_report`) independent of the predict call. An admin later
+Separately, a **logged-in** user may also `POST /report/` a URL
+(`UrlReportControl.create_report`) independent of the predict call. Only
+`/prediction/predict` was made anonymous-capable in this pass; `/report/` still
+requires a Bearer token (`routers/report/report_route.py` —
+`Depends(AuthGuard.get_current_user)`, untouched here) and
+`UrlReportService.create_report` reads `user_id=user.user_id`, so an anonymous
+caller could not reach it even if the dependency were relaxed. An admin later
 reviews it (`update_report`) — see item 5f. This review path does not feed back
 into the predict path above (see the "not overridden" note in 5f).
 

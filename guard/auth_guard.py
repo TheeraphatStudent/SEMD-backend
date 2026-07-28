@@ -68,10 +68,13 @@ def _get_current_user_optional(
     db: Session = Depends(get_db)
 ):
     """Best-effort caller identity for endpoints that must not require login
-    (e.g. the browser extension). Never raises: a missing header, a
-    malformed header, an expired/invalid token, or an unknown user id all
-    resolve to `None` (anonymous) instead of a 401 -- the caller proceeds
-    unauthenticated rather than being hard-blocked. `PredictionControl`,
+    (e.g. the browser extension). Never raises *on an authentication failure*:
+    a missing header, a malformed header, an expired/invalid token, or an
+    unknown user id all resolve to `None` (anonymous) instead of a 401 -- the
+    caller proceeds unauthenticated rather than being hard-blocked. An
+    infrastructure failure (e.g. the database session raising) still
+    propagates, which is intended -- a broken DB must surface as a 500, not be
+    silently downgraded to an anonymous request. `PredictionControl`,
     `UrlFlagService.check_url_flag(_async)`, and `QueueService.add_to_retrain_queue`
     already accept `user`/`user_id=None` end to end, so callers of this
     dependency don't need extra None-handling beyond what they'd do anyway.

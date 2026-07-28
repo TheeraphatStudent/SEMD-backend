@@ -1362,7 +1362,9 @@ paths:
       - prediction
       summary: Predict URL
       description: Predict if a URL is malicious or not using configured service (ML
-        model or third-party)
+        model or third-party). No login required -- an expired, missing, or invalid
+        token degrades to an anonymous call instead of a 401, so the browser extension
+        can call this without a session.
       operationId: predict_prediction_predict_post
       parameters:
       - name: authorization
@@ -5405,7 +5407,6 @@ components:
     OAuthProviderType:
       type: string
       enum:
-      - github
       - google
       title: OAuthProviderType
     PaginationMeta:
@@ -5548,46 +5549,6 @@ components:
       - message
       - data
       title: PredictionByModelResponse
-    PredictionDetailItem:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Prediction ID
-        url:
-          type: string
-          title: Url
-          description: Predicted URL
-        is_malicious:
-          type: boolean
-          title: Is Malicious
-          description: Prediction result
-        confidence:
-          type: number
-          title: Confidence
-          description: Confidence score
-        model_used:
-          type: string
-          title: Model Used
-          description: Model ID used
-        predicted_at:
-          type: string
-          title: Predicted At
-          description: Prediction timestamp
-        response_time:
-          type: number
-          title: Response Time
-          description: Response time in ms
-      type: object
-      required:
-      - id
-      - url
-      - is_malicious
-      - confidence
-      - model_used
-      - predicted_at
-      - response_time
-      title: PredictionDetailItem
     PredictionDetailResponse:
       properties:
         status:
@@ -5607,10 +5568,8 @@ components:
           - Not found
           - Internal server error
         data:
-          items:
-            $ref: '#/components/schemas/PredictionDetailItem'
-          type: array
-          title: Data
+          title: data
+          description: Prediction detail data
       type: object
       required:
       - status
@@ -7791,11 +7750,6 @@ components:
           - type: string
           - type: 'null'
           title: Gg Id
-        gh_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Gh Id
         is_2fa_enabled:
           type: boolean
           title: Is 2Fa Enabled
@@ -7828,27 +7782,31 @@ components:
       description: 'Public-facing user profile shape.
 
 
-        Deliberately excludes password_hash, gg_acc_token/gg_re_token,
+        Deliberately excludes password_hash, gg_acc_token, gh_acc_token/
 
-        gh_acc_token/gh_re_token, twofa_secret, and ex_acc_token -- these are
+        gh_re_token, twofa_secret, and ex_acc_token -- these are ORM columns on
 
-        ORM columns on `database.User`, not API-response fields. They were
+        `database.User`, not API-response fields. They were previously included
 
-        previously included here and returned verbatim by GET /auth/me,
+        here and returned verbatim by GET /auth/me, GET /auth/users, and
 
-        GET /auth/users, and GET /auth/users/{id} (self profile view, and any
+        GET /auth/users/{id} (self profile view, and any ADMIN viewing any other
 
-        ADMIN viewing any other user), i.e. every OAuth refresh token, the TOTP
+        user), i.e. every OAuth refresh token, the TOTP seed, the password hash,
 
-        seed, the password hash, and the live extension token were exposed over
+        and the live extension token were exposed over the API. See
 
-        the API. See docs/backend/features/extension-access-codes/README.md.
+        docs/backend/features/extension-access-codes/README.md.
 
-        `gg_id`/`gh_id` (provider account identifiers, not credentials) and
+        `gg_id` (Google provider account identifier, not a credential) and
 
         `ex_acc_token_exp` (an expiry timestamp, not a secret) are kept since
 
-        they''re legitimately useful for a "connected accounts" UI.'
+        they''re legitimately useful for a "connected accounts" UI. `gh_id` was
+
+        dropped along with the column -- GitHub is no longer a supported login
+
+        provider (see libs/types/enums.py::OAuthProviderType).'
     UserResponse:
       properties:
         status:
