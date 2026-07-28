@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
-from models.base_response_model import BaseResponseModel
+from models.common.base_response_model import BaseResponseModel
 from libs.types.enums import RoleType, OAuthProviderType
 
 
