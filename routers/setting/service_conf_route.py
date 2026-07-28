@@ -5,8 +5,8 @@ from typing import Dict, Any, List, Optional
 
 from control.service_conf_control import ServiceConfControl
 from guard.auth_guard import AuthGuard, get_async_db
-from database import User
-from models.service_conf_model import ServiceConfModel
+from models.db import User
+from models.service.service_conf_model import ServiceConfModel
 
 
 class ServiceConfRoute(BaseRoute):

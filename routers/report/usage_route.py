@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from guard.auth_guard import AuthGuard, get_async_db
-from database import User, UsageLog, Prediction, ServiceConf
+from models.db import User, UsageLog, Prediction, ServiceConf
 
 
 class UsageLogResponse(BaseModel):

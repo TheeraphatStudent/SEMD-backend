@@ -1,14 +1,15 @@
-from routers import BaseRoute
-from models import BaseResponseModel
-from models.url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
-from fastapi import HTTPException, Depends, Query
-from sqlalchemy.orm import Session
-from typing import List, Any
+from typing import Any, List
+
+from fastapi import Depends, Query
 from pydantic import Field
+from sqlalchemy.orm import Session
 
 from control.url_flag_control import UrlFlagControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_db
-from database import User
+from models import BaseResponseModel
+from models.report.url_flag_request import UrlFlagCreateRequest, UrlFlagUpdateRequest
+from routers import BaseRoute
 
 
 class UrlFlagResponse(BaseResponseModel):
@@ -75,11 +76,8 @@ class UrlFlagRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            flag = UrlFlagControl.create_flag(current_user, request, db)
-            return UrlFlagResponse(status=201, message="URL Flag created successfully", data=flag.model_dump())
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        flag = UrlFlagControl.create_flag(current_user, request, db)
+        return UrlFlagResponse(status=201, message="URL Flag created successfully", data=flag.model_dump())
 
     async def update_flag(
         self,
@@ -88,13 +86,8 @@ class UrlFlagRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            flag = UrlFlagControl.update_flag(current_user, flag_id, request, db)
-            return UrlFlagResponse(status=200, message="URL Flag updated successfully", data=flag.model_dump())
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        flag = UrlFlagControl.update_flag(current_user, flag_id, request, db)
+        return UrlFlagResponse(status=200, message="URL Flag updated successfully", data=flag.model_dump())
 
     async def delete_flag(
         self,
@@ -102,13 +95,8 @@ class UrlFlagRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            UrlFlagControl.delete_flag(current_user, flag_id, db)
-            return BaseResponseModel(status=200, message="URL Flag deleted successfully")
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        UrlFlagControl.delete_flag(current_user, flag_id, db)
+        return BaseResponseModel(status=200, message="URL Flag deleted successfully")
 
     async def get_all_flags(
         self,
@@ -117,11 +105,8 @@ class UrlFlagRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            flags = UrlFlagControl.get_all_flags(db, skip, limit)
-            return UrlFlagListResponse(status=200, message="URL Flags retrieved successfully", data=[f.model_dump() for f in flags])
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        flags = UrlFlagControl.get_all_flags(db, skip, limit)
+        return UrlFlagListResponse(status=200, message="URL Flags retrieved successfully", data=[f.model_dump() for f in flags])
 
     async def get_my_flags(
         self,
@@ -130,11 +115,8 @@ class UrlFlagRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            flags = UrlFlagControl.get_user_flags(current_user, db, skip, limit)
-            return UrlFlagListResponse(status=200, message="URL Flags retrieved successfully", data=[f.model_dump() for f in flags])
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        flags = UrlFlagControl.get_user_flags(current_user, db, skip, limit)
+        return UrlFlagListResponse(status=200, message="URL Flags retrieved successfully", data=[f.model_dump() for f in flags])
 
     async def get_flag_by_id(
         self,
@@ -142,10 +124,5 @@ class UrlFlagRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            flag = UrlFlagControl.get_flag(flag_id, db)
-            return UrlFlagResponse(status=200, message="URL Flag retrieved successfully", data=flag.model_dump())
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        flag = UrlFlagControl.get_flag(flag_id, db)
+        return UrlFlagResponse(status=200, message="URL Flag retrieved successfully", data=flag.model_dump())

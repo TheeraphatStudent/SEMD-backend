@@ -1,6 +1,6 @@
 from routers import BaseRoute
 from models import BaseResponseModel
-from models.system_config_model import SystemConfigModel, SystemConfigUpdateRequest
+from models.service.system_config_model import SystemConfigModel, SystemConfigUpdateRequest
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
@@ -8,7 +8,7 @@ from pydantic import Field
 
 from control.system_config_control import SystemConfigControl
 from guard.auth_guard import AuthGuard, get_db
-from database import User
+from models.db import User
 from libs.types.enums import RoleType
 
 

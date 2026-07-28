@@ -1,23 +1,36 @@
-from routers import BaseRoute
-from models.auth_model import (
-    AuthLoginRequest, AuthLoginProviderRequest, TwoFAVerifyRequest,
-    RefreshTokenRequest, TwoFAEnableRequest, TokenPairResponse,
-    PreAuthResponse, TwoFASetupResponse, OAuthDeviceCodeRequest,
-    OAuthDeviceCodeResponse, OAuthDevicePollRequest, OAuthAuthorizationRequest,
-    OAuthAuthorizationResponse, OAuthCallbackRequest, RegisterRequest,
-    RegisterResponse, CreateUserRequest, CreateUserResponse
-)
-from models.user_request import UserUpdateRequest, PasswordResetRequest
-from models.user_model import UserModel
-from models.base_response_model import BaseResponseModel
-from fastapi import HTTPException, Depends, Query
-from sqlalchemy.orm import Session
 from typing import Union
 
+from fastapi import Depends, Query
+from sqlalchemy.orm import Session
+
 from control.auth_control import AuthControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_db
-from database import User
 from libs.types.enums import OAuthProviderType
+from models.auth.auth_model import (
+    AuthLoginProviderRequest,
+    AuthLoginRequest,
+    CreateUserRequest,
+    CreateUserResponse,
+    OAuthAuthorizationRequest,
+    OAuthAuthorizationResponse,
+    OAuthCallbackRequest,
+    OAuthDeviceCodeRequest,
+    OAuthDeviceCodeResponse,
+    OAuthDevicePollRequest,
+    PreAuthResponse,
+    RefreshTokenRequest,
+    RegisterRequest,
+    RegisterResponse,
+    TokenPairResponse,
+    TwoFAEnableRequest,
+    TwoFASetupResponse,
+    TwoFAVerifyRequest,
+)
+from models.common.base_response_model import BaseResponseModel
+from models.auth.user_model import UserModel
+from models.auth.user_request import PasswordResetRequest, UserUpdateRequest
+from routers import BaseRoute
 
 
 class AuthRoute(BaseRoute):
@@ -143,108 +156,56 @@ class AuthRoute(BaseRoute):
         )(self.reset_password)
 
     async def login(self, request: AuthLoginRequest, db: Session = Depends(get_db)):
-        try:
-            return AuthControl.login(request, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return AuthControl.login(request, db)
 
     async def login_2fa(self, request: TwoFAVerifyRequest, db: Session = Depends(get_db)):
-        try:
-            return AuthControl.login_2fa(request, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return AuthControl.login_2fa(request, db)
 
     async def login_provider(self, request: AuthLoginProviderRequest, db: Session = Depends(get_db)):
-        try:
-            return await AuthControl.login_provider(request, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return await AuthControl.login_provider(request, db)
 
     async def refresh(self, request: RefreshTokenRequest, db: Session = Depends(get_db)):
-        try:
-            return AuthControl.refresh(request, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return AuthControl.refresh(request, db)
 
     async def logout(self, request: RefreshTokenRequest, db: Session = Depends(get_db)):
-        try:
-            AuthControl.logout(request.refresh_token, db)
-            return BaseResponseModel(status=200, message="Logged out successfully")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        AuthControl.logout(request.refresh_token, db)
+        return BaseResponseModel(status=200, message="Logged out successfully")
 
     async def setup_2fa(self, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
-        try:
-            return AuthControl.setup_2fa(current_user, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return AuthControl.setup_2fa(current_user, db)
 
     async def enable_2fa(self, request: TwoFAEnableRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
-        try:
-            AuthControl.enable_2fa(request, current_user, db)
-            return BaseResponseModel(status=200, message="2FA enabled successfully")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        AuthControl.enable_2fa(request, current_user, db)
+        return BaseResponseModel(status=200, message="2FA enabled successfully")
 
     async def oauth_device_initiate(self, request: OAuthDeviceCodeRequest):
-        try:
-            return await AuthControl.initiate_device_flow(request)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return await AuthControl.initiate_device_flow(request)
 
     async def oauth_device_poll(self, request: OAuthDevicePollRequest, db: Session = Depends(get_db)):
-        try:
-            result = await AuthControl.poll_device_flow(request, db)
-            if result is None:
-                return BaseResponseModel(status=202, message="Authorization pending")
-            return result
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        result = await AuthControl.poll_device_flow(request, db)
+        if result is None:
+            return BaseResponseModel(status=202, message="Authorization pending")
+        return result
 
     async def oauth_authorize(self, request: OAuthAuthorizationRequest):
-        try:
-            return AuthControl.initiate_oauth_authorization(request)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        return AuthControl.initiate_oauth_authorization(request)
 
     async def oauth_callback(self, provider: OAuthProviderType, code: str = Query(...), state: str = Query(...), db: Session = Depends(get_db)):
-        try:
-            request = OAuthCallbackRequest(code=code, state=state)
-            return await AuthControl.handle_oauth_callback(provider.value, request, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    
+        request = OAuthCallbackRequest(code=code, state=state)
+        return await AuthControl.handle_oauth_callback(provider.value, request, db)
+
     async def register(self, request: RegisterRequest, db: Session = Depends(get_db)):
-        try:
-            return AuthControl.register(request, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    
+        return AuthControl.register(request, db)
+
     async def create_user(self, request: CreateUserRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
-        try:
-            return AuthControl.create_user(request, current_user, db)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    
+        return AuthControl.create_user(request, current_user, db)
+
     async def get_me(self, current_user: User = Depends(AuthGuard.get_current_user)):
-        try:
-            return AuthControl.get_user_profile(current_user)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    
+        return AuthControl.get_user_profile(current_user)
+
     async def update_me(self, request: UserUpdateRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
-        try:
-            return AuthControl.update_user_profile(current_user, request, db)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    
+        return AuthControl.update_user_profile(current_user, request, db)
+
     async def reset_password(self, request: PasswordResetRequest, current_user: User = Depends(AuthGuard.get_current_user), db: Session = Depends(get_db)):
-        try:
-            AuthControl.reset_password(current_user, request, db)
-            return BaseResponseModel(status=200, message="Password reset successfully")
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        AuthControl.reset_password(current_user, request, db)
+        return BaseResponseModel(status=200, message="Password reset successfully")

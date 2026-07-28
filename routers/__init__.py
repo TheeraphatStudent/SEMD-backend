@@ -1,20 +1,27 @@
 # Routers package
-
-from .base_route import BaseRoute
+#
+# `.base_route` MUST be imported before any router submodule (e.g. `.auth`)
+# that does `from routers import BaseRoute` -- those submodules reach back
+# into this partially-initialized package, so BaseRoute has to already be
+# bound in this module's namespace first. ruff's import sort will alphabetize
+# this block if run with --fix on this file; verify import order still
+# satisfies that constraint after any auto-fix here (auth < base_route
+# alphabetically, which is backwards).
+from .base_route import BaseRoute  # noqa: I001 -- must precede .auth, see note above
 from .auth import AuthRoute, UserRoute
-from .ml import MLRoute
-from .prediction import PredictionRoute
-from .report import ReportRoute
 from .dashboard import DashboardRoute
-from .setting import SettingRoute, ThirdServiceRoute, ServiceConfRoute, UrlFlagRoute, AccessKeyRoute, SystemConfigRoute
+from .ml import MLRoute, MLTrainingRouter
+from .prediction import PredictionRoute
 from .queue import QueueRoute
+from .report import ReportRoute
+from .setting import AccessKeyRoute, ServiceConfRoute, SettingRoute, SystemConfigRoute, ThirdServiceRoute, UrlFlagRoute
 from .stat import (
-    ReportStatRoute,
-    PredictionStatRoute,
-    UserStatRoute,
     ApiKeyStatRoute,
+    PredictionStatRoute,
+    ReportStatRoute,
     ThirdPartyStatRoute,
-    UrlFlagStatRoute
+    UrlFlagStatRoute,
+    UserStatRoute,
 )
 
 __all__ = [
@@ -22,6 +29,7 @@ __all__ = [
     'AuthRoute',
     'UserRoute',
     'MLRoute',
+    'MLTrainingRouter',
     'PredictionRoute',
     'ReportRoute',
     'DashboardRoute',

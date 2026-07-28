@@ -1,13 +1,13 @@
-from routers import BaseRoute
-from models import ReportResponse, ReportListResponse
-from models.url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
-from fastapi import HTTPException, Depends, Query
+
+from fastapi import Depends, Query
 from sqlalchemy.orm import Session
-from typing import List
 
 from control.url_report_control import UrlReportControl
+from models.db import User
 from guard.auth_guard import AuthGuard, get_db
-from database import User
+from models import ReportListResponse, ReportResponse
+from models.report.url_report_request import UrlReportCreateRequest, UrlReportUpdateRequest
+from routers import BaseRoute
 
 
 class ReportRoute(BaseRoute):
@@ -66,11 +66,8 @@ class ReportRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            report = UrlReportControl.create_report(current_user, request, db)
-            return ReportResponse(status=201, message="Report created successfully", data=report.model_dump())
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        report = UrlReportControl.create_report(current_user, request, db)
+        return ReportResponse(status=201, message="Report created successfully", data=report.model_dump())
 
     async def update_report(
         self,
@@ -79,13 +76,8 @@ class ReportRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            report = UrlReportControl.update_report(current_user, report_id, request, db)
-            return ReportResponse(status=200, message="Report updated successfully", data=report.model_dump())
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        report = UrlReportControl.update_report(current_user, report_id, request, db)
+        return ReportResponse(status=200, message="Report updated successfully", data=report.model_dump())
 
     async def get_report_data(
         self,
@@ -94,11 +86,8 @@ class ReportRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            reports = UrlReportControl.get_all_reports(db, skip, limit)
-            return ReportListResponse(status=200, message="Reports retrieved successfully", data=[r.model_dump() for r in reports])
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        reports = UrlReportControl.get_all_reports(db, skip, limit)
+        return ReportListResponse(status=200, message="Reports retrieved successfully", data=[r.model_dump() for r in reports])
 
     async def get_my_reports(
         self,
@@ -107,11 +96,8 @@ class ReportRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            reports = UrlReportControl.get_user_reports(current_user, db, skip, limit)
-            return ReportListResponse(status=200, message="Reports retrieved successfully", data=[r.model_dump() for r in reports])
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        reports = UrlReportControl.get_user_reports(current_user, db, skip, limit)
+        return ReportListResponse(status=200, message="Reports retrieved successfully", data=[r.model_dump() for r in reports])
 
     async def get_report_by_id(
         self,
@@ -119,13 +105,8 @@ class ReportRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            report = UrlReportControl.get_report(report_id, db)
-            return ReportResponse(status=200, message="Report retrieved successfully", data=report.model_dump())
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        report = UrlReportControl.get_report(report_id, db)
+        return ReportResponse(status=200, message="Report retrieved successfully", data=report.model_dump())
 
     async def get_report_history(
         self,
@@ -133,10 +114,5 @@ class ReportRoute(BaseRoute):
         current_user: User = Depends(AuthGuard.get_current_user),
         db: Session = Depends(get_db)
     ):
-        try:
-            history = UrlReportControl.get_report_history(report_id, db)
-            return ReportListResponse(status=200, message="Report history retrieved successfully", data=[h.model_dump() for h in history])
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        history = UrlReportControl.get_report_history(report_id, db)
+        return ReportListResponse(status=200, message="Report history retrieved successfully", data=[h.model_dump() for h in history])

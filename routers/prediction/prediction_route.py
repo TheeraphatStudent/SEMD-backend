@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models import PredictionResponse, PredictionRequest
 from control.prediction_control import PredictionControl
 from guard.auth_guard import AuthGuard, get_async_db
-from database import User
+from models.db import User
 from typing import List, Optional
 import csv
 import io
