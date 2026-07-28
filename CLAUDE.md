@@ -25,7 +25,7 @@ Docker/Podman: `docker/compose.yaml` is the single stack entrypoint for backend 
 
 There is a `tests/unit/` suite using `unittest`. Lint/typecheck targets are wired through `make lint` and `make typecheck`.
 
-`main.py` regenerates `openapi.yaml` from the live FastAPI app on every import (`app.openapi()` dumped to YAML at module scope). This means starting the app in *any* mode rewrites `openapi.yaml` — expect it to show as modified after a dev server run, and treat it as generated output rather than hand-editable.
+`openapi.yaml` is generated output, not hand-editable — regenerate it with `make openapi` (`uv run python -c "import yaml, main; open('openapi.yaml', 'w').write(yaml.dump(main.app.openapi(), sort_keys=False))"`). `main.py` itself does not regenerate it on import — it's a thin `app = create_application()` wrapper (see `application.py`); running the dev/prod server does not rewrite the file.
 
 ## Architecture: layering
 
