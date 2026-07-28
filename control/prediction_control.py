@@ -1,12 +1,12 @@
 from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import reject_unsafe_urls
 from models.db import ServiceConf, User
-from libs.types.enums import ServiceType
+from libs.types.enums import RoleType, ServiceType
 from services.prediction_service import PredictionService
 from services.queue_service import QueueService
 from services.url_flag_service import UrlFlagService
@@ -59,14 +59,31 @@ class PredictionControl:
         return results
 
     async def _get_default_ml_service(self) -> Optional[int]:
-        stmt = select(ServiceConf).where(
-            ServiceConf.is_active == True,
-            ServiceConf.service_type == ServiceType.ML_MODEL.value
-        ).order_by(ServiceConf.created_at.asc()).limit(1)
-        
+        # Only ever auto-pick a config that predict_with_service's ownership
+        # check (services/prediction_service.py) would let ANY caller use --
+        # owner-less, or owned by an admin/super-admin ("shared service").
+        # Without this filter, the oldest active ML_MODEL row could be a
+        # MEMBER's private config, which would then 403 for every caller who
+        # didn't explicitly pass service_id -- including every anonymous
+        # caller, defeating the point of keyless prediction.
+        stmt = (
+            select(ServiceConf)
+            .outerjoin(User, ServiceConf.user_id == User.user_id)
+            .where(
+                ServiceConf.is_active == True,
+                ServiceConf.service_type == ServiceType.ML_MODEL.value,
+                or_(
+                    ServiceConf.user_id.is_(None),
+                    User.role.in_([RoleType.ADMIN.value, RoleType.SUPER_ADMIN.value]),
+                ),
+            )
+            .order_by(ServiceConf.created_at.asc())
+            .limit(1)
+        )
+
         result = await self.db.execute(stmt)
         service = result.scalar_one_or_none()
-        
+
         return service.service_conf_id if service else None
 
     async def _check_url_flag(self, url: str) -> Dict[str, Any]:

@@ -387,23 +387,23 @@ a new test (`tests/unit/test_prediction_service_ownership.py`). Full suite is no
 112 tests (86 original + 26 added across this fix and its own test coverage), all
 passing.
 
-Three items surfaced by that same review still need action, listed here rather
-than fixed silently:
+A scoped re-review of that fix caught one more consequence of making the
+ownership check correct: `control/prediction_control.py::_get_default_ml_service`
+(used whenever a `/prediction/predict` request doesn't specify `service_id`)
+picked the oldest active `ML_MODEL` row with no ownership filter at all. Once
+the ownership check stopped silently skipping for anonymous callers, an
+environment whose oldest `ML_MODEL` config happened to be MEMBER-owned would
+have every anonymous (and every other non-owning) caller 403 on the default
+path — silently defeating the entire point of this pass. Fixed in code rather
+than left as an ops checklist item: the query now only ever selects a row that
+`predict_with_service`'s ownership check would let *any* caller use — owner-less
+(`user_id IS NULL`) or admin/super-admin-owned — via an `outerjoin` to `User`
+filtered on role. Covered by
+`tests/unit/test_prediction_control_default_service.py`. Full suite is now 115
+tests, all passing.
 
-**Pre-deploy check — default ML service ownership.** `init.sql` seeds no
-`service_conf` row, so "the default ML service" is whichever active `ML_MODEL`
-config was created first, by whoever. If that row is owned by a non-admin
-MEMBER, every anonymous `/prediction/predict` call (the exact flow this pass
-exists to enable) will now correctly 403 under the fixed ownership check —
-which is *correct* per-request behavior, but means the anonymous flow won't
-actually work in an environment where the seed data wasn't set up with this in
-mind. Before deploying this change, run:
-```sql
-SELECT service_conf_id, user_id FROM service_conf
-WHERE is_active AND service_type='ML_MODEL' ORDER BY created_at ASC LIMIT 1;
-```
-and if `user_id` is a non-admin, set it to `NULL` (unowned/system config) or to
-an admin/super-admin-owned row.
+Two items surfaced by the reviews still need action, listed here rather than
+fixed silently:
 
 **`semd-frontend`'s generated API client is stale beyond this pass's scope, and
 regenerating it in full currently breaks the frontend build.** Attempting
