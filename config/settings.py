@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     redis_password: str = config.get('REDIS', 'PASSWORD', fallback='')
     redis_db: int = config.getint('REDIS', 'DB', fallback=0)
 
+    # Anonymous prediction abuse controls
+    prediction_rate_limit_requests: int = config.getint(
+        'PREDICTION_RATE_LIMIT', 'REQUESTS', fallback=20)
+    prediction_rate_limit_window_seconds: int = config.getint(
+        'PREDICTION_RATE_LIMIT', 'WINDOW_SECONDS', fallback=60)
+
     # MLflow settings
     mlflow_tracking_uri: str = config.get(
         'MLFLOW', 'TRACKING_URL', fallback='http://localhost:5000')

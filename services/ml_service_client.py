@@ -70,7 +70,7 @@ class MLServiceClient:
 
         redis_client.push_to_queue(self.prediction_queue, job_data)
 
-        logger.info(f"Submitted prediction job: {job_id} for URL: {url}")
+        logger.info(f"Submitted prediction job: {job_id}")
 
         return job_id
 
@@ -110,6 +110,7 @@ class MLServiceClient:
         to `timeout` seconds (30-60s), serializing all concurrent request
         handling in that worker process -- flagged in
         SEMD_BACKEND_CURRENT_STATE.md section 8 and fixed here (Domain 12).
+
         """
         cache_key = f"{self.result_cache_prefix}{job_id}"
 

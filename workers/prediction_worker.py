@@ -9,6 +9,7 @@ Flow:
 
 """
 
+from services.client.redis_client import redis_client
 import sys
 import os
 import time
@@ -17,8 +18,6 @@ import signal
 import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from services.client.redis_client import redis_client
 
 
 logging.basicConfig(
@@ -62,7 +61,7 @@ class MLResultWorker:
             logger.info(f"Cached result at: {cache_key}")
 
             if result_data.get('url'):
-                logger.info(f"  URL: {result_data['url']}")
+                logger.info('  Result includes a submitted URL')
             if result_data.get('prediction'):
                 pred = result_data['prediction']
                 logger.info(

@@ -27,24 +27,25 @@ class MLPredictionService:
         model_id: Optional[int] = None,
         timeout: int = 30
     ) -> Dict[str, Any]:
-        logger.info(f"Submitting prediction job for URL: {url}")
+        logger.info('Submitting prediction job')
         await reject_unsafe_urls([url])
         model_selector = await self._resolve_model_selector(model_id)
-        
+
         result = await ml_service_client.predict_url_sync(
             url=url,
             model_id=model_selector,
             timeout=timeout
         )
-        
+
         if result.get('status') == 'timeout':
-            raise TimeoutError(f"ML service did not respond within {timeout} seconds")
-        
+            raise TimeoutError(
+                f"ML service did not respond within {timeout} seconds")
+
         if result.get('status') == 'failed':
             raise ValueError(result.get('error', 'Prediction failed'))
-        
+
         prediction_data = result.get('prediction', {})
-        
+
         return {
             'url': url,
             'prediction': prediction_data.get('prediction', 'unknown'),
@@ -69,22 +70,23 @@ class MLPredictionService:
         logger.info(f"Submitting batch prediction job for {len(urls)} URLs")
         await reject_unsafe_urls(urls)
         model_selector = await self._resolve_model_selector(model_id)
-        
+
         result = await ml_service_client.predict_urls_sync(
             urls=urls,
             model_id=model_selector,
             timeout=timeout
         )
-        
+
         if result.get('status') == 'timeout':
-            raise TimeoutError(f"ML service did not respond within {timeout} seconds")
-        
+            raise TimeoutError(
+                f"ML service did not respond within {timeout} seconds")
+
         if result.get('status') == 'failed':
             raise ValueError(result.get('error', 'Batch prediction failed'))
-        
+
         predictions = []
         results_data = result.get('results', [])
-        
+
         for r in results_data:
             if r.get('status') == 'success':
                 pred_data = r.get('prediction', {})
@@ -102,7 +104,7 @@ class MLPredictionService:
                     'prediction_time_ms': pred_data.get('prediction_time_ms', 0.0),
                     'algorithm': 'unknown',
                 })
-        
+
         return {
             'predictions': predictions,
             'total': result.get('total', len(urls)),
@@ -115,11 +117,13 @@ class MLPredictionService:
         if model_id is None:
             return None
 
-        stmt = select(ModelRegistry).where(ModelRegistry.model_registry_id == model_id)
+        stmt = select(ModelRegistry).where(
+            ModelRegistry.model_registry_id == model_id)
         result = await self.db.execute(stmt)
         model = result.scalar_one_or_none()
         if model is None:
             raise ValueError(f"Model registry entry {model_id} was not found")
         if model.mlflow_model_version is None:
-            raise ValueError(f"Model registry entry {model_id} does not have an MLflow model version")
+            raise ValueError(
+                f"Model registry entry {model_id} does not have an MLflow model version")
         return str(model.mlflow_model_version)
