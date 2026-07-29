@@ -1,0 +1,45 @@
+name: Backend Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch: {}
+
+concurrency:
+  group: backend-unit-tests-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Run tests/unit (unittest)
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 15
+    steps:
+      - name: Check out the pull request head commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d40ea0daa72c8281bfdf36960 # v5.4.2
+        with:
+          python-version: "3.12"
+
+      - name: Bootstrap config files
+        run: make config
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Run unit tests
+        run: make test

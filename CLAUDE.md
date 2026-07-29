@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `semd-backend` is the FastAPI backend of SEMD ("Suspicious-URL Evaluation for Malicious Detection"). It is one of four independent git submodules of the parent SEMD project (backend / ML service / web frontend / browser extension) — see `../CLAUDE.md` at the repo root for the cross-service architecture and how this module talks to `semd-ml` over Redis. This file only covers what's inside `semd-backend/`.
 
+Work tracked on Monday.com follows a fixed branch/PR/status protocol — see `../CLAUDE.md`'s "Monday.com task workflow (agent rule)" section before starting any job that originates from, or should be tracked as, a Monday task. This applies regardless of whether a session starts inside `semd-backend/` (which won't automatically load the root file).
+
 ## Setup and running
 
 Python `3.12.x` (pinned via `.python-version`). Everything is driven through the `makefile` and `uv` — there is no venv-activation script anymore (the old `backend-working.sh`/`setup-config.sh` were consolidated into it):
