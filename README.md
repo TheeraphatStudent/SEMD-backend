@@ -52,6 +52,25 @@ where the backend and Redis share the host network. Inside `docker/compose.yaml`
 shared Redis's container/service name so the backend can reach the same authenticated Redis instance the
 `semd-ml` worker consumes from.
 
+### Anonymous prediction controls
+
+`POST /prediction/predict` allows callers without a session, so anonymous requests are limited with a
+Redis-backed fixed window. Set either environment variables or these `backend.ini` values:
+
+```ini
+[PREDICTION_RATE_LIMIT]
+REQUESTS = 20
+WINDOW_SECONDS = 60
+```
+
+Environment variables `PREDICTION_RATE_LIMIT_REQUESTS` and
+`PREDICTION_RATE_LIMIT_WINDOW_SECONDS` override the file. A caller over the limit receives `429` and a
+`Retry-After` header. Redis must be available: failure returns `503` rather than failing open.
+
+Submitted URLs, including URL query strings, are redacted from JSON logs. Keep application logs on stdout
+and configure the container/platform collector to retain them for the approved period (30 days recommended);
+this backend deliberately does not write URL-bearing log files.
+
 ## Docker Layout
 
 All runtime/container assets now live under `docker/`:
